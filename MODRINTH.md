@@ -68,6 +68,11 @@ Mod id / dependency id: `mgf`.
 
 **Compatibility:** Sodium ✅ (tested). Backend-replacing mods (VulkanMod, Sulkan) ❌ — architecturally incompatible with any Blaze3D-level framework.
 
+## License
+
+- **Vulcanite itself:** [PolyForm Shield 1.0.0](https://polyformproject.org/licenses/shield/1.0.0/) — the source is available to read, debug, and contribute to, and **modpack inclusion is welcome** (modpacks don't compete with the software). What the license forbids is repackaging Vulcanite into a competing product.
+- **`mgf-api`:** MIT — depend on it, bundle it, no strings attached.
+
 ## Status & roadmap
 
 ⚠️ **Experimental alpha.** The vanilla Vulkan backend itself is experimental; expect rough edges. Every release is gated on an automated launch-and-assert test suite on both backends.

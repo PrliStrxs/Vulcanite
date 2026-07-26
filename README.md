@@ -49,6 +49,17 @@ Acceptance criteria and the fail-soft policy are defined in design doc §10 (M0)
 and §7. Test **both** backends every session — vanilla's auto-fallback can
 switch backends silently.
 
+## License
+
+Vulcanite (the mod, everything outside `mgf-api/`) is licensed under the
+[PolyForm Shield License 1.0.0](https://polyformproject.org/licenses/shield/1.0.0/):
+source-available — read it, debug against it, send patches, include it in
+modpacks — but it may not be used to provide a competing product. See
+[LICENSE](LICENSE).
+
+`mgf-api` is MIT-licensed ([mgf-api/LICENSE](mgf-api/LICENSE)) so consumer
+mods can depend on and bundle the API without restrictions.
+
 ## Code layout rules
 
 - One concern per file; no god classes. Mixins live in `dev.mgf.impl.mixin`,

@@ -36,3 +36,10 @@ processResources {
         expand "version": project.version
     }
 }
+
+tasks.named("jar") {
+    // PolyForm Shield's Notices section requires shipping the terms with copies.
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${base.archivesName.get()}" }
+    }
+}

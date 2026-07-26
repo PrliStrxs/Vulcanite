@@ -15,3 +15,9 @@ java {
 
 // mgf-api is intentionally dependency-free: no Minecraft, no LWJGL, no loader types.
 // Consumers talk to the runtime through opaque handles (long) and plain Java types.
+
+tasks.named("jar") {
+    from(project.file("LICENSE")) {
+        rename { "${it}_${base.archivesName.get()}" }
+    }
+}
