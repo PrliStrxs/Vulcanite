@@ -1,0 +1,28 @@
+# Design documents (kept out of version control by request)
+docs/
+
+# Gradle
+.gradle/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+bin/
+
+# Loom / Fabric dev runtime
+run/
+runs/
+remappedSrc/
+
+# Misc
+hs_err_pid*.log
+replay_pid*.log
+.DS_Store

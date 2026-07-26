@@ -1,0 +1,38 @@
+plugins {
+    id "net.fabricmc.fabric-loom" version "${loom_version}"
+}
+
+base {
+    // This project builds the "mgf" mod jar players install for MC 26.2.
+    archivesName = "mgf"
+}
+
+version = "${project.mod_version}+mc${project.minecraft_version}"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/mgf.accesswidener")
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // The stable API ships inside this jar (Loom wraps plain jars automatically).
+    api project(":mgf-api")
+    include project(":mgf-api")
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}

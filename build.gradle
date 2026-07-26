@@ -1,0 +1,10 @@
+// Root project: shared configuration only. All real work happens in subprojects.
+subprojects {
+    group = project.maven_group
+    version = project.mod_version
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+        options.release = 25
+    }
+}

@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = "Fabric"
+            url = "https://maven.fabricmc.net/"
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "mgf"
+
+include "mgf-api"
+include "mgf-impl-26.2"
+include "samples:sample-interop"
+// ":smoke-test" is wired in once the launch harness lands (M1); see smoke-test/README.md.

@@ -1,0 +1,32 @@
+plugins {
+    id "net.fabricmc.fabric-loom" version "${loom_version}"
+}
+
+base {
+    archivesName = "mgf-sample-interop"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    // Compile against the stable API only; the impl mod joins the dev runtime
+    // via classpath mod discovery (its fabric.mod.json is on the classpath).
+    implementation project(":mgf-api")
+    implementation project(":mgf-impl-26.2")
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}

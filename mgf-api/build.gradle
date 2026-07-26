@@ -1,0 +1,17 @@
+plugins {
+    id "java-library"
+}
+
+base {
+    archivesName = "mgf-api"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
+}
+
+// mgf-api is intentionally dependency-free: no Minecraft, no LWJGL, no loader types.
+// Consumers talk to the runtime through opaque handles (long) and plain Java types.

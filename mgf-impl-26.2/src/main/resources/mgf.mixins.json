@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "dev.mgf.impl.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "VulkanBackendMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
