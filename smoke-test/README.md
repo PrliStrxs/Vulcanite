@@ -1,13 +1,32 @@
-# smoke-test (placeholder)
+# smoke-test
 
-Launch-and-assert harness, scheduled for milestone M1 (design doc §11):
+Launch-and-assert harness (design doc §11). The `mgf-smoke` mod runs the
+assertion set at CLIENT_STARTED, writes `run/mgf-smoke-result.txt`
+(first line `PASS`/`FAIL`, then one line per check), and stops the client;
+the Gradle task fails unless the file says `PASS`.
 
-- Auto-launch the client with MGF + samples on both backends.
-- Assert each seam engaged: negotiated extensions present in
-  `DeviceInfo.underlyingExtensions`, interop handles non-null, injected passes
-  executed (from M2 on).
-- Run against every 26.x snapshot the week it drops; release gating — never
-  publish an MGF build for an MC version this harness has not passed on.
+## Usage
 
-Not yet wired into `settings.gradle`; add `include "smoke-test"` once the
-harness lands.
+```
+./gradlew :smoke-test:smokeTest                      # Vulkan (default)
+./gradlew :smoke-test:smokeTest -PsmokeBackend=opengl
+./gradlew :smoke-test:smokeTest -PwithSodium         # Sodium coexistence run
+```
+
+The task rewrites `preferredGraphicsBackend` in `run/options.txt` before
+launching and passes the expected backend to the mod via
+`-Dmgf.smoke.expectedBackend`, so assertions know which branch to check
+(a silent vanilla auto-fallback to the other backend therefore FAILS the run,
+by design).
+
+## What is asserted
+
+- Vulkan runs: backend/tier/negotiation flags, requested extension enabled and
+  visible through caps, `onDeviceCreated` fired with the correct
+  missing-required set (a deliberately nonexistent required extension), all
+  VkInterop handles non-zero.
+- OpenGL runs: clean degradation — OPENGL_COMPAT tier, empty interop, no
+  callback fired.
+
+Run it against every new Minecraft snapshot before declaring MGF compatible
+(release gating, design doc §11).

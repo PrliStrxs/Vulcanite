@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "mgf-smoke",
+  "version": "${version}",
+  "name": "MGF Smoke Test",
+  "description": "Launch-and-assert harness: verifies every MGF seam on the expected backend, writes a result file, and stops the client.",
+  "authors": [
+    "PrliStrxs"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.mgf.smoke.SmokeTestClient"
+    ],
+    "mgf:vulkan_boot": [
+      "dev.mgf.smoke.SmokeVulkanBoot"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "fabric-api": "*",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "mgf": "*"
+  }
+}

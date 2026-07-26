@@ -1,0 +1,93 @@
+plugins {
+    id "net.fabricmc.fabric-loom" version "${loom_version}"
+}
+
+base {
+    archivesName = "mgf-smoke"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+// Which backend this smoke run expects: -PsmokeBackend=vulkan (default) or opengl.
+def smokeBackend = providers.gradleProperty("smokeBackend").getOrElse("vulkan")
+
+loom {
+    runs {
+        client {
+            vmArg "-Dmgf.smoke.expectedBackend=${smokeBackend}"
+            // Forces the backend regardless of options.txt and of vanilla's
+            // crash watchdog (which resets the option after an "unexpected
+            // shutdown" — and our harness stopping at CLIENT_STARTED counts
+            // as one). Log line: "Graphics backend forced to {} by launch
+            // argument, in-game preferred graphics backend setting is ignored".
+            programArg "--graphicsBackend"
+            programArg smokeBackend
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    implementation project(":mgf-api")
+    implementation project(":mgf-impl-26.2")
+
+    // Step 3 of M1: -PwithSodium adds Sodium to the dev runtime for coexistence runs.
+    if (project.hasProperty("withSodium")) {
+        runtimeOnly "maven.modrinth:sodium:${project.sodium_version}"
+    }
+}
+
+def runDir = file("run")
+def resultFile = new File(runDir, "mgf-smoke-result.txt")
+
+// Clears the previous result before launching (backend selection is done via
+// the --graphicsBackend launch argument above, immune to options.txt state).
+tasks.register("prepareSmokeRun") {
+    inputs.property "backend", smokeBackend
+    outputs.upToDateWhen { false }
+    doLast {
+        runDir.mkdirs()
+        resultFile.delete()
+        logger.lifecycle("Smoke run prepared: backend=${smokeBackend}")
+    }
+}
+
+tasks.named("runClient") {
+    mustRunAfter "prepareSmokeRun"
+}
+
+// Full harness: prepare -> launch (mod asserts, writes result, stops client) -> verify.
+tasks.register("smokeTest") {
+    dependsOn "prepareSmokeRun", "runClient"
+    doLast {
+        if (!resultFile.exists()) {
+            throw new GradleException("Smoke test produced no result file — the client likely crashed before CLIENT_STARTED. Check ${runDir}/logs/latest.log")
+        }
+        def lines = resultFile.readLines()
+        logger.lifecycle("Smoke result:\n" + lines.join("\n"))
+        if (lines.isEmpty() || lines[0] != "PASS") {
+            throw new GradleException("Smoke test FAILED — see details above")
+        }
+    }
+}
