@@ -1,33 +1,28 @@
 package dev.mgf.impl.vk;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
+import com.mojang.blaze3d.vulkan.VulkanDevice;
 import com.mojang.blaze3d.vulkan.VulkanPhysicalDevice;
 import com.mojang.blaze3d.vulkan.init.VulkanFeature;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-
-import dev.mgf.api.vk.VulkanBootConfigurator;
-import dev.mgf.api.vk.VulkanBootRegistrar;
+import dev.mgf.api.vk.VulkanBootResult;
 import dev.mgf.impl.core.MgfConstants;
 import dev.mgf.impl.core.SeamHealth;
+import dev.mgf.impl.vk.VulkanBootRegistrations.ExtensionRequest;
+import dev.mgf.impl.vk.VulkanBootRegistrations.ModRegistration;
 
 /**
- * Collects {@code mgf:vulkan_boot} entrypoint requests and merges them into
- * vanilla's device-creation arguments. Invoked from {@code VulkanBackendMixin}
- * on the render thread, immediately before {@code vkCreateDevice}.
+ * Device-creation-time negotiation and the post-creation callback dispatch.
+ * Both entry points are invoked from mixins and must never throw upward.
  */
 public final class VulkanBootNegotiation {
-
-    /** One consumer request, kept for logging and post-boot inspection. */
-    private record ExtensionRequest(String modId, String extension, boolean required) {
-    }
 
     /**
      * Outcome of negotiation, readable after device creation.
@@ -37,12 +32,16 @@ public final class VulkanBootNegotiation {
      * @param deviceExtensions the exact extension list the device was created with —
      *        the authoritative clean source ({@code DeviceInfo.underlyingExtensions}
      *        is a debug list with {@code " (I)"}/{@code " (D)"} suffixes)
+     * @param missingRequiredByMod per mod id, its required-but-unavailable extensions
      */
-    public record Outcome(Map<String, Boolean> requestedExtensions, long vkPhysicalDevice,
-                          Set<String> deviceExtensions) {
+    public record Outcome(Map<String, Boolean> requestedExtensions,
+                          long vkPhysicalDevice,
+                          Set<String> deviceExtensions,
+                          Map<String, Set<String>> missingRequiredByMod) {
     }
 
     private static volatile Outcome outcome;
+    private static final AtomicBoolean DEVICE_CREATED_FIRED = new AtomicBoolean();
 
     private VulkanBootNegotiation() {
     }
@@ -70,61 +69,92 @@ public final class VulkanBootNegotiation {
                                  VulkanPhysicalDevice physicalDevice) {
         SeamHealth.markEngaged(SeamHealth.Seam.EXTENSION_NEGOTIATION);
 
-        Map<String, Boolean> requested = new ConcurrentHashMap<>();
-        for (ExtensionRequest request : collectRequests()) {
-            boolean enabled = applyExtensionRequest(request, vanillaExtensions, physicalDevice);
-            requested.merge(request.extension(), enabled, Boolean::logicalOr);
+        Map<String, Boolean> requested = new HashMap<>();
+        Map<String, Set<String>> missingRequiredByMod = new HashMap<>();
+
+        for (ModRegistration registration : VulkanBootRegistrations.collect()) {
+            for (ExtensionRequest request : registration.requests()) {
+                boolean enabled = applyExtensionRequest(registration.modId(), request,
+                        vanillaExtensions, physicalDevice);
+                requested.merge(request.extension(), enabled, Boolean::logicalOr);
+                if (!enabled && request.required()) {
+                    missingRequiredByMod
+                            .computeIfAbsent(registration.modId(), id -> new HashSet<>())
+                            .add(request.extension());
+                }
+            }
         }
 
         outcome = new Outcome(Map.copyOf(requested), physicalDevice.vkPhysicalDevice().address(),
-                Set.copyOf(vanillaExtensions));
+                Set.copyOf(vanillaExtensions), deepCopy(missingRequiredByMod));
         MgfConstants.LOGGER.info("Vulkan boot negotiation done: {} extension(s) requested, device extension list = {}",
                 requested.size(), vanillaExtensions);
     }
 
-    private static List<ExtensionRequest> collectRequests() {
-        List<ExtensionRequest> requests = new ArrayList<>();
-        List<EntrypointContainer<VulkanBootRegistrar>> containers = FabricLoader.getInstance()
-                .getEntrypointContainers(MgfConstants.ENTRYPOINT_VULKAN_BOOT, VulkanBootRegistrar.class);
+    /**
+     * Invoked from {@code VulkanDeviceMixin} at the tail of the
+     * {@code VulkanDevice} constructor: the earliest point where queues, VMA,
+     * and the command encoder are live. Fires each mod's
+     * {@code onDeviceCreated} callbacks exactly once, isolated from each other.
+     */
+    public static void fireDeviceCreated(VulkanDevice device) {
+        if (!DEVICE_CREATED_FIRED.compareAndSet(false, true)) {
+            return;
+        }
+        SeamHealth.markEngaged(SeamHealth.Seam.DEVICE_CREATED_HOOK);
 
-        for (EntrypointContainer<VulkanBootRegistrar> container : containers) {
-            String modId = container.getProvider().getMetadata().getId();
-            VulkanBootConfigurator configurator = (extensionName, required) -> {
-                if (extensionName == null || extensionName.isBlank()) {
-                    MgfConstants.LOGGER.warn("Mod '{}' requested a blank Vulkan extension name; ignored", modId);
-                    return;
+        Outcome negotiated = outcome;
+        Set<String> enabled = negotiated != null
+                ? negotiated.deviceExtensions()
+                : VulkanDeviceAccess.enabledDeviceExtensions(device);
+        VkInteropImpl interop = new VkInteropImpl(device);
+
+        for (ModRegistration registration : VulkanBootRegistrations.collect()) {
+            if (registration.deviceCreatedCallbacks().isEmpty()) {
+                continue;
+            }
+            Set<String> missingRequired = negotiated != null
+                    ? negotiated.missingRequiredByMod().getOrDefault(registration.modId(), Set.of())
+                    : Set.of();
+            VulkanBootResult result = new VulkanBootResultImpl(interop, enabled, missingRequired);
+            for (Consumer<VulkanBootResult> callback : registration.deviceCreatedCallbacks()) {
+                try {
+                    callback.accept(result);
+                } catch (Throwable t) {
+                    MgfConstants.LOGGER.error("onDeviceCreated callback of mod '{}' threw",
+                            registration.modId(), t);
                 }
-                requests.add(new ExtensionRequest(modId, extensionName, required));
-            };
-            try {
-                container.getEntrypoint().configureVulkan(configurator);
-            } catch (Throwable t) {
-                MgfConstants.LOGGER.error("Vulkan boot registrar of mod '{}' threw; its requests are skipped", modId, t);
             }
         }
-        return requests;
     }
 
-    private static boolean applyExtensionRequest(ExtensionRequest request,
+    private static boolean applyExtensionRequest(String modId,
+                                                 ExtensionRequest request,
                                                  Collection<String> extensions,
                                                  VulkanPhysicalDevice physicalDevice) {
         if (extensions.contains(request.extension())) {
-            MgfConstants.LOGGER.debug("Mod '{}': extension {} already enabled", request.modId(), request.extension());
+            MgfConstants.LOGGER.debug("Mod '{}': extension {} already enabled", modId, request.extension());
             return true;
         }
         if (physicalDevice.hasDeviceExtension(request.extension())) {
             extensions.add(request.extension());
-            MgfConstants.LOGGER.info("Mod '{}': enabling Vulkan device extension {}", request.modId(), request.extension());
+            MgfConstants.LOGGER.info("Mod '{}': enabling Vulkan device extension {}", modId, request.extension());
             return true;
         }
         if (request.required()) {
             MgfConstants.LOGGER.warn(
                     "Mod '{}' requires Vulkan device extension {} but this GPU does not support it; the mod should disable itself",
-                    request.modId(), request.extension());
+                    modId, request.extension());
         } else {
             MgfConstants.LOGGER.info("Mod '{}': optional Vulkan device extension {} not supported by this GPU",
-                    request.modId(), request.extension());
+                    modId, request.extension());
         }
         return false;
+    }
+
+    private static Map<String, Set<String>> deepCopy(Map<String, Set<String>> source) {
+        Map<String, Set<String>> copy = new HashMap<>();
+        source.forEach((mod, extensions) -> copy.put(mod, Set.copyOf(extensions)));
+        return Map.copyOf(copy);
     }
 }

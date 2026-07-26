@@ -1,5 +1,7 @@
 package dev.mgf.api.vk;
 
+import java.util.function.Consumer;
+
 /**
  * Collects Vulkan device-creation requests from a {@link VulkanBootRegistrar}.
  *
@@ -19,8 +21,24 @@ public interface VulkanBootConfigurator {
      * Request a Vulkan device extension.
      *
      * @param extensionName e.g. {@code "VK_NV_optical_flow"}
-     * @param required whether the requesting mod cannot function without it
-     *        (affects log severity only — MGF still boots either way)
+     * @param required whether the requesting mod cannot function without it.
+     *        MGF still boots either way; a missing required extension is logged
+     *        as a warning and reported via
+     *        {@link VulkanBootResult#missingRequiredExtensions()}
      */
     void requestDeviceExtension(String extensionName, boolean required);
+
+    /**
+     * Register a callback fired once, on the render thread, right after the
+     * Vulkan device has been created — the earliest point where interop
+     * handles are valid.
+     *
+     * <p>Never fires when the game runs on OpenGL (or if the device-created
+     * seam failed to apply on this game version); use a client lifecycle event
+     * plus {@link dev.mgf.api.GraphicsCaps} as the fallback path for that case.
+     *
+     * <p>Callbacks must not throw — exceptions are caught, logged, and
+     * swallowed so device creation can never be broken by a consumer.
+     */
+    void onDeviceCreated(Consumer<VulkanBootResult> callback);
 }

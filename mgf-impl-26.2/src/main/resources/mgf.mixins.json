@@ -3,7 +3,8 @@
   "package": "dev.mgf.impl.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "VulkanBackendMixin"
+    "VulkanBackendMixin",
+    "VulkanDeviceMixin"
   ],
   "injectors": {
     "defaultRequire": 0

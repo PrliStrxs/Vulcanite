@@ -17,7 +17,9 @@ public final class SeamHealth {
     /** Fragile seams, one per mixin-backed integration point. */
     public enum Seam {
         /** {@code VulkanBackendMixin} fired during Vulkan device creation. */
-        EXTENSION_NEGOTIATION
+        EXTENSION_NEGOTIATION,
+        /** {@code VulkanDeviceMixin} fired after the Vulkan device was constructed. */
+        DEVICE_CREATED_HOOK
     }
 
     private static final Set<Seam> ENGAGED = ConcurrentHashMap.newKeySet();
