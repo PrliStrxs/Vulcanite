@@ -3,6 +3,9 @@ package dev.mgf.smoke;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.blaze3d.pipeline.CompiledRenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import dev.mgf.api.CapsTier;
 import dev.mgf.api.GraphicsBackendKind;
 import dev.mgf.api.Mgf;
@@ -10,6 +13,7 @@ import dev.mgf.api.MgfRuntime;
 import dev.mgf.api.graph.FrameGraphAnchor;
 import dev.mgf.api.unstable.graph.FrameGraphEvents;
 import dev.mgf.impl.graph.FrameGraphDispatch;
+import dev.mgf.samples.interop.SampleVignette;
 
 /**
  * The assertion set. Each check appends a human-readable line; failures make
@@ -54,6 +58,16 @@ final class SmokeChecks {
         // cannot have fired in this harness. In-world verification is manual
         // (sample-interop logs "Frame-graph anchor fired: ..." once per anchor).
         lines.add("INFO frameGraphAnchorsFired=" + FrameGraphDispatch.firedAnchors());
+
+        // Gated on BOTH backends: compiles the sample's post pipeline through
+        // the live device (GL: GLSL compile; Vulkan: shaderc -> SPIR-V), which
+        // catches shader/pipeline breakage without needing a world.
+        try {
+            CompiledRenderPipeline compiled = RenderSystem.getDevice().precompilePipeline(SampleVignette.PIPELINE);
+            check(compiled.isValid(), "postPipelineValid=" + compiled.isValid());
+        } catch (Throwable t) {
+            fail("postPipelineValid threw: " + t);
+        }
     }
 
     private void runVulkanChecks(MgfRuntime runtime) {

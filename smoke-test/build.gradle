@@ -51,6 +51,8 @@ dependencies {
 
     implementation project(":mgf-api")
     implementation project(":mgf-impl-26.2")
+    // Sample joins the smoke runtime so its pipelines/probes are gated too.
+    implementation project(":samples:sample-interop")
 
     // Step 3 of M1: -PwithSodium adds Sodium to the dev runtime for coexistence runs.
     if (project.hasProperty("withSodium")) {
