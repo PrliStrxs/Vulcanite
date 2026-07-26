@@ -8,7 +8,7 @@ Vulcanite is a client-side **prerequisite (library) mod** that opens those doors
 
 ---
 
-## What it does today (0.1 alpha)
+## Features (0.1 alpha)
 
 - 🔌 **Vulkan extension negotiation** — declare the device extensions your mod needs (e.g. `VK_NV_optical_flow`, `VK_KHR_external_memory`) and Vulcanite enables them at device creation, with per-GPU availability checks and clean per-mod reporting when something isn't supported.
 - 🤝 **Native interop** — raw `VkInstance` / `VkDevice` / physical device / graphics, compute and transfer queues / VMA allocator handles, delivered through a callback the moment the device exists. Hand them straight to your native bridge.
