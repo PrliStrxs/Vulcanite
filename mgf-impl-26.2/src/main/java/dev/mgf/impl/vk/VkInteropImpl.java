@@ -72,6 +72,6 @@ public final class VkInteropImpl implements VkInterop {
 
     @Override
     public Set<String> enabledDeviceExtensions() {
-        return device.getDeviceInfo().underlyingExtensions();
+        return VulkanDeviceAccess.enabledDeviceExtensions(device);
     }
 }

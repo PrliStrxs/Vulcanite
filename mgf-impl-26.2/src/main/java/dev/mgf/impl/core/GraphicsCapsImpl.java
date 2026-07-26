@@ -27,7 +27,7 @@ public final class GraphicsCapsImpl implements GraphicsCaps {
     @Override
     public Set<String> enabledDeviceExtensions() {
         return VulkanDeviceAccess.current()
-                .map(device -> device.getDeviceInfo().underlyingExtensions())
+                .map(VulkanDeviceAccess::enabledDeviceExtensions)
                 .orElse(Set.of());
     }
 

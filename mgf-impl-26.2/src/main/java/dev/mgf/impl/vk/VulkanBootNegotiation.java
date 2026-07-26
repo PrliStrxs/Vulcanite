@@ -29,8 +29,17 @@ public final class VulkanBootNegotiation {
     private record ExtensionRequest(String modId, String extension, boolean required) {
     }
 
-    /** Outcome of negotiation, readable after device creation (e.g. by diagnostics). */
-    public record Outcome(Map<String, Boolean> requestedExtensions, long vkPhysicalDevice) {
+    /**
+     * Outcome of negotiation, readable after device creation.
+     *
+     * @param requestedExtensions each consumer-requested extension and whether it was enabled
+     * @param vkPhysicalDevice raw {@code VkPhysicalDevice} handle (vanilla exposes no accessor)
+     * @param deviceExtensions the exact extension list the device was created with —
+     *        the authoritative clean source ({@code DeviceInfo.underlyingExtensions}
+     *        is a debug list with {@code " (I)"}/{@code " (D)"} suffixes)
+     */
+    public record Outcome(Map<String, Boolean> requestedExtensions, long vkPhysicalDevice,
+                          Set<String> deviceExtensions) {
     }
 
     private static volatile Outcome outcome;
@@ -67,7 +76,8 @@ public final class VulkanBootNegotiation {
             requested.merge(request.extension(), enabled, Boolean::logicalOr);
         }
 
-        outcome = new Outcome(Map.copyOf(requested), physicalDevice.vkPhysicalDevice().address());
+        outcome = new Outcome(Map.copyOf(requested), physicalDevice.vkPhysicalDevice().address(),
+                Set.copyOf(vanillaExtensions));
         MgfConstants.LOGGER.info("Vulkan boot negotiation done: {} extension(s) requested, device extension list = {}",
                 requested.size(), vanillaExtensions);
     }
