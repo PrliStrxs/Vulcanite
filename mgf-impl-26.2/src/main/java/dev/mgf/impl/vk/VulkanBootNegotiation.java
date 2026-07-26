@@ -2,7 +2,6 @@ package dev.mgf.impl.vk;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,28 +44,32 @@ public final class VulkanBootNegotiation {
     }
 
     /**
-     * Applies all consumer requests to vanilla's extension/feature sets.
-     * Never throws: on any internal error the vanilla arguments pass through
-     * unchanged (fail-soft policy).
+     * Applies all consumer requests by mutating vanilla's extension collection
+     * <b>in place</b>. Bytecode-verified on 26.2: the same local {@code HashSet}
+     * is passed both to the private {@code createDevice} call and to the
+     * {@code VulkanDevice} constructor (which feeds
+     * {@code DeviceInfo.underlyingExtensions}), so in-place mutation keeps
+     * vanilla's bookkeeping accurate — replacing the argument would enable the
+     * extensions on the device but leave them missing from {@code DeviceInfo}.
+     *
+     * <p>The feature set is currently untouched (the stable API only exposes
+     * extension requests); vanilla passes a mutable copy there too, so future
+     * feature support can use the same in-place approach.
      */
-    public static Result negotiate(Collection<String> vanillaExtensions,
-                                   Set<VulkanFeature> vanillaFeatures,
-                                   VulkanPhysicalDevice physicalDevice) {
+    public static void negotiate(Collection<String> vanillaExtensions,
+                                 Set<VulkanFeature> vanillaFeatures,
+                                 VulkanPhysicalDevice physicalDevice) {
         SeamHealth.markEngaged(SeamHealth.Seam.EXTENSION_NEGOTIATION);
 
-        Collection<String> extensions = new LinkedHashSet<>(vanillaExtensions);
-        Set<VulkanFeature> features = new LinkedHashSet<>(vanillaFeatures);
         Map<String, Boolean> requested = new ConcurrentHashMap<>();
-
         for (ExtensionRequest request : collectRequests()) {
-            boolean enabled = applyExtensionRequest(request, extensions, physicalDevice);
+            boolean enabled = applyExtensionRequest(request, vanillaExtensions, physicalDevice);
             requested.merge(request.extension(), enabled, Boolean::logicalOr);
         }
 
         outcome = new Outcome(Map.copyOf(requested), physicalDevice.vkPhysicalDevice().address());
         MgfConstants.LOGGER.info("Vulkan boot negotiation done: {} extension(s) requested, device extension list = {}",
-                requested.size(), extensions);
-        return new Result(extensions, features);
+                requested.size(), vanillaExtensions);
     }
 
     private static List<ExtensionRequest> collectRequests() {
@@ -113,9 +116,5 @@ public final class VulkanBootNegotiation {
                     request.modId(), request.extension());
         }
         return false;
-    }
-
-    /** Mutated copies of vanilla's device-creation arguments. */
-    public record Result(Collection<String> extensions, Set<VulkanFeature> features) {
     }
 }

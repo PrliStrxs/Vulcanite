@@ -45,11 +45,10 @@ public abstract class VulkanBackendMixin {
             VulkanPhysicalDevice physicalDevice = args.get(1);
             Set<VulkanFeature> features = args.get(2);
 
-            VulkanBootNegotiation.Result result =
-                    VulkanBootNegotiation.negotiate(extensions, features, physicalDevice);
-
-            args.set(0, result.extensions());
-            args.set(2, result.features());
+            // Mutates the collections in place: the same HashSet flows into the
+            // VulkanDevice constructor, keeping DeviceInfo.underlyingExtensions
+            // accurate (see VulkanBootNegotiation.negotiate javadoc).
+            VulkanBootNegotiation.negotiate(extensions, features, physicalDevice);
         } catch (Throwable t) {
             // Fail-soft: never let negotiation break device creation — a boot
             // crash would trip vanilla's watchdog and force the player to OpenGL.
