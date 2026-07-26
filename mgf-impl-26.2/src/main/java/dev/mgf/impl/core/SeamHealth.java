@@ -19,7 +19,9 @@ public final class SeamHealth {
         /** {@code VulkanBackendMixin} fired during Vulkan device creation. */
         EXTENSION_NEGOTIATION,
         /** {@code VulkanDeviceMixin} fired after the Vulkan device was constructed. */
-        DEVICE_CREATED_HOOK
+        DEVICE_CREATED_HOOK,
+        /** {@code LevelRendererMixin} dispatched at least one frame-graph anchor. */
+        FRAME_GRAPH_EVENTS
     }
 
     private static final Set<Seam> ENGAGED = ConcurrentHashMap.newKeySet();

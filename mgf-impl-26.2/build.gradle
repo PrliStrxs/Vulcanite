@@ -23,6 +23,8 @@ loom {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    // Compile-time only: Fabric Loader 0.19.3 bundles MixinExtras 0.5.4 at runtime.
+    compileOnly "io.github.llamalad7:mixinextras-fabric:0.5.4"
 
     // The stable API ships inside this jar (Loom wraps plain jars automatically).
     api project(":mgf-api")

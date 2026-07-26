@@ -7,6 +7,9 @@ import dev.mgf.api.CapsTier;
 import dev.mgf.api.GraphicsBackendKind;
 import dev.mgf.api.Mgf;
 import dev.mgf.api.MgfRuntime;
+import dev.mgf.api.graph.FrameGraphAnchor;
+import dev.mgf.api.unstable.graph.FrameGraphEvents;
+import dev.mgf.impl.graph.FrameGraphDispatch;
 
 /**
  * The assertion set. Each check appends a human-readable line; failures make
@@ -36,7 +39,21 @@ final class SmokeChecks {
         } else {
             checks.runOpenGlChecks(runtime);
         }
+        checks.runFrameGraphChecks();
         return checks;
+    }
+
+    private void runFrameGraphChecks() {
+        try {
+            FrameGraphEvents.register(FrameGraphAnchor.BEFORE_EXECUTE, context -> { });
+            check(true, "frameGraphListenerRegistered=true");
+        } catch (Throwable t) {
+            fail("frameGraphListenerRegistered threw: " + t);
+        }
+        // Not gated: the frame graph never runs on the title screen, so anchors
+        // cannot have fired in this harness. In-world verification is manual
+        // (sample-interop logs "Frame-graph anchor fired: ..." once per anchor).
+        lines.add("INFO frameGraphAnchorsFired=" + FrameGraphDispatch.firedAnchors());
     }
 
     private void runVulkanChecks(MgfRuntime runtime) {

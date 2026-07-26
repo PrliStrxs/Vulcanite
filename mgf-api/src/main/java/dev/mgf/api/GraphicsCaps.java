@@ -30,4 +30,13 @@ public interface GraphicsCaps {
      *         were no-ops)
      */
     boolean extensionNegotiationActive();
+
+    /**
+     * @return whether MGF's frame-graph event seam has fired at least once.
+     *         Note this only becomes {@code true} once a level is actually
+     *         being rendered (the frame graph does not run on the title
+     *         screen), and stays {@code false} if the seam failed to apply
+     *         on this game version.
+     */
+    boolean frameGraphEventsActive();
 }

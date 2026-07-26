@@ -21,6 +21,7 @@ public final class SampleInteropClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        SampleFrameGraphProbe.install();
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> report());
     }
 

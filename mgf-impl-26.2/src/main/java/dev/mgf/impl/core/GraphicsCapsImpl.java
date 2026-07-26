@@ -35,4 +35,9 @@ public final class GraphicsCapsImpl implements GraphicsCaps {
     public boolean extensionNegotiationActive() {
         return SeamHealth.isEngaged(SeamHealth.Seam.EXTENSION_NEGOTIATION);
     }
+
+    @Override
+    public boolean frameGraphEventsActive() {
+        return SeamHealth.isEngaged(SeamHealth.Seam.FRAME_GRAPH_EVENTS);
+    }
 }

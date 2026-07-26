@@ -3,6 +3,7 @@
   "package": "dev.mgf.impl.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "LevelRendererMixin",
     "VulkanBackendMixin",
     "VulkanDeviceMixin"
   ],
