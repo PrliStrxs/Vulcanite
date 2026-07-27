@@ -5,6 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 import dev.mgf.api.internal.MgfRuntimeHolder;
 import dev.mgf.impl.core.MgfConstants;
 import dev.mgf.impl.core.MgfRuntimeImpl;
+import dev.mgf.impl.compute.ComputeAutoExposureRegistry;
 import dev.mgf.impl.post.PostFxOverlays;
 
 /**
@@ -17,6 +18,7 @@ public final class MgfClient implements ClientModInitializer {
     public void onInitializeClient() {
         MgfRuntimeImpl runtime = new MgfRuntimeImpl();
         MgfRuntimeHolder.set(runtime);
+        ComputeAutoExposureRegistry.bootstrap();
         PostFxOverlays.bootstrap();
         MgfConstants.LOGGER.info("MGF {} initialized (Minecraft 26.2 implementation)", runtime.version());
     }

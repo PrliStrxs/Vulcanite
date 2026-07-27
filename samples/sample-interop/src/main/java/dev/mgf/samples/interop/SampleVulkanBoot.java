@@ -16,6 +16,7 @@ public final class SampleVulkanBoot implements VulkanBootRegistrar {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("MGF-Sample-Interop");
 
+    static final String EXT_FORMAT_FEATURE_FLAGS_2 = "VK_KHR_format_feature_flags2";
     static final String EXT_OPTICAL_FLOW = "VK_NV_optical_flow";
     static final String EXT_EXTERNAL_MEMORY = "VK_KHR_external_memory";
     static final String EXT_EXTERNAL_MEMORY_WIN32 = "VK_KHR_external_memory_win32";
@@ -24,6 +25,7 @@ public final class SampleVulkanBoot implements VulkanBootRegistrar {
 
     @Override
     public void configureVulkan(VulkanBootConfigurator configurator) {
+        configurator.requestDeviceExtension(EXT_FORMAT_FEATURE_FLAGS_2, false);
         configurator.requestDeviceExtension(EXT_OPTICAL_FLOW, false);
         configurator.requestDeviceExtension(EXT_EXTERNAL_MEMORY, false);
         configurator.requestDeviceExtension(EXT_EXTERNAL_MEMORY_WIN32, false);

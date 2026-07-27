@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.mgf.impl.core.MgfConstants;
+import dev.mgf.impl.compute.ComputeServiceRegistry;
 import dev.mgf.impl.vk.VulkanBootNegotiation;
 
 /**
@@ -29,6 +30,15 @@ public abstract class VulkanDeviceMixin {
             VulkanBootNegotiation.fireDeviceCreated((VulkanDevice) (Object) this);
         } catch (Throwable t) {
             MgfConstants.LOGGER.error("Device-created dispatch failed; continuing", t);
+        }
+    }
+
+    @Inject(method = "close", at = @At("HEAD"))
+    private void mgf$beforeDeviceClose(CallbackInfo ci) {
+        try {
+            ComputeServiceRegistry.onDeviceClosing((VulkanDevice) (Object) this);
+        } catch (Throwable t) {
+            MgfConstants.LOGGER.error("Compute shutdown failed; continuing Vulkan device destruction", t);
         }
     }
 }

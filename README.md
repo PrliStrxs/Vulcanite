@@ -16,7 +16,7 @@ architecture, roadmap, and rationale.
 |---|---|---|
 | `:mgf-api` | `mgf-api` | Stable consumer API. Pure Java — no Minecraft, LWJGL, or loader types. |
 | `:mgf-impl-26.2` | `mgf` | The mod players install. All mixins, access wideners, and 26.2-specific adapters. Bundles `mgf-api`. |
-| `:samples:sample-interop` | dev-only | Exercises extension negotiation, frame-graph hooks, custom pipelines, generated/resource shaders, and world-space geometry. |
+| `:samples:sample-interop` | dev-only | Exercises extension negotiation, frame-graph hooks, custom pipelines, compute, generated/resource shaders, world-space geometry, and visible auto exposure. |
 | `smoke-test/` | — | Launch-and-assert harness; wired into the build in M1 (see its README). |
 
 Consumer mods depend on `mgf-api` only. Each Minecraft drop gets its own
@@ -47,6 +47,8 @@ Then in the generated run directory set `preferredGraphicsBackend:"vulkan"` in
 - `MGF seam engaged: PIPELINE_RELOAD_HOOK`
 - `M3 world-geometry sample registered`; enter a world to see the rotating,
   depth-tested custom-shader pyramid in front of the camera
+- `Compute: available=true reason=available`; on Vulkan, entering a world also
+  runs the M4 luminance-histogram auto-exposure sample before M2 PostFx
 
 Acceptance criteria and the fail-soft policy are defined in design doc §10 (M0)
 and §7. Test **both** backends every session — vanilla's auto-fallback can
@@ -58,6 +60,31 @@ composes generated and resource-pack GLSL with 26.3-compatible includes and
 explicit stage locations. Consumer code that needs these helpers depends on the
 installed implementation artifact; the stable `mgf-api` surface remains free of
 Mojang types.
+
+## M4 compute
+
+`ComputeServices` exposes the render-thread Vulkan compute dispatcher for
+MGF-owned storage buffers. `ComputeEffects.registerMainColorAutoExposure(...)`
+registers the visible sample path: it samples the world main color image,
+computes a luminance histogram and temporal exposure, writes an owned storage
+image, and copies the result back before M2 PostFx. OpenGL reports compute as
+unavailable and leaves the frame graph unchanged.
+
+Main-color compute must use vanilla's graphics queue and keep borrowed images in
+`VK_IMAGE_LAYOUT_GENERAL`; dedicated compute-queue scheduling is deferred. The
+full ownership, barrier, resize/reload, world-transition, and shutdown contract
+is documented in [Compute synchronization and lifecycle](docs/compute-synchronization.md).
+
+Run the automated backend checks and Khronos synchronization validation with:
+
+```
+./gradlew :smoke-test:smokeTest
+./gradlew :smoke-test:smokeTest -PsmokeBackend=opengl
+./gradlew :smoke-test:smokeTest -PsmokeValidation
+```
+
+The smoke harness does not enter a world. Verify visible auto exposure manually
+in the interop sample after the automated runs pass.
 
 ## License
 

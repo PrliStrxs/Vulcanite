@@ -31,7 +31,8 @@ final class SmokeChecks {
     private SmokeChecks() {
     }
 
-    static SmokeChecks run(String expectedBackend, long generationBeforeReload) {
+    static SmokeChecks run(String expectedBackend, long generationBeforeReload,
+                           List<SmokeComputeProbe.Check> computeChecks) {
         SmokeChecks checks = new SmokeChecks();
         checks.lines.add("expectedBackend=" + expectedBackend);
         if (!Mgf.isAvailable()) {
@@ -40,11 +41,15 @@ final class SmokeChecks {
         }
         MgfRuntime runtime = Mgf.runtime();
         checks.lines.add("mgfVersion=" + runtime.version());
+        checks.lines.add("validationRequested=" + Boolean.getBoolean("mgf.smoke.validation"));
 
         if ("vulkan".equalsIgnoreCase(expectedBackend)) {
             checks.runVulkanChecks(runtime);
         } else {
             checks.runOpenGlChecks(runtime);
+        }
+        for (SmokeComputeProbe.Check check : computeChecks) {
+            checks.check(check.passed(), check.detail());
         }
         checks.runFrameGraphChecks(generationBeforeReload);
         return checks;
@@ -89,6 +94,10 @@ final class SmokeChecks {
                 "tier=" + runtime.caps().tier() + " (expected VULKAN_FULL)");
         check(runtime.caps().extensionNegotiationActive(), "negotiationActive="
                 + runtime.caps().extensionNegotiationActive());
+        check(runtime.caps().hasCompute(), "capsComputeAvailable=" + runtime.caps().hasCompute());
+        check(runtime.caps().computeUnavailableReason().isEmpty(),
+                "capsComputeUnavailableReason="
+                        + runtime.caps().computeUnavailableReason().orElse("available"));
         check(runtime.caps().hasDeviceExtension(SmokeVulkanBoot.EXT_AVAILABLE),
                 "capsSeesRequestedExtension=" + runtime.caps().hasDeviceExtension(SmokeVulkanBoot.EXT_AVAILABLE));
 
@@ -124,6 +133,10 @@ final class SmokeChecks {
                 "deviceExtensionsEmpty=" + runtime.caps().enabledDeviceExtensions().isEmpty());
         check(!SmokeVulkanBoot.callbackFired,
                 "onDeviceCreatedNotFired=" + !SmokeVulkanBoot.callbackFired);
+        check(!runtime.caps().hasCompute(), "capsComputeUnavailable=" + !runtime.caps().hasCompute());
+        String computeReason = runtime.caps().computeUnavailableReason().orElse("missing reason");
+        check("Compute is unavailable on the OpenGL backend".equals(computeReason),
+                "capsComputeUnavailableReason=" + computeReason);
     }
 
     private void check(boolean ok, String detail) {

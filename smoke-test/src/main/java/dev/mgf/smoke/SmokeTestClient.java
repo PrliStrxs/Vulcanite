@@ -38,6 +38,7 @@ public final class SmokeTestClient implements ClientModInitializer {
     private boolean finished;
     private boolean reloadStarted;
     private int ticks;
+    private SmokeComputeProbe computeProbe;
 
     @Override
     public void onInitializeClient() {
@@ -64,6 +65,15 @@ public final class SmokeTestClient implements ClientModInitializer {
             }
             reloadStarted = true;
             ticks = 0;
+            try {
+                computeProbe = SmokeComputeProbe.prepare(expectedBackend);
+            } catch (Throwable t) {
+                finished = true;
+                LOGGER.error("Pre-reload compute probe failed", t);
+                writeResult(false, List.of("pre-reload compute probe failed: " + t));
+                client.stop();
+                return;
+            }
             long generationBeforeReload = PipelineWarmupRegistry.generation(SampleWorldGeometry.PIPELINE);
             client.reloadResourcePacks().whenCompleteAsync((unused, error) -> {
                 if (error != null) {
@@ -74,7 +84,7 @@ public final class SmokeTestClient implements ClientModInitializer {
                     return;
                 }
                 finished = true;
-                runChecks(client, expectedBackend, generationBeforeReload);
+                runChecks(client, expectedBackend, generationBeforeReload, computeProbe);
             }, client);
         });
     }
@@ -87,10 +97,12 @@ public final class SmokeTestClient implements ClientModInitializer {
         }
     }
 
-    private static void runChecks(Minecraft client, String expectedBackend, long generationBeforeReload) {
+    private static void runChecks(Minecraft client, String expectedBackend,
+                                  long generationBeforeReload, SmokeComputeProbe computeProbe) {
         SmokeChecks checks;
-        try {
-            checks = SmokeChecks.run(expectedBackend, generationBeforeReload);
+        try (computeProbe) {
+            checks = SmokeChecks.run(expectedBackend, generationBeforeReload,
+                    computeProbe.finishAfterReload());
         } catch (Throwable t) {
             LOGGER.error("Smoke checks threw", t);
             writeResult(false, List.of("exception: " + t));

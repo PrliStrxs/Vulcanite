@@ -28,11 +28,15 @@ repositories {
 
 // Which backend this smoke run expects: -PsmokeBackend=vulkan (default) or opengl.
 def smokeBackend = providers.gradleProperty("smokeBackend").getOrElse("vulkan")
+def smokeValidationProperty = providers.gradleProperty("smokeValidation")
+def smokeValidation = smokeValidationProperty.isPresent()
+        && !smokeValidationProperty.get().equalsIgnoreCase("false")
 
 loom {
     runs {
         client {
             vmArg "-Dmgf.smoke.expectedBackend=${smokeBackend}"
+            vmArg "-Dmgf.smoke.validation=${smokeValidation}"
             // Forces the backend regardless of options.txt and of vanilla's
             // crash watchdog (which resets the option after an "unexpected
             // shutdown" — and our harness stopping at CLIENT_STARTED counts
@@ -40,6 +44,9 @@ loom {
             // argument, in-game preferred graphics backend setting is ignored".
             programArg "--graphicsBackend"
             programArg smokeBackend
+            if (smokeValidation && smokeBackend.equalsIgnoreCase("vulkan")) {
+                programArg "--vulkanValidation"
+            }
         }
     }
 }
@@ -67,6 +74,7 @@ def resultFile = new File(runDir, "mgf-smoke-result.txt")
 // the --graphicsBackend launch argument above, immune to options.txt state).
 tasks.register("prepareSmokeRun") {
     inputs.property "backend", smokeBackend
+    inputs.property "validation", smokeValidation
     outputs.upToDateWhen { false }
     doLast {
         runDir.mkdirs()
@@ -90,6 +98,24 @@ tasks.register("smokeTest") {
         logger.lifecycle("Smoke result:\n" + lines.join("\n"))
         if (lines.isEmpty() || lines[0] != "PASS") {
             throw new GradleException("Smoke test FAILED — see details above")
+        }
+        if (smokeValidation && smokeBackend.equalsIgnoreCase("vulkan")) {
+            def logFile = new File(runDir, "logs/latest.log")
+            if (!logFile.exists()) {
+                throw new GradleException("Validation smoke produced no latest.log")
+            }
+            def logText = logFile.getText("UTF-8")
+            if (!logText.contains("Enabling Vulkan validation layers")) {
+                throw new GradleException("Khronos validation was requested but did not enable")
+            }
+            def validationFailures = logFile.readLines("UTF-8").findAll {
+                it =~ /(?i)(VUID-|SYNC-HAZARD-|UNASSIGNED-|Validation Error|Validation Warning)/
+            }
+            if (!validationFailures.isEmpty()) {
+                throw new GradleException("Vulkan validation reported ${validationFailures.size()} issue(s):\n"
+                        + validationFailures.take(20).join("\n"))
+            }
+            logger.lifecycle("Vulkan validation enabled with no reported issues")
         }
     }
 }

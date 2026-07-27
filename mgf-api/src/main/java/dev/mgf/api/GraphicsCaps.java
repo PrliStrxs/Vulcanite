@@ -1,6 +1,7 @@
 package dev.mgf.api;
 
 import java.util.Set;
+import java.util.Optional;
 
 /**
  * Capability probing for the current device and for MGF's own seams.
@@ -45,4 +46,16 @@ public interface GraphicsCaps {
      *         pipelines can therefore be recompiled after resource reloads
      */
     boolean pipelineWarmupReloadActive();
+
+    /**
+     * @return whether MGF's Vulkan compute dispatcher is available on the
+     *         current graphics device
+     */
+    boolean hasCompute();
+
+    /**
+     * @return empty when compute is available, otherwise a precise reason why
+     *         the service is disabled
+     */
+    Optional<String> computeUnavailableReason();
 }

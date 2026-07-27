@@ -24,6 +24,7 @@ public final class SampleInteropClient implements ClientModInitializer {
         SampleFrameGraphProbe.install();
         SampleVignette.install();
         SampleWorldGeometry.install();
+        SampleAutoExposure.install();
         SampleDepthReadback.install();
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> report());
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> SampleWorldGeometry.close());
@@ -41,6 +42,11 @@ public final class SampleInteropClient implements ClientModInitializer {
                 runtime.caps().tier(),
                 runtime.caps().extensionNegotiationActive());
 
+        LOGGER.info("Compute: available={} reason={}",
+                runtime.caps().hasCompute(),
+                runtime.caps().computeUnavailableReason().orElse("available"));
+
+        reportExtension(runtime, SampleVulkanBoot.EXT_FORMAT_FEATURE_FLAGS_2);
         reportExtension(runtime, SampleVulkanBoot.EXT_OPTICAL_FLOW);
         reportExtension(runtime, SampleVulkanBoot.EXT_EXTERNAL_MEMORY);
         reportExtension(runtime, SampleVulkanBoot.EXT_EXTERNAL_MEMORY_WIN32);
