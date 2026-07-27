@@ -46,7 +46,7 @@ public final class PostFxOverlays {
             return;
         }
         bootstrapped = true;
-        FrameGraphDispatch.register(FrameGraphAnchor.BEFORE_EXECUTE, PostFxOverlays::addOverlayPasses);
+        FrameGraphDispatch.registerLast(FrameGraphAnchor.BEFORE_EXECUTE, PostFxOverlays::addOverlayPasses);
     }
 
     public static void add(String name, RenderPipeline pipeline) {

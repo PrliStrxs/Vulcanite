@@ -17,7 +17,8 @@ The task rewrites `preferredGraphicsBackend` in `run/options.txt` before
 launching and passes the expected backend to the mod via
 `-Dmgf.smoke.expectedBackend`, so assertions know which branch to check
 (a silent vanilla auto-fallback to the other backend therefore FAILS the run,
-by design).
+by design). After initial startup, the harness triggers a second resource reload
+and verifies that the registered M3 pipeline is compiled again.
 
 ## What is asserted
 
@@ -27,6 +28,9 @@ by design).
   VkInterop handles non-zero.
 - OpenGL runs: clean degradation — OPENGL_COMPAT tier, empty interop, no
   callback fired.
+- All runs: the shader-reload hook fired and the M3 world-geometry pipeline
+  compiled successfully through the active backend.
+- Sodium runs: the Vulkan checks above pass while Sodium is loaded.
 
 Run it against every new Minecraft snapshot before declaring MGF compatible
 (release gating, design doc §11).

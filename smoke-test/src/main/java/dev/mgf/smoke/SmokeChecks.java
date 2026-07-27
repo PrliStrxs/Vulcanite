@@ -12,8 +12,11 @@ import dev.mgf.api.Mgf;
 import dev.mgf.api.MgfRuntime;
 import dev.mgf.api.graph.FrameGraphAnchor;
 import dev.mgf.api.unstable.graph.FrameGraphEvents;
+import dev.mgf.api.unstable.pipeline.MgfPipelines;
 import dev.mgf.impl.graph.FrameGraphDispatch;
+import dev.mgf.impl.pipeline.PipelineWarmupRegistry;
 import dev.mgf.samples.interop.SampleVignette;
+import dev.mgf.samples.interop.SampleWorldGeometry;
 
 /**
  * The assertion set. Each check appends a human-readable line; failures make
@@ -28,7 +31,7 @@ final class SmokeChecks {
     private SmokeChecks() {
     }
 
-    static SmokeChecks run(String expectedBackend) {
+    static SmokeChecks run(String expectedBackend, long generationBeforeReload) {
         SmokeChecks checks = new SmokeChecks();
         checks.lines.add("expectedBackend=" + expectedBackend);
         if (!Mgf.isAvailable()) {
@@ -43,11 +46,11 @@ final class SmokeChecks {
         } else {
             checks.runOpenGlChecks(runtime);
         }
-        checks.runFrameGraphChecks();
+        checks.runFrameGraphChecks(generationBeforeReload);
         return checks;
     }
 
-    private void runFrameGraphChecks() {
+    private void runFrameGraphChecks(long generationBeforeReload) {
         try {
             FrameGraphEvents.register(FrameGraphAnchor.BEFORE_EXECUTE, context -> { });
             check(true, "frameGraphListenerRegistered=true");
@@ -68,6 +71,15 @@ final class SmokeChecks {
         } catch (Throwable t) {
             fail("postPipelineValid threw: " + t);
         }
+
+        check(Mgf.runtime().caps().pipelineWarmupReloadActive(),
+                "pipelineWarmupReloadActive=" + Mgf.runtime().caps().pipelineWarmupReloadActive());
+        check(MgfPipelines.warmupStatus(SampleWorldGeometry.PIPELINE) == MgfPipelines.WarmupStatus.VALID,
+                "worldGeometryPipelineWarmup=" + MgfPipelines.warmupStatus(SampleWorldGeometry.PIPELINE));
+        check(PipelineWarmupRegistry.generation(SampleWorldGeometry.PIPELINE) > generationBeforeReload,
+                "pipelineWarmupReloadGeneration="
+                        + PipelineWarmupRegistry.generation(SampleWorldGeometry.PIPELINE)
+                        + " (before reload " + generationBeforeReload + ")");
     }
 
     private void runVulkanChecks(MgfRuntime runtime) {

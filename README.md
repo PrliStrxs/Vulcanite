@@ -16,7 +16,7 @@ architecture, roadmap, and rationale.
 |---|---|---|
 | `:mgf-api` | `mgf-api` | Stable consumer API. Pure Java — no Minecraft, LWJGL, or loader types. |
 | `:mgf-impl-26.2` | `mgf` | The mod players install. All mixins, access wideners, and 26.2-specific adapters. Bundles `mgf-api`. |
-| `:samples:sample-interop` | dev-only | Requests Vulkan extensions via MGF and logs negotiated device state at startup (M0/M1 verification). |
+| `:samples:sample-interop` | dev-only | Exercises extension negotiation, frame-graph hooks, custom pipelines, generated/resource shaders, and world-space geometry. |
 | `smoke-test/` | — | Launch-and-assert harness; wired into the build in M1 (see its README). |
 
 Consumer mods depend on `mgf-api` only. Each Minecraft drop gets its own
@@ -31,7 +31,7 @@ Consumer mods depend on `mgf-api` only. Each Minecraft drop gets its own
 Requires JDK 25 (Gradle toolchains will fetch one if missing). No mappings are
 involved — 26.x is unobfuscated and code targets Mojang's real names.
 
-## Running the M0 spike
+## Running the interop sample
 
 ```
 ./gradlew :samples:sample-interop:runClient
@@ -44,10 +44,20 @@ Then in the generated run directory set `preferredGraphicsBackend:"vulkan"` in
 - `Mod 'mgf-sample-interop': enabling Vulkan device extension VK_NV_optical_flow`
 - `Requested extension ... -> enabled=true`
 - `VkInterop: instance=0x... device=0x...` with non-zero handles
+- `MGF seam engaged: PIPELINE_RELOAD_HOOK`
+- `M3 world-geometry sample registered`; enter a world to see the rotating,
+  depth-tested custom-shader pyramid in front of the camera
 
 Acceptance criteria and the fail-soft policy are defined in design doc §10 (M0)
 and §7. Test **both** backends every session — vanilla's auto-fallback can
 switch backends silently.
+
+Minecraft-specific pipeline helpers live under the unstable 26.2 API:
+`MgfPipelines` builds and warms custom render pipelines, while `ShaderSources`
+composes generated and resource-pack GLSL with 26.3-compatible includes and
+explicit stage locations. Consumer code that needs these helpers depends on the
+installed implementation artifact; the stable `mgf-api` surface remains free of
+Mojang types.
 
 ## License
 

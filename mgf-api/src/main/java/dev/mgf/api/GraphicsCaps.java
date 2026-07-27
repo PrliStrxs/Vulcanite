@@ -39,4 +39,10 @@ public interface GraphicsCaps {
      *         on this game version.
      */
     boolean frameGraphEventsActive();
+
+    /**
+     * @return whether MGF's shader-reload hook has run and registered custom
+     *         pipelines can therefore be recompiled after resource reloads
+     */
+    boolean pipelineWarmupReloadActive();
 }

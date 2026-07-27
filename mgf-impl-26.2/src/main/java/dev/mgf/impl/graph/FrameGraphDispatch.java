@@ -25,6 +25,8 @@ import dev.mgf.impl.core.SeamHealth;
 public final class FrameGraphDispatch {
 
     private static final Map<FrameGraphAnchor, List<FrameGraphListener>> LISTENERS = new EnumMap<>(FrameGraphAnchor.class);
+    private static final Map<FrameGraphAnchor, List<FrameGraphListener>> LAST_LISTENERS =
+            new EnumMap<>(FrameGraphAnchor.class);
     /** Listeners that threw — muted for the session so one bad mod cannot spam or stall the render loop. */
     private static final Set<FrameGraphListener> MUTED = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private static final Set<FrameGraphAnchor> FIRED = EnumSet.noneOf(FrameGraphAnchor.class);
@@ -32,6 +34,7 @@ public final class FrameGraphDispatch {
     static {
         for (FrameGraphAnchor anchor : FrameGraphAnchor.values()) {
             LISTENERS.put(anchor, new CopyOnWriteArrayList<>());
+            LAST_LISTENERS.put(anchor, new CopyOnWriteArrayList<>());
         }
     }
 
@@ -42,16 +45,25 @@ public final class FrameGraphDispatch {
         LISTENERS.get(anchor).add(listener);
     }
 
+    /** Registers an internal finalizer that always runs after ordinary listeners. */
+    public static void registerLast(FrameGraphAnchor anchor, FrameGraphListener listener) {
+        LAST_LISTENERS.get(anchor).add(listener);
+    }
+
     /** Render thread only. Never throws. */
     public static void dispatch(FrameGraphAnchor anchor, FrameGraphBuilder builder, LevelTargetBundle targets) {
         SeamHealth.markEngaged(SeamHealth.Seam.FRAME_GRAPH_EVENTS);
         FIRED.add(anchor); // render-thread-confined, EnumSet is fine
 
-        List<FrameGraphListener> listeners = LISTENERS.get(anchor);
-        if (listeners.isEmpty()) {
-            return;
-        }
         FrameGraphContext context = new FrameGraphContext(anchor, builder, targets);
+        dispatchListeners(LISTENERS.get(anchor), context, anchor);
+        dispatchListeners(LAST_LISTENERS.get(anchor), context, anchor);
+    }
+
+    private static void dispatchListeners(
+            List<FrameGraphListener> listeners,
+            FrameGraphContext context,
+            FrameGraphAnchor anchor) {
         for (FrameGraphListener listener : listeners) {
             if (MUTED.contains(listener)) {
                 continue;

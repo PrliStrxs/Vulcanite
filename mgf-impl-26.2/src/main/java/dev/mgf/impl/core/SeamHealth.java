@@ -21,7 +21,9 @@ public final class SeamHealth {
         /** {@code VulkanDeviceMixin} fired after the Vulkan device was constructed. */
         DEVICE_CREATED_HOOK,
         /** {@code LevelRendererMixin} dispatched at least one frame-graph anchor. */
-        FRAME_GRAPH_EVENTS
+        FRAME_GRAPH_EVENTS,
+        /** {@code ShaderManagerMixin} ran after a shader resource reload. */
+        PIPELINE_RELOAD_HOOK
     }
 
     private static final Set<Seam> ENGAGED = ConcurrentHashMap.newKeySet();

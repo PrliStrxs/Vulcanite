@@ -40,4 +40,9 @@ public final class GraphicsCapsImpl implements GraphicsCaps {
     public boolean frameGraphEventsActive() {
         return SeamHealth.isEngaged(SeamHealth.Seam.FRAME_GRAPH_EVENTS);
     }
+
+    @Override
+    public boolean pipelineWarmupReloadActive() {
+        return SeamHealth.isEngaged(SeamHealth.Seam.PIPELINE_RELOAD_HOOK);
+    }
 }

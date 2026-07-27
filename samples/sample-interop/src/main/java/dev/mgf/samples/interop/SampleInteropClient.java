@@ -23,8 +23,10 @@ public final class SampleInteropClient implements ClientModInitializer {
     public void onInitializeClient() {
         SampleFrameGraphProbe.install();
         SampleVignette.install();
+        SampleWorldGeometry.install();
         SampleDepthReadback.install();
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> report());
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> SampleWorldGeometry.close());
     }
 
     private static void report() {

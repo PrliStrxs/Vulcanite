@@ -17,13 +17,16 @@ import net.minecraft.resources.Identifier;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
+import dev.mgf.impl.pipeline.PipelineWarmupRegistry;
+import dev.mgf.samples.interop.SampleWorldGeometry;
+
 /**
  * Orchestrates the smoke run. CLIENT_STARTED fires before the initial resource
  * reload finishes (the shader compilation cache is still empty there), so the
- * harness instead polls each tick until the vanilla fullscreen shader resolves
- * — the exact readiness condition the pipeline checks depend on — then runs
- * {@link SmokeChecks}, writes {@code mgf-smoke-result.txt} (first line
- * PASS/FAIL), and stops the client for the Gradle {@code smokeTest} task.
+ * harness instead polls each tick until the vanilla fullscreen shader resolves,
+ * triggers and awaits a second resource reload, then runs {@link SmokeChecks}.
+ * This proves registered custom pipelines survive cache replacement before the
+ * harness writes {@code mgf-smoke-result.txt} and stops the client.
  */
 public final class SmokeTestClient implements ClientModInitializer {
 
@@ -33,6 +36,7 @@ public final class SmokeTestClient implements ClientModInitializer {
     private static final int TIMEOUT_TICKS = 1200;
 
     private boolean finished;
+    private boolean reloadStarted;
     private int ticks;
 
     @Override
@@ -40,6 +44,14 @@ public final class SmokeTestClient implements ClientModInitializer {
         String expectedBackend = System.getProperty("mgf.smoke.expectedBackend", "vulkan");
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (finished) {
+                return;
+            }
+            if (reloadStarted) {
+                if (++ticks >= TIMEOUT_TICKS) {
+                    finished = true;
+                    writeResult(false, List.of("second resource reload did not complete"));
+                    client.stop();
+                }
                 return;
             }
             if (!shadersReady(client)) {
@@ -50,8 +62,20 @@ public final class SmokeTestClient implements ClientModInitializer {
                 }
                 return;
             }
-            finished = true;
-            runChecks(client, expectedBackend);
+            reloadStarted = true;
+            ticks = 0;
+            long generationBeforeReload = PipelineWarmupRegistry.generation(SampleWorldGeometry.PIPELINE);
+            client.reloadResourcePacks().whenCompleteAsync((unused, error) -> {
+                if (error != null) {
+                    finished = true;
+                    LOGGER.error("Second resource reload failed", error);
+                    writeResult(false, List.of("second resource reload failed: " + error));
+                    client.stop();
+                    return;
+                }
+                finished = true;
+                runChecks(client, expectedBackend, generationBeforeReload);
+            }, client);
         });
     }
 
@@ -63,10 +87,10 @@ public final class SmokeTestClient implements ClientModInitializer {
         }
     }
 
-    private static void runChecks(Minecraft client, String expectedBackend) {
+    private static void runChecks(Minecraft client, String expectedBackend, long generationBeforeReload) {
         SmokeChecks checks;
         try {
-            checks = SmokeChecks.run(expectedBackend);
+            checks = SmokeChecks.run(expectedBackend, generationBeforeReload);
         } catch (Throwable t) {
             LOGGER.error("Smoke checks threw", t);
             writeResult(false, List.of("exception: " + t));
