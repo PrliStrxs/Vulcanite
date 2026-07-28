@@ -1,5 +1,6 @@
 plugins {
     id "java-library"
+    id "maven-publish"
 }
 
 base {
@@ -11,10 +12,36 @@ java {
         languageVersion = JavaLanguageVersion.of(25)
     }
     withSourcesJar()
+    withJavadocJar()
 }
 
 // mgf-api is intentionally dependency-free: no Minecraft, no LWJGL, no loader types.
 // Consumers talk to the runtime through opaque handles (long) and plain Java types.
+
+dependencies {
+    testImplementation platform("org.junit:junit-bom:5.13.4")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named("test") {
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "mgf-api"
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "staging"
+            url = rootProject.layout.buildDirectory.dir("repository")
+        }
+    }
+}
 
 tasks.named("jar") {
     from(project.file("LICENSE")) {
