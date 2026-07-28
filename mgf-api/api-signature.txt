@@ -1,0 +1,662 @@
+CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationCapabilities(java.util.Set<dev.mgf.api.provider.ColorEncoding>,java.util.Set<dev.mgf.api.provider.ProviderId>,int)
+CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationFrame(dev.mgf.api.provider.FrameInfo,dev.mgf.api.provider.FrameDimensions,dev.mgf.api.provider.CommandRecordingContext,dev.mgf.api.framegen.FrameGenerationResources,java.util.Optional<dev.mgf.api.provider.FrameMatrices>)
+CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationRequirements(java.util.Set<dev.mgf.api.provider.FrameResourceKind>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>)
+CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationResources(dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>)
+CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationSupport(dev.mgf.api.provider.ProviderSupport,java.util.Optional<dev.mgf.api.framegen.FrameGenerationCapabilities>,java.util.Optional<dev.mgf.api.framegen.FrameGenerationRequirements>)
+CONSTRUCTOR public dev.mgf.api.present.PresentBatch(java.util.List<dev.mgf.api.present.PresentFrame>)
+CONSTRUCTOR public dev.mgf.api.present.PresentFrame(dev.mgf.api.provider.FrameInfo,dev.mgf.api.present.PresentFrameKind,int,dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.CommandRecordingContext>)
+CONSTRUCTOR public dev.mgf.api.present.PresentHookCapabilities(boolean)
+CONSTRUCTOR public dev.mgf.api.present.PresentHookSupport(dev.mgf.api.provider.ProviderSupport,java.util.Optional<dev.mgf.api.present.PresentHookCapabilities>)
+CONSTRUCTOR public dev.mgf.api.present.PresentReceipt(dev.mgf.api.provider.FrameInfo,dev.mgf.api.present.PresentFrameKind,int,boolean,long,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.provider.BorrowedImage(long,long,int,int,int,long,dev.mgf.api.provider.ColorEncoding,dev.mgf.api.provider.ImageState,dev.mgf.api.provider.ImageOwnership,dev.mgf.api.provider.ImageLifetime,long,long)
+CONSTRUCTOR public dev.mgf.api.provider.CommandRecordingContext(long,int,long,long)
+CONSTRUCTOR public dev.mgf.api.provider.FrameDimensions(int,int,int,int)
+CONSTRUCTOR public dev.mgf.api.provider.FrameInfo(long,double,boolean,long,long)
+CONSTRUCTOR public dev.mgf.api.provider.FrameMatrices(dev.mgf.api.provider.Matrix4,dev.mgf.api.provider.Matrix4,dev.mgf.api.provider.Matrix4,dev.mgf.api.provider.Matrix4)
+CONSTRUCTOR public dev.mgf.api.provider.ImageState(int,long,long,int)
+CONSTRUCTOR public dev.mgf.api.provider.Matrix4(float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderDescriptor(dev.mgf.api.provider.ProviderId,java.lang.String,java.lang.String,int,int,int)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderEnvironment(dev.mgf.api.GraphicsBackendKind,long,java.util.Optional<dev.mgf.api.vk.VkInterop>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>,boolean)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderId(java.lang.String)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderResult(dev.mgf.api.provider.ProviderResultCode,java.lang.String,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderSelection(dev.mgf.api.provider.ProviderKind,java.util.List<dev.mgf.api.provider.ProviderId>,java.util.Optional<dev.mgf.api.provider.ProviderId>,dev.mgf.api.provider.ProviderSessionState,java.lang.String,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderSelections(dev.mgf.api.provider.ProviderSelection,dev.mgf.api.provider.ProviderSelection,dev.mgf.api.provider.ProviderSelection)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderSessionContext(dev.mgf.api.provider.ProviderEnvironment)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderSupport(boolean,java.lang.String,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscaleFrame(dev.mgf.api.provider.FrameInfo,dev.mgf.api.provider.FrameDimensions,dev.mgf.api.provider.CommandRecordingContext,dev.mgf.api.upscale.UpscaleResources,dev.mgf.api.upscale.UpscaleParameters)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscaleParameters(java.util.Optional<dev.mgf.api.provider.FrameMatrices>,float,float,float,float,float,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscaleResources(dev.mgf.api.provider.BorrowedImage,dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscalerCapabilities(double,double,java.util.Set<dev.mgf.api.provider.ColorEncoding>,java.util.Set<java.lang.String>)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscalerRequirements(java.util.Set<dev.mgf.api.provider.FrameResourceKind>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscalerSupport(dev.mgf.api.provider.ProviderSupport,java.util.Optional<dev.mgf.api.upscale.UpscalerCapabilities>,java.util.Optional<dev.mgf.api.upscale.UpscalerRequirements>)
+FIELD public static final dev.mgf.api.CapsTier.OPENGL_COMPAT dev.mgf.api.CapsTier
+FIELD public static final dev.mgf.api.CapsTier.VULKAN_BASIC dev.mgf.api.CapsTier
+FIELD public static final dev.mgf.api.CapsTier.VULKAN_FULL dev.mgf.api.CapsTier
+FIELD public static final dev.mgf.api.GraphicsBackendKind.OPENGL dev.mgf.api.GraphicsBackendKind
+FIELD public static final dev.mgf.api.GraphicsBackendKind.UNKNOWN dev.mgf.api.GraphicsBackendKind
+FIELD public static final dev.mgf.api.GraphicsBackendKind.VULKAN dev.mgf.api.GraphicsBackendKind
+FIELD public static final dev.mgf.api.graph.FrameGraphAnchor.AFTER_MAIN dev.mgf.api.graph.FrameGraphAnchor
+FIELD public static final dev.mgf.api.graph.FrameGraphAnchor.AFTER_SKY dev.mgf.api.graph.FrameGraphAnchor
+FIELD public static final dev.mgf.api.graph.FrameGraphAnchor.AFTER_WEATHER dev.mgf.api.graph.FrameGraphAnchor
+FIELD public static final dev.mgf.api.graph.FrameGraphAnchor.BEFORE_EXECUTE dev.mgf.api.graph.FrameGraphAnchor
+FIELD public static final dev.mgf.api.present.PresentFrameKind.GENERATED dev.mgf.api.present.PresentFrameKind
+FIELD public static final dev.mgf.api.present.PresentFrameKind.REAL dev.mgf.api.present.PresentFrameKind
+FIELD public static final dev.mgf.api.provider.ColorEncoding.HDR_LINEAR dev.mgf.api.provider.ColorEncoding
+FIELD public static final dev.mgf.api.provider.ColorEncoding.LINEAR dev.mgf.api.provider.ColorEncoding
+FIELD public static final dev.mgf.api.provider.ColorEncoding.SRGB dev.mgf.api.provider.ColorEncoding
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.COLOR dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.DEPTH dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.EXPOSURE dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.MATRICES dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.MOTION_VECTORS dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.OPTICAL_FLOW dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.REACTIVE_MASK dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.TRANSPARENCY_MASK dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.FrameResourceKind.UI_MASK dev.mgf.api.provider.FrameResourceKind
+FIELD public static final dev.mgf.api.provider.ImageLifetime.CALLBACK dev.mgf.api.provider.ImageLifetime
+FIELD public static final dev.mgf.api.provider.ImageLifetime.DEVICE_SESSION dev.mgf.api.provider.ImageLifetime
+FIELD public static final dev.mgf.api.provider.ImageOwnership.MGF dev.mgf.api.provider.ImageOwnership
+FIELD public static final dev.mgf.api.provider.ImageOwnership.MINECRAFT dev.mgf.api.provider.ImageOwnership
+FIELD public static final dev.mgf.api.provider.ProviderKind.FRAME_GENERATION dev.mgf.api.provider.ProviderKind
+FIELD public static final dev.mgf.api.provider.ProviderKind.PRESENT_HOOK dev.mgf.api.provider.ProviderKind
+FIELD public static final dev.mgf.api.provider.ProviderKind.UPSCALER dev.mgf.api.provider.ProviderKind
+FIELD public static final dev.mgf.api.provider.ProviderResultCode.FATAL_FAILURE dev.mgf.api.provider.ProviderResultCode
+FIELD public static final dev.mgf.api.provider.ProviderResultCode.RECOVERABLE_FAILURE dev.mgf.api.provider.ProviderResultCode
+FIELD public static final dev.mgf.api.provider.ProviderResultCode.SKIPPED dev.mgf.api.provider.ProviderResultCode
+FIELD public static final dev.mgf.api.provider.ProviderResultCode.SUCCESS dev.mgf.api.provider.ProviderResultCode
+FIELD public static final dev.mgf.api.provider.ProviderSessionState.ACTIVE dev.mgf.api.provider.ProviderSessionState
+FIELD public static final dev.mgf.api.provider.ProviderSessionState.DISABLED dev.mgf.api.provider.ProviderSessionState
+FIELD public static final dev.mgf.api.provider.ProviderSessionState.OFF dev.mgf.api.provider.ProviderSessionState
+FIELD public static final dev.mgf.api.provider.ProviderSessionState.READY dev.mgf.api.provider.ProviderSessionState
+FIELD public static final dev.mgf.api.provider.ProviderSessionState.UNSUPPORTED dev.mgf.api.provider.ProviderSessionState
+FIELD public static final dev.mgf.api.provider.ResetReason.CAMERA_DISCONTINUITY dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.provider.ResetReason.DEVICE_REPLACED dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.provider.ResetReason.DIMENSION_CHANGE dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.provider.ResetReason.FIRST_FRAME dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.provider.ResetReason.PROVIDER_CHANGE dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.provider.ResetReason.RESIZE dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.provider.ResetReason.RESOURCE_RELOAD dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.provider.ResetReason.WORLD_CHANGE dev.mgf.api.provider.ResetReason
+INTERFACE dev.mgf.api.framegen.FrameGenerationSession java.lang.AutoCloseable
+INTERFACE dev.mgf.api.present.PresentHookSession java.lang.AutoCloseable
+INTERFACE dev.mgf.api.provider.ProviderId java.lang.Comparable<dev.mgf.api.provider.ProviderId>
+INTERFACE dev.mgf.api.upscale.UpscalerSession java.lang.AutoCloseable
+METHOD public abstract dev.mgf.api.GraphicsCaps.computeUnavailableReason() java.util.Optional<java.lang.String>
+METHOD public abstract dev.mgf.api.GraphicsCaps.enabledDeviceExtensions() java.util.Set<java.lang.String>
+METHOD public abstract dev.mgf.api.GraphicsCaps.extensionNegotiationActive() boolean
+METHOD public abstract dev.mgf.api.GraphicsCaps.frameGraphEventsActive() boolean
+METHOD public abstract dev.mgf.api.GraphicsCaps.hasCompute() boolean
+METHOD public abstract dev.mgf.api.GraphicsCaps.hasDeviceExtension(java.lang.String) boolean
+METHOD public abstract dev.mgf.api.GraphicsCaps.pipelineWarmupReloadActive() boolean
+METHOD public abstract dev.mgf.api.GraphicsCaps.tier() dev.mgf.api.CapsTier
+METHOD public abstract dev.mgf.api.MgfRuntime.activeBackend() dev.mgf.api.GraphicsBackendKind
+METHOD public abstract dev.mgf.api.MgfRuntime.caps() dev.mgf.api.GraphicsCaps
+METHOD public abstract dev.mgf.api.MgfRuntime.providers() dev.mgf.api.provider.ProviderSelections
+METHOD public abstract dev.mgf.api.MgfRuntime.version() java.lang.String
+METHOD public abstract dev.mgf.api.MgfRuntime.vkInterop() java.util.Optional<dev.mgf.api.vk.VkInterop>
+METHOD public abstract dev.mgf.api.framegen.FrameGenerationProvider.descriptor() dev.mgf.api.provider.ProviderDescriptor
+METHOD public abstract dev.mgf.api.framegen.FrameGenerationProvider.open(dev.mgf.api.provider.ProviderSessionContext) dev.mgf.api.framegen.FrameGenerationSession
+METHOD public abstract dev.mgf.api.framegen.FrameGenerationProvider.probe(dev.mgf.api.provider.ProviderEnvironment,java.util.Optional<dev.mgf.api.provider.ProviderId>) dev.mgf.api.framegen.FrameGenerationSupport
+METHOD public abstract dev.mgf.api.framegen.FrameGenerationSession.close() void
+METHOD public abstract dev.mgf.api.framegen.FrameGenerationSession.record(dev.mgf.api.framegen.FrameGenerationFrame) dev.mgf.api.provider.ProviderResult
+METHOD public abstract dev.mgf.api.framegen.FrameGenerationSession.reset(dev.mgf.api.provider.ResetReason) void
+METHOD public abstract dev.mgf.api.framegen.FrameGenerationSession.resize(dev.mgf.api.provider.FrameDimensions) void
+METHOD public abstract dev.mgf.api.present.PresentHookProvider.descriptor() dev.mgf.api.provider.ProviderDescriptor
+METHOD public abstract dev.mgf.api.present.PresentHookProvider.open(dev.mgf.api.provider.ProviderSessionContext) dev.mgf.api.present.PresentHookSession
+METHOD public abstract dev.mgf.api.present.PresentHookProvider.probe(dev.mgf.api.provider.ProviderEnvironment,java.util.Optional<dev.mgf.api.provider.ProviderId>) dev.mgf.api.present.PresentHookSupport
+METHOD public abstract dev.mgf.api.present.PresentHookSession.afterPresent(dev.mgf.api.present.PresentReceipt) void
+METHOD public abstract dev.mgf.api.present.PresentHookSession.beforePresent(dev.mgf.api.present.PresentFrame) dev.mgf.api.provider.ProviderResult
+METHOD public abstract dev.mgf.api.present.PresentHookSession.close() void
+METHOD public abstract dev.mgf.api.present.PresentHookSession.reset(dev.mgf.api.provider.ResetReason) void
+METHOD public abstract dev.mgf.api.provider.MgfProviderRegistrar.registerProviders(dev.mgf.api.provider.ProviderRegistry) void
+METHOD public abstract dev.mgf.api.provider.ProviderRegistry.registerFrameGenerator(dev.mgf.api.framegen.FrameGenerationProvider) void
+METHOD public abstract dev.mgf.api.provider.ProviderRegistry.registerPresentHook(dev.mgf.api.present.PresentHookProvider) void
+METHOD public abstract dev.mgf.api.provider.ProviderRegistry.registerUpscaler(dev.mgf.api.upscale.UpscalerProvider) void
+METHOD public abstract dev.mgf.api.upscale.UpscalerProvider.descriptor() dev.mgf.api.provider.ProviderDescriptor
+METHOD public abstract dev.mgf.api.upscale.UpscalerProvider.open(dev.mgf.api.provider.ProviderSessionContext) dev.mgf.api.upscale.UpscalerSession
+METHOD public abstract dev.mgf.api.upscale.UpscalerProvider.probe(dev.mgf.api.provider.ProviderEnvironment) dev.mgf.api.upscale.UpscalerSupport
+METHOD public abstract dev.mgf.api.upscale.UpscalerSession.close() void
+METHOD public abstract dev.mgf.api.upscale.UpscalerSession.record(dev.mgf.api.upscale.UpscaleFrame) dev.mgf.api.provider.ProviderResult
+METHOD public abstract dev.mgf.api.upscale.UpscalerSession.reset(dev.mgf.api.provider.ResetReason) void
+METHOD public abstract dev.mgf.api.upscale.UpscalerSession.resize(dev.mgf.api.provider.FrameDimensions) void
+METHOD public abstract dev.mgf.api.vk.VkInterop.computeQueue() long
+METHOD public abstract dev.mgf.api.vk.VkInterop.computeQueueFamily() int
+METHOD public abstract dev.mgf.api.vk.VkInterop.enabledDeviceExtensions() java.util.Set<java.lang.String>
+METHOD public abstract dev.mgf.api.vk.VkInterop.graphicsQueue() long
+METHOD public abstract dev.mgf.api.vk.VkInterop.graphicsQueueFamily() int
+METHOD public abstract dev.mgf.api.vk.VkInterop.transferQueue() long
+METHOD public abstract dev.mgf.api.vk.VkInterop.transferQueueFamily() int
+METHOD public abstract dev.mgf.api.vk.VkInterop.vkDevice() long
+METHOD public abstract dev.mgf.api.vk.VkInterop.vkInstance() long
+METHOD public abstract dev.mgf.api.vk.VkInterop.vkPhysicalDevice() long
+METHOD public abstract dev.mgf.api.vk.VkInterop.vmaAllocator() long
+METHOD public abstract dev.mgf.api.vk.VulkanBootConfigurator.onDeviceCreated(java.util.function.Consumer<dev.mgf.api.vk.VulkanBootResult>) void
+METHOD public abstract dev.mgf.api.vk.VulkanBootConfigurator.requestDeviceExtension(java.lang.String,boolean) void
+METHOD public abstract dev.mgf.api.vk.VulkanBootRegistrar.configureVulkan(dev.mgf.api.vk.VulkanBootConfigurator) void
+METHOD public abstract dev.mgf.api.vk.VulkanBootResult.enabledDeviceExtensions() java.util.Set<java.lang.String>
+METHOD public abstract dev.mgf.api.vk.VulkanBootResult.interop() dev.mgf.api.vk.VkInterop
+METHOD public abstract dev.mgf.api.vk.VulkanBootResult.isExtensionEnabled(java.lang.String) boolean
+METHOD public abstract dev.mgf.api.vk.VulkanBootResult.missingRequiredExtensions() java.util.Set<java.lang.String>
+METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.acceptsUpscaler(dev.mgf.api.provider.ProviderId) boolean
+METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.colorEncodings() java.util.Set<dev.mgf.api.provider.ColorEncoding>
+METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.compatibleUpscalers() java.util.Set<dev.mgf.api.provider.ProviderId>
+METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.maximumGeneratedFrames() int
+METHOD public dev.mgf.api.framegen.FrameGenerationFrame.command() dev.mgf.api.provider.CommandRecordingContext
+METHOD public dev.mgf.api.framegen.FrameGenerationFrame.dimensions() dev.mgf.api.provider.FrameDimensions
+METHOD public dev.mgf.api.framegen.FrameGenerationFrame.frameInfo() dev.mgf.api.provider.FrameInfo
+METHOD public dev.mgf.api.framegen.FrameGenerationFrame.matrices() java.util.Optional<dev.mgf.api.provider.FrameMatrices>
+METHOD public dev.mgf.api.framegen.FrameGenerationFrame.resources() dev.mgf.api.framegen.FrameGenerationResources
+METHOD public dev.mgf.api.framegen.FrameGenerationRequirements.optionalResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
+METHOD public dev.mgf.api.framegen.FrameGenerationRequirements.requiredResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
+METHOD public dev.mgf.api.framegen.FrameGenerationResources.currentReal() dev.mgf.api.provider.BorrowedImage
+METHOD public dev.mgf.api.framegen.FrameGenerationResources.depth() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.framegen.FrameGenerationResources.generatedOutput() dev.mgf.api.provider.BorrowedImage
+METHOD public dev.mgf.api.framegen.FrameGenerationResources.motionVectors() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.framegen.FrameGenerationResources.opticalFlow() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.framegen.FrameGenerationResources.previousReal() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.framegen.FrameGenerationResources.uiMask() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.framegen.FrameGenerationSupport.capabilities() java.util.Optional<dev.mgf.api.framegen.FrameGenerationCapabilities>
+METHOD public dev.mgf.api.framegen.FrameGenerationSupport.requirements() java.util.Optional<dev.mgf.api.framegen.FrameGenerationRequirements>
+METHOD public dev.mgf.api.framegen.FrameGenerationSupport.status() dev.mgf.api.provider.ProviderSupport
+METHOD public dev.mgf.api.present.PresentBatch.frames() java.util.List<dev.mgf.api.present.PresentFrame>
+METHOD public dev.mgf.api.present.PresentFrame.command() java.util.Optional<dev.mgf.api.provider.CommandRecordingContext>
+METHOD public dev.mgf.api.present.PresentFrame.frameInfo() dev.mgf.api.provider.FrameInfo
+METHOD public dev.mgf.api.present.PresentFrame.kind() dev.mgf.api.present.PresentFrameKind
+METHOD public dev.mgf.api.present.PresentFrame.ordinal() int
+METHOD public dev.mgf.api.present.PresentFrame.source() dev.mgf.api.provider.BorrowedImage
+METHOD public dev.mgf.api.present.PresentHookCapabilities.supportsGeneratedFrames() boolean
+METHOD public dev.mgf.api.present.PresentHookSupport.capabilities() java.util.Optional<dev.mgf.api.present.PresentHookCapabilities>
+METHOD public dev.mgf.api.present.PresentHookSupport.status() dev.mgf.api.provider.ProviderSupport
+METHOD public dev.mgf.api.present.PresentReceipt.frameInfo() dev.mgf.api.provider.FrameInfo
+METHOD public dev.mgf.api.present.PresentReceipt.kind() dev.mgf.api.present.PresentFrameKind
+METHOD public dev.mgf.api.present.PresentReceipt.message() java.lang.String
+METHOD public dev.mgf.api.present.PresentReceipt.ordinal() int
+METHOD public dev.mgf.api.present.PresentReceipt.presentDurationNanos() long
+METHOD public dev.mgf.api.present.PresentReceipt.presented() boolean
+METHOD public dev.mgf.api.provider.BorrowedImage.colorEncoding() dev.mgf.api.provider.ColorEncoding
+METHOD public dev.mgf.api.provider.BorrowedImage.deviceGeneration() long
+METHOD public dev.mgf.api.provider.BorrowedImage.height() int
+METHOD public dev.mgf.api.provider.BorrowedImage.imageHandle() long
+METHOD public dev.mgf.api.provider.BorrowedImage.imageViewHandle() long
+METHOD public dev.mgf.api.provider.BorrowedImage.lifetime() dev.mgf.api.provider.ImageLifetime
+METHOD public dev.mgf.api.provider.BorrowedImage.nativeFormat() int
+METHOD public dev.mgf.api.provider.BorrowedImage.nativeUsageMask() long
+METHOD public dev.mgf.api.provider.BorrowedImage.ownership() dev.mgf.api.provider.ImageOwnership
+METHOD public dev.mgf.api.provider.BorrowedImage.resourceGeneration() long
+METHOD public dev.mgf.api.provider.BorrowedImage.state() dev.mgf.api.provider.ImageState
+METHOD public dev.mgf.api.provider.BorrowedImage.width() int
+METHOD public dev.mgf.api.provider.CommandRecordingContext.commandBufferHandle() long
+METHOD public dev.mgf.api.provider.CommandRecordingContext.deviceGeneration() long
+METHOD public dev.mgf.api.provider.CommandRecordingContext.queueFamilyIndex() int
+METHOD public dev.mgf.api.provider.CommandRecordingContext.resourceGeneration() long
+METHOD public dev.mgf.api.provider.FrameDimensions.displayHeight() int
+METHOD public dev.mgf.api.provider.FrameDimensions.displayWidth() int
+METHOD public dev.mgf.api.provider.FrameDimensions.renderHeight() int
+METHOD public dev.mgf.api.provider.FrameDimensions.renderWidth() int
+METHOD public dev.mgf.api.provider.FrameInfo.deltaSeconds() double
+METHOD public dev.mgf.api.provider.FrameInfo.deviceGeneration() long
+METHOD public dev.mgf.api.provider.FrameInfo.frameId() long
+METHOD public dev.mgf.api.provider.FrameInfo.historyReset() boolean
+METHOD public dev.mgf.api.provider.FrameInfo.resourceGeneration() long
+METHOD public dev.mgf.api.provider.FrameMatrices.currentInverseViewProjection() dev.mgf.api.provider.Matrix4
+METHOD public dev.mgf.api.provider.FrameMatrices.currentViewProjection() dev.mgf.api.provider.Matrix4
+METHOD public dev.mgf.api.provider.FrameMatrices.previousInverseViewProjection() dev.mgf.api.provider.Matrix4
+METHOD public dev.mgf.api.provider.FrameMatrices.previousViewProjection() dev.mgf.api.provider.Matrix4
+METHOD public dev.mgf.api.provider.ImageState.accessMask() long
+METHOD public dev.mgf.api.provider.ImageState.layout() int
+METHOD public dev.mgf.api.provider.ImageState.queueFamilyIndex() int
+METHOD public dev.mgf.api.provider.ImageState.stageMask() long
+METHOD public dev.mgf.api.provider.Matrix4.m00() float
+METHOD public dev.mgf.api.provider.Matrix4.m01() float
+METHOD public dev.mgf.api.provider.Matrix4.m02() float
+METHOD public dev.mgf.api.provider.Matrix4.m03() float
+METHOD public dev.mgf.api.provider.Matrix4.m10() float
+METHOD public dev.mgf.api.provider.Matrix4.m11() float
+METHOD public dev.mgf.api.provider.Matrix4.m12() float
+METHOD public dev.mgf.api.provider.Matrix4.m13() float
+METHOD public dev.mgf.api.provider.Matrix4.m20() float
+METHOD public dev.mgf.api.provider.Matrix4.m21() float
+METHOD public dev.mgf.api.provider.Matrix4.m22() float
+METHOD public dev.mgf.api.provider.Matrix4.m23() float
+METHOD public dev.mgf.api.provider.Matrix4.m30() float
+METHOD public dev.mgf.api.provider.Matrix4.m31() float
+METHOD public dev.mgf.api.provider.Matrix4.m32() float
+METHOD public dev.mgf.api.provider.Matrix4.m33() float
+METHOD public dev.mgf.api.provider.ProviderDescriptor.displayName() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderDescriptor.id() dev.mgf.api.provider.ProviderId
+METHOD public dev.mgf.api.provider.ProviderDescriptor.minimumApiMajor() int
+METHOD public dev.mgf.api.provider.ProviderDescriptor.minimumApiMinor() int
+METHOD public dev.mgf.api.provider.ProviderDescriptor.priority() int
+METHOD public dev.mgf.api.provider.ProviderDescriptor.providerVersion() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderEnvironment.availableResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
+METHOD public dev.mgf.api.provider.ProviderEnvironment.backend() dev.mgf.api.GraphicsBackendKind
+METHOD public dev.mgf.api.provider.ProviderEnvironment.deviceGeneration() long
+METHOD public dev.mgf.api.provider.ProviderEnvironment.multiPresentSupported() boolean
+METHOD public dev.mgf.api.provider.ProviderEnvironment.vulkanInterop() java.util.Optional<dev.mgf.api.vk.VkInterop>
+METHOD public dev.mgf.api.provider.ProviderId.compareTo(dev.mgf.api.provider.ProviderId) int
+METHOD public dev.mgf.api.provider.ProviderId.toString() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderId.value() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderResult.code() dev.mgf.api.provider.ProviderResultCode
+METHOD public dev.mgf.api.provider.ProviderResult.message() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderResult.reasonCode() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderSelection.kind() dev.mgf.api.provider.ProviderKind
+METHOD public dev.mgf.api.provider.ProviderSelection.message() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderSelection.reasonCode() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderSelection.registered() java.util.List<dev.mgf.api.provider.ProviderId>
+METHOD public dev.mgf.api.provider.ProviderSelection.selected() java.util.Optional<dev.mgf.api.provider.ProviderId>
+METHOD public dev.mgf.api.provider.ProviderSelection.state() dev.mgf.api.provider.ProviderSessionState
+METHOD public dev.mgf.api.provider.ProviderSelections.frameGeneration() dev.mgf.api.provider.ProviderSelection
+METHOD public dev.mgf.api.provider.ProviderSelections.presentHook() dev.mgf.api.provider.ProviderSelection
+METHOD public dev.mgf.api.provider.ProviderSelections.upscaler() dev.mgf.api.provider.ProviderSelection
+METHOD public dev.mgf.api.provider.ProviderSessionContext.environment() dev.mgf.api.provider.ProviderEnvironment
+METHOD public dev.mgf.api.provider.ProviderSupport.message() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderSupport.reasonCode() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderSupport.supported() boolean
+METHOD public dev.mgf.api.upscale.UpscaleFrame.command() dev.mgf.api.provider.CommandRecordingContext
+METHOD public dev.mgf.api.upscale.UpscaleFrame.dimensions() dev.mgf.api.provider.FrameDimensions
+METHOD public dev.mgf.api.upscale.UpscaleFrame.frameInfo() dev.mgf.api.provider.FrameInfo
+METHOD public dev.mgf.api.upscale.UpscaleFrame.parameters() dev.mgf.api.upscale.UpscaleParameters
+METHOD public dev.mgf.api.upscale.UpscaleFrame.resources() dev.mgf.api.upscale.UpscaleResources
+METHOD public dev.mgf.api.upscale.UpscaleParameters.farPlane() float
+METHOD public dev.mgf.api.upscale.UpscaleParameters.jitterX() float
+METHOD public dev.mgf.api.upscale.UpscaleParameters.jitterY() float
+METHOD public dev.mgf.api.upscale.UpscaleParameters.matrices() java.util.Optional<dev.mgf.api.provider.FrameMatrices>
+METHOD public dev.mgf.api.upscale.UpscaleParameters.nearPlane() float
+METHOD public dev.mgf.api.upscale.UpscaleParameters.qualityMode() java.lang.String
+METHOD public dev.mgf.api.upscale.UpscaleParameters.verticalFieldOfViewDegrees() float
+METHOD public dev.mgf.api.upscale.UpscaleResources.depth() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.upscale.UpscaleResources.exposure() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.upscale.UpscaleResources.inputColor() dev.mgf.api.provider.BorrowedImage
+METHOD public dev.mgf.api.upscale.UpscaleResources.motionVectors() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.upscale.UpscaleResources.outputColor() dev.mgf.api.provider.BorrowedImage
+METHOD public dev.mgf.api.upscale.UpscaleResources.reactiveMask() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.upscale.UpscaleResources.transparencyMask() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.upscale.UpscalerCapabilities.colorEncodings() java.util.Set<dev.mgf.api.provider.ColorEncoding>
+METHOD public dev.mgf.api.upscale.UpscalerCapabilities.maximumScale() double
+METHOD public dev.mgf.api.upscale.UpscalerCapabilities.minimumScale() double
+METHOD public dev.mgf.api.upscale.UpscalerCapabilities.qualityModes() java.util.Set<java.lang.String>
+METHOD public dev.mgf.api.upscale.UpscalerRequirements.optionalResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
+METHOD public dev.mgf.api.upscale.UpscalerRequirements.requiredResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
+METHOD public dev.mgf.api.upscale.UpscalerSupport.capabilities() java.util.Optional<dev.mgf.api.upscale.UpscalerCapabilities>
+METHOD public dev.mgf.api.upscale.UpscalerSupport.requirements() java.util.Optional<dev.mgf.api.upscale.UpscalerRequirements>
+METHOD public dev.mgf.api.upscale.UpscalerSupport.status() dev.mgf.api.provider.ProviderSupport
+METHOD public final dev.mgf.api.framegen.FrameGenerationCapabilities.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.framegen.FrameGenerationCapabilities.hashCode() int
+METHOD public final dev.mgf.api.framegen.FrameGenerationCapabilities.toString() java.lang.String
+METHOD public final dev.mgf.api.framegen.FrameGenerationFrame.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.framegen.FrameGenerationFrame.hashCode() int
+METHOD public final dev.mgf.api.framegen.FrameGenerationFrame.toString() java.lang.String
+METHOD public final dev.mgf.api.framegen.FrameGenerationRequirements.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.framegen.FrameGenerationRequirements.hashCode() int
+METHOD public final dev.mgf.api.framegen.FrameGenerationRequirements.toString() java.lang.String
+METHOD public final dev.mgf.api.framegen.FrameGenerationResources.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.framegen.FrameGenerationResources.hashCode() int
+METHOD public final dev.mgf.api.framegen.FrameGenerationResources.toString() java.lang.String
+METHOD public final dev.mgf.api.framegen.FrameGenerationSupport.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.framegen.FrameGenerationSupport.hashCode() int
+METHOD public final dev.mgf.api.framegen.FrameGenerationSupport.toString() java.lang.String
+METHOD public final dev.mgf.api.present.PresentBatch.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.present.PresentBatch.hashCode() int
+METHOD public final dev.mgf.api.present.PresentBatch.toString() java.lang.String
+METHOD public final dev.mgf.api.present.PresentFrame.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.present.PresentFrame.hashCode() int
+METHOD public final dev.mgf.api.present.PresentFrame.toString() java.lang.String
+METHOD public final dev.mgf.api.present.PresentHookCapabilities.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.present.PresentHookCapabilities.hashCode() int
+METHOD public final dev.mgf.api.present.PresentHookCapabilities.toString() java.lang.String
+METHOD public final dev.mgf.api.present.PresentHookSupport.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.present.PresentHookSupport.hashCode() int
+METHOD public final dev.mgf.api.present.PresentHookSupport.toString() java.lang.String
+METHOD public final dev.mgf.api.present.PresentReceipt.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.present.PresentReceipt.hashCode() int
+METHOD public final dev.mgf.api.present.PresentReceipt.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.BorrowedImage.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.BorrowedImage.hashCode() int
+METHOD public final dev.mgf.api.provider.BorrowedImage.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.CommandRecordingContext.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.CommandRecordingContext.hashCode() int
+METHOD public final dev.mgf.api.provider.CommandRecordingContext.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.FrameDimensions.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.FrameDimensions.hashCode() int
+METHOD public final dev.mgf.api.provider.FrameDimensions.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.FrameInfo.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.FrameInfo.hashCode() int
+METHOD public final dev.mgf.api.provider.FrameInfo.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.FrameMatrices.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.FrameMatrices.hashCode() int
+METHOD public final dev.mgf.api.provider.FrameMatrices.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ImageState.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ImageState.hashCode() int
+METHOD public final dev.mgf.api.provider.ImageState.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.Matrix4.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.Matrix4.hashCode() int
+METHOD public final dev.mgf.api.provider.Matrix4.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ProviderDescriptor.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderDescriptor.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderDescriptor.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ProviderEnvironment.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderEnvironment.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderEnvironment.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ProviderId.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderId.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderResult.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderResult.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderResult.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ProviderSelection.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderSelection.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderSelection.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ProviderSelections.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderSelections.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderSelections.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ProviderSessionContext.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderSessionContext.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderSessionContext.toString() java.lang.String
+METHOD public final dev.mgf.api.provider.ProviderSupport.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.provider.ProviderSupport.hashCode() int
+METHOD public final dev.mgf.api.provider.ProviderSupport.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.UpscaleFrame.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.UpscaleFrame.hashCode() int
+METHOD public final dev.mgf.api.upscale.UpscaleFrame.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.UpscaleParameters.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.UpscaleParameters.hashCode() int
+METHOD public final dev.mgf.api.upscale.UpscaleParameters.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.UpscaleResources.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.UpscaleResources.hashCode() int
+METHOD public final dev.mgf.api.upscale.UpscaleResources.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.UpscalerCapabilities.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.UpscalerCapabilities.hashCode() int
+METHOD public final dev.mgf.api.upscale.UpscalerCapabilities.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.UpscalerRequirements.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.UpscalerRequirements.hashCode() int
+METHOD public final dev.mgf.api.upscale.UpscalerRequirements.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.UpscalerSupport.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.UpscalerSupport.hashCode() int
+METHOD public final dev.mgf.api.upscale.UpscalerSupport.toString() java.lang.String
+METHOD public static dev.mgf.api.CapsTier.valueOf(java.lang.String) dev.mgf.api.CapsTier
+METHOD public static dev.mgf.api.CapsTier.values() dev.mgf.api.CapsTier[]
+METHOD public static dev.mgf.api.GraphicsBackendKind.valueOf(java.lang.String) dev.mgf.api.GraphicsBackendKind
+METHOD public static dev.mgf.api.GraphicsBackendKind.values() dev.mgf.api.GraphicsBackendKind[]
+METHOD public static dev.mgf.api.Mgf.isAvailable() boolean
+METHOD public static dev.mgf.api.Mgf.runtime() dev.mgf.api.MgfRuntime
+METHOD public static dev.mgf.api.framegen.FrameGenerationSupport.available(dev.mgf.api.framegen.FrameGenerationCapabilities,dev.mgf.api.framegen.FrameGenerationRequirements) dev.mgf.api.framegen.FrameGenerationSupport
+METHOD public static dev.mgf.api.framegen.FrameGenerationSupport.unavailable(java.lang.String,java.lang.String) dev.mgf.api.framegen.FrameGenerationSupport
+METHOD public static dev.mgf.api.graph.FrameGraphAnchor.valueOf(java.lang.String) dev.mgf.api.graph.FrameGraphAnchor
+METHOD public static dev.mgf.api.graph.FrameGraphAnchor.values() dev.mgf.api.graph.FrameGraphAnchor[]
+METHOD public static dev.mgf.api.internal.MgfRuntimeHolder.get() dev.mgf.api.MgfRuntime
+METHOD public static dev.mgf.api.internal.MgfRuntimeHolder.set(dev.mgf.api.MgfRuntime) void
+METHOD public static dev.mgf.api.present.PresentFrameKind.valueOf(java.lang.String) dev.mgf.api.present.PresentFrameKind
+METHOD public static dev.mgf.api.present.PresentFrameKind.values() dev.mgf.api.present.PresentFrameKind[]
+METHOD public static dev.mgf.api.present.PresentHookSupport.available(dev.mgf.api.present.PresentHookCapabilities) dev.mgf.api.present.PresentHookSupport
+METHOD public static dev.mgf.api.present.PresentHookSupport.unavailable(java.lang.String,java.lang.String) dev.mgf.api.present.PresentHookSupport
+METHOD public static dev.mgf.api.provider.ColorEncoding.valueOf(java.lang.String) dev.mgf.api.provider.ColorEncoding
+METHOD public static dev.mgf.api.provider.ColorEncoding.values() dev.mgf.api.provider.ColorEncoding[]
+METHOD public static dev.mgf.api.provider.FrameResourceKind.valueOf(java.lang.String) dev.mgf.api.provider.FrameResourceKind
+METHOD public static dev.mgf.api.provider.FrameResourceKind.values() dev.mgf.api.provider.FrameResourceKind[]
+METHOD public static dev.mgf.api.provider.ImageLifetime.valueOf(java.lang.String) dev.mgf.api.provider.ImageLifetime
+METHOD public static dev.mgf.api.provider.ImageLifetime.values() dev.mgf.api.provider.ImageLifetime[]
+METHOD public static dev.mgf.api.provider.ImageOwnership.valueOf(java.lang.String) dev.mgf.api.provider.ImageOwnership
+METHOD public static dev.mgf.api.provider.ImageOwnership.values() dev.mgf.api.provider.ImageOwnership[]
+METHOD public static dev.mgf.api.provider.Matrix4.identity() dev.mgf.api.provider.Matrix4
+METHOD public static dev.mgf.api.provider.ProviderKind.valueOf(java.lang.String) dev.mgf.api.provider.ProviderKind
+METHOD public static dev.mgf.api.provider.ProviderKind.values() dev.mgf.api.provider.ProviderKind[]
+METHOD public static dev.mgf.api.provider.ProviderResult.fatal(java.lang.String,java.lang.String) dev.mgf.api.provider.ProviderResult
+METHOD public static dev.mgf.api.provider.ProviderResult.recoverable(java.lang.String,java.lang.String) dev.mgf.api.provider.ProviderResult
+METHOD public static dev.mgf.api.provider.ProviderResult.skipped(java.lang.String,java.lang.String) dev.mgf.api.provider.ProviderResult
+METHOD public static dev.mgf.api.provider.ProviderResult.success() dev.mgf.api.provider.ProviderResult
+METHOD public static dev.mgf.api.provider.ProviderResultCode.valueOf(java.lang.String) dev.mgf.api.provider.ProviderResultCode
+METHOD public static dev.mgf.api.provider.ProviderResultCode.values() dev.mgf.api.provider.ProviderResultCode[]
+METHOD public static dev.mgf.api.provider.ProviderSelection.off(dev.mgf.api.provider.ProviderKind) dev.mgf.api.provider.ProviderSelection
+METHOD public static dev.mgf.api.provider.ProviderSelections.off() dev.mgf.api.provider.ProviderSelections
+METHOD public static dev.mgf.api.provider.ProviderSessionState.valueOf(java.lang.String) dev.mgf.api.provider.ProviderSessionState
+METHOD public static dev.mgf.api.provider.ProviderSessionState.values() dev.mgf.api.provider.ProviderSessionState[]
+METHOD public static dev.mgf.api.provider.ProviderSupport.available() dev.mgf.api.provider.ProviderSupport
+METHOD public static dev.mgf.api.provider.ProviderSupport.unsupported(java.lang.String,java.lang.String) dev.mgf.api.provider.ProviderSupport
+METHOD public static dev.mgf.api.provider.ResetReason.valueOf(java.lang.String) dev.mgf.api.provider.ResetReason
+METHOD public static dev.mgf.api.provider.ResetReason.values() dev.mgf.api.provider.ResetReason[]
+METHOD public static dev.mgf.api.upscale.UpscalerSupport.available(dev.mgf.api.upscale.UpscalerCapabilities,dev.mgf.api.upscale.UpscalerRequirements) dev.mgf.api.upscale.UpscalerSupport
+METHOD public static dev.mgf.api.upscale.UpscalerSupport.unavailable(java.lang.String,java.lang.String) dev.mgf.api.upscale.UpscalerSupport
+METHOD public volatile dev.mgf.api.provider.ProviderId.compareTo(java.lang.Object) int
+RECORD dev.mgf.api.framegen.FrameGenerationCapabilities 0 java.util.Set<dev.mgf.api.provider.ColorEncoding> colorEncodings
+RECORD dev.mgf.api.framegen.FrameGenerationCapabilities 1 java.util.Set<dev.mgf.api.provider.ProviderId> compatibleUpscalers
+RECORD dev.mgf.api.framegen.FrameGenerationCapabilities 2 int maximumGeneratedFrames
+RECORD dev.mgf.api.framegen.FrameGenerationFrame 0 dev.mgf.api.provider.FrameInfo frameInfo
+RECORD dev.mgf.api.framegen.FrameGenerationFrame 1 dev.mgf.api.provider.FrameDimensions dimensions
+RECORD dev.mgf.api.framegen.FrameGenerationFrame 2 dev.mgf.api.provider.CommandRecordingContext command
+RECORD dev.mgf.api.framegen.FrameGenerationFrame 3 dev.mgf.api.framegen.FrameGenerationResources resources
+RECORD dev.mgf.api.framegen.FrameGenerationFrame 4 java.util.Optional<dev.mgf.api.provider.FrameMatrices> matrices
+RECORD dev.mgf.api.framegen.FrameGenerationRequirements 0 java.util.Set<dev.mgf.api.provider.FrameResourceKind> requiredResources
+RECORD dev.mgf.api.framegen.FrameGenerationRequirements 1 java.util.Set<dev.mgf.api.provider.FrameResourceKind> optionalResources
+RECORD dev.mgf.api.framegen.FrameGenerationResources 0 dev.mgf.api.provider.BorrowedImage currentReal
+RECORD dev.mgf.api.framegen.FrameGenerationResources 1 java.util.Optional<dev.mgf.api.provider.BorrowedImage> previousReal
+RECORD dev.mgf.api.framegen.FrameGenerationResources 2 dev.mgf.api.provider.BorrowedImage generatedOutput
+RECORD dev.mgf.api.framegen.FrameGenerationResources 3 java.util.Optional<dev.mgf.api.provider.BorrowedImage> depth
+RECORD dev.mgf.api.framegen.FrameGenerationResources 4 java.util.Optional<dev.mgf.api.provider.BorrowedImage> motionVectors
+RECORD dev.mgf.api.framegen.FrameGenerationResources 5 java.util.Optional<dev.mgf.api.provider.BorrowedImage> opticalFlow
+RECORD dev.mgf.api.framegen.FrameGenerationResources 6 java.util.Optional<dev.mgf.api.provider.BorrowedImage> uiMask
+RECORD dev.mgf.api.framegen.FrameGenerationSupport 0 dev.mgf.api.provider.ProviderSupport status
+RECORD dev.mgf.api.framegen.FrameGenerationSupport 1 java.util.Optional<dev.mgf.api.framegen.FrameGenerationCapabilities> capabilities
+RECORD dev.mgf.api.framegen.FrameGenerationSupport 2 java.util.Optional<dev.mgf.api.framegen.FrameGenerationRequirements> requirements
+RECORD dev.mgf.api.present.PresentBatch 0 java.util.List<dev.mgf.api.present.PresentFrame> frames
+RECORD dev.mgf.api.present.PresentFrame 0 dev.mgf.api.provider.FrameInfo frameInfo
+RECORD dev.mgf.api.present.PresentFrame 1 dev.mgf.api.present.PresentFrameKind kind
+RECORD dev.mgf.api.present.PresentFrame 2 int ordinal
+RECORD dev.mgf.api.present.PresentFrame 3 dev.mgf.api.provider.BorrowedImage source
+RECORD dev.mgf.api.present.PresentFrame 4 java.util.Optional<dev.mgf.api.provider.CommandRecordingContext> command
+RECORD dev.mgf.api.present.PresentHookCapabilities 0 boolean supportsGeneratedFrames
+RECORD dev.mgf.api.present.PresentHookSupport 0 dev.mgf.api.provider.ProviderSupport status
+RECORD dev.mgf.api.present.PresentHookSupport 1 java.util.Optional<dev.mgf.api.present.PresentHookCapabilities> capabilities
+RECORD dev.mgf.api.present.PresentReceipt 0 dev.mgf.api.provider.FrameInfo frameInfo
+RECORD dev.mgf.api.present.PresentReceipt 1 dev.mgf.api.present.PresentFrameKind kind
+RECORD dev.mgf.api.present.PresentReceipt 2 int ordinal
+RECORD dev.mgf.api.present.PresentReceipt 3 boolean presented
+RECORD dev.mgf.api.present.PresentReceipt 4 long presentDurationNanos
+RECORD dev.mgf.api.present.PresentReceipt 5 java.lang.String message
+RECORD dev.mgf.api.provider.BorrowedImage 0 long imageHandle
+RECORD dev.mgf.api.provider.BorrowedImage 1 long imageViewHandle
+RECORD dev.mgf.api.provider.BorrowedImage 10 long deviceGeneration
+RECORD dev.mgf.api.provider.BorrowedImage 11 long resourceGeneration
+RECORD dev.mgf.api.provider.BorrowedImage 2 int width
+RECORD dev.mgf.api.provider.BorrowedImage 3 int height
+RECORD dev.mgf.api.provider.BorrowedImage 4 int nativeFormat
+RECORD dev.mgf.api.provider.BorrowedImage 5 long nativeUsageMask
+RECORD dev.mgf.api.provider.BorrowedImage 6 dev.mgf.api.provider.ColorEncoding colorEncoding
+RECORD dev.mgf.api.provider.BorrowedImage 7 dev.mgf.api.provider.ImageState state
+RECORD dev.mgf.api.provider.BorrowedImage 8 dev.mgf.api.provider.ImageOwnership ownership
+RECORD dev.mgf.api.provider.BorrowedImage 9 dev.mgf.api.provider.ImageLifetime lifetime
+RECORD dev.mgf.api.provider.CommandRecordingContext 0 long commandBufferHandle
+RECORD dev.mgf.api.provider.CommandRecordingContext 1 int queueFamilyIndex
+RECORD dev.mgf.api.provider.CommandRecordingContext 2 long deviceGeneration
+RECORD dev.mgf.api.provider.CommandRecordingContext 3 long resourceGeneration
+RECORD dev.mgf.api.provider.FrameDimensions 0 int renderWidth
+RECORD dev.mgf.api.provider.FrameDimensions 1 int renderHeight
+RECORD dev.mgf.api.provider.FrameDimensions 2 int displayWidth
+RECORD dev.mgf.api.provider.FrameDimensions 3 int displayHeight
+RECORD dev.mgf.api.provider.FrameInfo 0 long frameId
+RECORD dev.mgf.api.provider.FrameInfo 1 double deltaSeconds
+RECORD dev.mgf.api.provider.FrameInfo 2 boolean historyReset
+RECORD dev.mgf.api.provider.FrameInfo 3 long deviceGeneration
+RECORD dev.mgf.api.provider.FrameInfo 4 long resourceGeneration
+RECORD dev.mgf.api.provider.FrameMatrices 0 dev.mgf.api.provider.Matrix4 currentViewProjection
+RECORD dev.mgf.api.provider.FrameMatrices 1 dev.mgf.api.provider.Matrix4 previousViewProjection
+RECORD dev.mgf.api.provider.FrameMatrices 2 dev.mgf.api.provider.Matrix4 currentInverseViewProjection
+RECORD dev.mgf.api.provider.FrameMatrices 3 dev.mgf.api.provider.Matrix4 previousInverseViewProjection
+RECORD dev.mgf.api.provider.ImageState 0 int layout
+RECORD dev.mgf.api.provider.ImageState 1 long stageMask
+RECORD dev.mgf.api.provider.ImageState 2 long accessMask
+RECORD dev.mgf.api.provider.ImageState 3 int queueFamilyIndex
+RECORD dev.mgf.api.provider.Matrix4 0 float m00
+RECORD dev.mgf.api.provider.Matrix4 1 float m01
+RECORD dev.mgf.api.provider.Matrix4 10 float m22
+RECORD dev.mgf.api.provider.Matrix4 11 float m23
+RECORD dev.mgf.api.provider.Matrix4 12 float m30
+RECORD dev.mgf.api.provider.Matrix4 13 float m31
+RECORD dev.mgf.api.provider.Matrix4 14 float m32
+RECORD dev.mgf.api.provider.Matrix4 15 float m33
+RECORD dev.mgf.api.provider.Matrix4 2 float m02
+RECORD dev.mgf.api.provider.Matrix4 3 float m03
+RECORD dev.mgf.api.provider.Matrix4 4 float m10
+RECORD dev.mgf.api.provider.Matrix4 5 float m11
+RECORD dev.mgf.api.provider.Matrix4 6 float m12
+RECORD dev.mgf.api.provider.Matrix4 7 float m13
+RECORD dev.mgf.api.provider.Matrix4 8 float m20
+RECORD dev.mgf.api.provider.Matrix4 9 float m21
+RECORD dev.mgf.api.provider.ProviderDescriptor 0 dev.mgf.api.provider.ProviderId id
+RECORD dev.mgf.api.provider.ProviderDescriptor 1 java.lang.String displayName
+RECORD dev.mgf.api.provider.ProviderDescriptor 2 java.lang.String providerVersion
+RECORD dev.mgf.api.provider.ProviderDescriptor 3 int priority
+RECORD dev.mgf.api.provider.ProviderDescriptor 4 int minimumApiMajor
+RECORD dev.mgf.api.provider.ProviderDescriptor 5 int minimumApiMinor
+RECORD dev.mgf.api.provider.ProviderEnvironment 0 dev.mgf.api.GraphicsBackendKind backend
+RECORD dev.mgf.api.provider.ProviderEnvironment 1 long deviceGeneration
+RECORD dev.mgf.api.provider.ProviderEnvironment 2 java.util.Optional<dev.mgf.api.vk.VkInterop> vulkanInterop
+RECORD dev.mgf.api.provider.ProviderEnvironment 3 java.util.Set<dev.mgf.api.provider.FrameResourceKind> availableResources
+RECORD dev.mgf.api.provider.ProviderEnvironment 4 boolean multiPresentSupported
+RECORD dev.mgf.api.provider.ProviderId 0 java.lang.String value
+RECORD dev.mgf.api.provider.ProviderResult 0 dev.mgf.api.provider.ProviderResultCode code
+RECORD dev.mgf.api.provider.ProviderResult 1 java.lang.String reasonCode
+RECORD dev.mgf.api.provider.ProviderResult 2 java.lang.String message
+RECORD dev.mgf.api.provider.ProviderSelection 0 dev.mgf.api.provider.ProviderKind kind
+RECORD dev.mgf.api.provider.ProviderSelection 1 java.util.List<dev.mgf.api.provider.ProviderId> registered
+RECORD dev.mgf.api.provider.ProviderSelection 2 java.util.Optional<dev.mgf.api.provider.ProviderId> selected
+RECORD dev.mgf.api.provider.ProviderSelection 3 dev.mgf.api.provider.ProviderSessionState state
+RECORD dev.mgf.api.provider.ProviderSelection 4 java.lang.String reasonCode
+RECORD dev.mgf.api.provider.ProviderSelection 5 java.lang.String message
+RECORD dev.mgf.api.provider.ProviderSelections 0 dev.mgf.api.provider.ProviderSelection upscaler
+RECORD dev.mgf.api.provider.ProviderSelections 1 dev.mgf.api.provider.ProviderSelection frameGeneration
+RECORD dev.mgf.api.provider.ProviderSelections 2 dev.mgf.api.provider.ProviderSelection presentHook
+RECORD dev.mgf.api.provider.ProviderSessionContext 0 dev.mgf.api.provider.ProviderEnvironment environment
+RECORD dev.mgf.api.provider.ProviderSupport 0 boolean supported
+RECORD dev.mgf.api.provider.ProviderSupport 1 java.lang.String reasonCode
+RECORD dev.mgf.api.provider.ProviderSupport 2 java.lang.String message
+RECORD dev.mgf.api.upscale.UpscaleFrame 0 dev.mgf.api.provider.FrameInfo frameInfo
+RECORD dev.mgf.api.upscale.UpscaleFrame 1 dev.mgf.api.provider.FrameDimensions dimensions
+RECORD dev.mgf.api.upscale.UpscaleFrame 2 dev.mgf.api.provider.CommandRecordingContext command
+RECORD dev.mgf.api.upscale.UpscaleFrame 3 dev.mgf.api.upscale.UpscaleResources resources
+RECORD dev.mgf.api.upscale.UpscaleFrame 4 dev.mgf.api.upscale.UpscaleParameters parameters
+RECORD dev.mgf.api.upscale.UpscaleParameters 0 java.util.Optional<dev.mgf.api.provider.FrameMatrices> matrices
+RECORD dev.mgf.api.upscale.UpscaleParameters 1 float jitterX
+RECORD dev.mgf.api.upscale.UpscaleParameters 2 float jitterY
+RECORD dev.mgf.api.upscale.UpscaleParameters 3 float nearPlane
+RECORD dev.mgf.api.upscale.UpscaleParameters 4 float farPlane
+RECORD dev.mgf.api.upscale.UpscaleParameters 5 float verticalFieldOfViewDegrees
+RECORD dev.mgf.api.upscale.UpscaleParameters 6 java.lang.String qualityMode
+RECORD dev.mgf.api.upscale.UpscaleResources 0 dev.mgf.api.provider.BorrowedImage inputColor
+RECORD dev.mgf.api.upscale.UpscaleResources 1 dev.mgf.api.provider.BorrowedImage outputColor
+RECORD dev.mgf.api.upscale.UpscaleResources 2 java.util.Optional<dev.mgf.api.provider.BorrowedImage> depth
+RECORD dev.mgf.api.upscale.UpscaleResources 3 java.util.Optional<dev.mgf.api.provider.BorrowedImage> motionVectors
+RECORD dev.mgf.api.upscale.UpscaleResources 4 java.util.Optional<dev.mgf.api.provider.BorrowedImage> exposure
+RECORD dev.mgf.api.upscale.UpscaleResources 5 java.util.Optional<dev.mgf.api.provider.BorrowedImage> reactiveMask
+RECORD dev.mgf.api.upscale.UpscaleResources 6 java.util.Optional<dev.mgf.api.provider.BorrowedImage> transparencyMask
+RECORD dev.mgf.api.upscale.UpscalerCapabilities 0 double minimumScale
+RECORD dev.mgf.api.upscale.UpscalerCapabilities 1 double maximumScale
+RECORD dev.mgf.api.upscale.UpscalerCapabilities 2 java.util.Set<dev.mgf.api.provider.ColorEncoding> colorEncodings
+RECORD dev.mgf.api.upscale.UpscalerCapabilities 3 java.util.Set<java.lang.String> qualityModes
+RECORD dev.mgf.api.upscale.UpscalerRequirements 0 java.util.Set<dev.mgf.api.provider.FrameResourceKind> requiredResources
+RECORD dev.mgf.api.upscale.UpscalerRequirements 1 java.util.Set<dev.mgf.api.provider.FrameResourceKind> optionalResources
+RECORD dev.mgf.api.upscale.UpscalerSupport 0 dev.mgf.api.provider.ProviderSupport status
+RECORD dev.mgf.api.upscale.UpscalerSupport 1 java.util.Optional<dev.mgf.api.upscale.UpscalerCapabilities> capabilities
+RECORD dev.mgf.api.upscale.UpscalerSupport 2 java.util.Optional<dev.mgf.api.upscale.UpscalerRequirements> requirements
+SUPER dev.mgf.api.CapsTier java.lang.Enum<dev.mgf.api.CapsTier>
+SUPER dev.mgf.api.GraphicsBackendKind java.lang.Enum<dev.mgf.api.GraphicsBackendKind>
+SUPER dev.mgf.api.Mgf java.lang.Object
+SUPER dev.mgf.api.framegen.FrameGenerationCapabilities java.lang.Record
+SUPER dev.mgf.api.framegen.FrameGenerationFrame java.lang.Record
+SUPER dev.mgf.api.framegen.FrameGenerationRequirements java.lang.Record
+SUPER dev.mgf.api.framegen.FrameGenerationResources java.lang.Record
+SUPER dev.mgf.api.framegen.FrameGenerationSupport java.lang.Record
+SUPER dev.mgf.api.graph.FrameGraphAnchor java.lang.Enum<dev.mgf.api.graph.FrameGraphAnchor>
+SUPER dev.mgf.api.internal.MgfRuntimeHolder java.lang.Object
+SUPER dev.mgf.api.present.PresentBatch java.lang.Record
+SUPER dev.mgf.api.present.PresentFrame java.lang.Record
+SUPER dev.mgf.api.present.PresentFrameKind java.lang.Enum<dev.mgf.api.present.PresentFrameKind>
+SUPER dev.mgf.api.present.PresentHookCapabilities java.lang.Record
+SUPER dev.mgf.api.present.PresentHookSupport java.lang.Record
+SUPER dev.mgf.api.present.PresentReceipt java.lang.Record
+SUPER dev.mgf.api.provider.BorrowedImage java.lang.Record
+SUPER dev.mgf.api.provider.ColorEncoding java.lang.Enum<dev.mgf.api.provider.ColorEncoding>
+SUPER dev.mgf.api.provider.CommandRecordingContext java.lang.Record
+SUPER dev.mgf.api.provider.FrameDimensions java.lang.Record
+SUPER dev.mgf.api.provider.FrameInfo java.lang.Record
+SUPER dev.mgf.api.provider.FrameMatrices java.lang.Record
+SUPER dev.mgf.api.provider.FrameResourceKind java.lang.Enum<dev.mgf.api.provider.FrameResourceKind>
+SUPER dev.mgf.api.provider.ImageLifetime java.lang.Enum<dev.mgf.api.provider.ImageLifetime>
+SUPER dev.mgf.api.provider.ImageOwnership java.lang.Enum<dev.mgf.api.provider.ImageOwnership>
+SUPER dev.mgf.api.provider.ImageState java.lang.Record
+SUPER dev.mgf.api.provider.Matrix4 java.lang.Record
+SUPER dev.mgf.api.provider.ProviderDescriptor java.lang.Record
+SUPER dev.mgf.api.provider.ProviderEnvironment java.lang.Record
+SUPER dev.mgf.api.provider.ProviderId java.lang.Record
+SUPER dev.mgf.api.provider.ProviderKind java.lang.Enum<dev.mgf.api.provider.ProviderKind>
+SUPER dev.mgf.api.provider.ProviderResult java.lang.Record
+SUPER dev.mgf.api.provider.ProviderResultCode java.lang.Enum<dev.mgf.api.provider.ProviderResultCode>
+SUPER dev.mgf.api.provider.ProviderSelection java.lang.Record
+SUPER dev.mgf.api.provider.ProviderSelections java.lang.Record
+SUPER dev.mgf.api.provider.ProviderSessionContext java.lang.Record
+SUPER dev.mgf.api.provider.ProviderSessionState java.lang.Enum<dev.mgf.api.provider.ProviderSessionState>
+SUPER dev.mgf.api.provider.ProviderSupport java.lang.Record
+SUPER dev.mgf.api.provider.ResetReason java.lang.Enum<dev.mgf.api.provider.ResetReason>
+SUPER dev.mgf.api.upscale.UpscaleFrame java.lang.Record
+SUPER dev.mgf.api.upscale.UpscaleParameters java.lang.Record
+SUPER dev.mgf.api.upscale.UpscaleResources java.lang.Record
+SUPER dev.mgf.api.upscale.UpscalerCapabilities java.lang.Record
+SUPER dev.mgf.api.upscale.UpscalerRequirements java.lang.Record
+SUPER dev.mgf.api.upscale.UpscalerSupport java.lang.Record
+TYPE public abstract interface interface dev.mgf.api.GraphicsCaps
+TYPE public abstract interface interface dev.mgf.api.MgfRuntime
+TYPE public abstract interface interface dev.mgf.api.framegen.FrameGenerationProvider
+TYPE public abstract interface interface dev.mgf.api.framegen.FrameGenerationSession
+TYPE public abstract interface interface dev.mgf.api.present.PresentHookProvider
+TYPE public abstract interface interface dev.mgf.api.present.PresentHookSession
+TYPE public abstract interface interface dev.mgf.api.provider.MgfProviderRegistrar
+TYPE public abstract interface interface dev.mgf.api.provider.ProviderRegistry
+TYPE public abstract interface interface dev.mgf.api.upscale.UpscalerProvider
+TYPE public abstract interface interface dev.mgf.api.upscale.UpscalerSession
+TYPE public abstract interface interface dev.mgf.api.vk.VkInterop
+TYPE public abstract interface interface dev.mgf.api.vk.VulkanBootConfigurator
+TYPE public abstract interface interface dev.mgf.api.vk.VulkanBootRegistrar
+TYPE public abstract interface interface dev.mgf.api.vk.VulkanBootResult
+TYPE public final class dev.mgf.api.Mgf
+TYPE public final class dev.mgf.api.internal.MgfRuntimeHolder
+TYPE public final enum dev.mgf.api.CapsTier
+TYPE public final enum dev.mgf.api.GraphicsBackendKind
+TYPE public final enum dev.mgf.api.graph.FrameGraphAnchor
+TYPE public final enum dev.mgf.api.present.PresentFrameKind
+TYPE public final enum dev.mgf.api.provider.ColorEncoding
+TYPE public final enum dev.mgf.api.provider.FrameResourceKind
+TYPE public final enum dev.mgf.api.provider.ImageLifetime
+TYPE public final enum dev.mgf.api.provider.ImageOwnership
+TYPE public final enum dev.mgf.api.provider.ProviderKind
+TYPE public final enum dev.mgf.api.provider.ProviderResultCode
+TYPE public final enum dev.mgf.api.provider.ProviderSessionState
+TYPE public final enum dev.mgf.api.provider.ResetReason
+TYPE public final record dev.mgf.api.framegen.FrameGenerationCapabilities
+TYPE public final record dev.mgf.api.framegen.FrameGenerationFrame
+TYPE public final record dev.mgf.api.framegen.FrameGenerationRequirements
+TYPE public final record dev.mgf.api.framegen.FrameGenerationResources
+TYPE public final record dev.mgf.api.framegen.FrameGenerationSupport
+TYPE public final record dev.mgf.api.present.PresentBatch
+TYPE public final record dev.mgf.api.present.PresentFrame
+TYPE public final record dev.mgf.api.present.PresentHookCapabilities
+TYPE public final record dev.mgf.api.present.PresentHookSupport
+TYPE public final record dev.mgf.api.present.PresentReceipt
+TYPE public final record dev.mgf.api.provider.BorrowedImage
+TYPE public final record dev.mgf.api.provider.CommandRecordingContext
+TYPE public final record dev.mgf.api.provider.FrameDimensions
+TYPE public final record dev.mgf.api.provider.FrameInfo
+TYPE public final record dev.mgf.api.provider.FrameMatrices
+TYPE public final record dev.mgf.api.provider.ImageState
+TYPE public final record dev.mgf.api.provider.Matrix4
+TYPE public final record dev.mgf.api.provider.ProviderDescriptor
+TYPE public final record dev.mgf.api.provider.ProviderEnvironment
+TYPE public final record dev.mgf.api.provider.ProviderId
+TYPE public final record dev.mgf.api.provider.ProviderResult
+TYPE public final record dev.mgf.api.provider.ProviderSelection
+TYPE public final record dev.mgf.api.provider.ProviderSelections
+TYPE public final record dev.mgf.api.provider.ProviderSessionContext
+TYPE public final record dev.mgf.api.provider.ProviderSupport
+TYPE public final record dev.mgf.api.upscale.UpscaleFrame
+TYPE public final record dev.mgf.api.upscale.UpscaleParameters
+TYPE public final record dev.mgf.api.upscale.UpscaleResources
+TYPE public final record dev.mgf.api.upscale.UpscalerCapabilities
+TYPE public final record dev.mgf.api.upscale.UpscalerRequirements
+TYPE public final record dev.mgf.api.upscale.UpscalerSupport

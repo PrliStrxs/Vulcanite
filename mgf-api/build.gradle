@@ -1,3 +1,5 @@
+import dev.mgf.build.ApiSignatureTask
+
 plugins {
     id "java-library"
     id "maven-publish"
@@ -47,4 +49,22 @@ tasks.named("jar") {
     from(project.file("LICENSE")) {
         rename { "${it}_${base.archivesName.get()}" }
     }
+}
+
+tasks.register("apiSignature", ApiSignatureTask) {
+    dependsOn tasks.named("jar")
+    apiJar.set(tasks.named("jar").flatMap { it.archiveFile })
+    signatureFile.set(layout.buildDirectory.file("reports/api-signature.txt"))
+}
+
+tasks.register("apiCompatibilityCheck", ApiSignatureTask) {
+    dependsOn tasks.named("jar")
+    apiJar.set(tasks.named("jar").flatMap { it.archiveFile })
+    baselineFile.set(layout.projectDirectory.file("api-signature.txt"))
+    signatureFile.set(layout.buildDirectory.file("reports/api-signature-check.txt"))
+    compareWithBaseline.set(true)
+}
+
+tasks.named("check") {
+    dependsOn tasks.named("apiCompatibilityCheck")
 }

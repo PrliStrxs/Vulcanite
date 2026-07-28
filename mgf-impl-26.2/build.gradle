@@ -45,6 +45,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifactId = "mgf-fabric-26.2"
+            version = project.mod_version
             from components.java
         }
     }

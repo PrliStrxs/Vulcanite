@@ -12,6 +12,7 @@ import static org.lwjgl.vulkan.VK10.VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 
 import com.mojang.blaze3d.GpuFormat;
@@ -60,6 +61,14 @@ public final class ProviderFrameBridge {
     private static long deviceGeneration;
     private static long nextFrameId;
     private static long previousFrameNanos;
+    private static final LongAdder ACTIVE_FRAMES = new LongAdder();
+    private static final LongAdder ALLOCATIONS = new LongAdder();
+    private static final LongAdder COMMAND_RECORDINGS = new LongAdder();
+    private static final LongAdder COPIES = new LongAdder();
+    private static final LongAdder PIXEL_CHANGING_COPIES = new LongAdder();
+    private static final LongAdder REAL_PRESENTS = new LongAdder();
+    private static final LongAdder GENERATED_PRESENTS = new LongAdder();
+    private static final LongAdder EXTRA_PRESENTS = new LongAdder();
 
     private ProviderFrameBridge() {
     }
@@ -117,6 +126,29 @@ public final class ProviderFrameBridge {
         return activePath.apply(original);
     }
 
+    public static Diagnostics diagnostics() {
+        return new Diagnostics(
+                ACTIVE_FRAMES.sum(),
+                ALLOCATIONS.sum(),
+                COMMAND_RECORDINGS.sum(),
+                COPIES.sum(),
+                PIXEL_CHANGING_COPIES.sum(),
+                REAL_PRESENTS.sum(),
+                GENERATED_PRESENTS.sum(),
+                EXTRA_PRESENTS.sum());
+    }
+
+    public static void resetDiagnostics() {
+        ACTIVE_FRAMES.reset();
+        ALLOCATIONS.reset();
+        COMMAND_RECORDINGS.reset();
+        COPIES.reset();
+        PIXEL_CHANGING_COPIES.reset();
+        REAL_PRESENTS.reset();
+        GENERATED_PRESENTS.reset();
+        EXTRA_PRESENTS.reset();
+    }
+
     public static void present(GpuSurface surface) {
         Objects.requireNonNull(surface, "surface");
         PendingFrame current = pending;
@@ -137,6 +169,7 @@ public final class ProviderFrameBridge {
                 pending = null;
                 return original;
             }
+            ACTIVE_FRAMES.increment();
 
             ProviderRuntime runtime = ProviderRuntime.current();
             FrameDimensions dimensions = new FrameDimensions(
@@ -149,6 +182,7 @@ public final class ProviderFrameBridge {
                 frameResources = ensureResources();
                 boolean resized = frameResources.ensure(dimensions);
                 if (resized) {
+                    ALLOCATIONS.add(4L);
                     runtime.resize(dimensions);
                 }
                 resourceGeneration = frameResources.resourceGeneration();
@@ -196,6 +230,7 @@ public final class ProviderFrameBridge {
         int width = dimensions.displayWidth();
         int height = dimensions.displayHeight();
 
+        COMMAND_RECORDINGS.increment();
         try (VulkanProviderCommandRecorder recorder = new VulkanProviderCommandRecorder(
                 device, frameInfo.deviceGeneration(), frameInfo.resourceGeneration())) {
             if (runtime.upscalerActive()) {
@@ -230,9 +265,11 @@ public final class ProviderFrameBridge {
             boolean upscaled = upscalerResult.code() == ProviderResultCode.SUCCESS;
             if (runtime.frameGenerationActive()) {
                 if (upscaled) {
+                    COPIES.increment();
                     recorder.copyOwnedToOwned(
                             frameResources.upscaledOutput(), frameResources.realSnapshot(), width, height);
                 } else {
+                    COPIES.increment();
                     recorder.copyMinecraftToOwned(
                             mainTexture.vkImage(), frameResources.realSnapshot(), width, height);
                 }
@@ -284,6 +321,7 @@ public final class ProviderFrameBridge {
                 if (!copiedToMinecraft) {
                     recorder.prepareMinecraftForBlit(mainTexture.vkImage());
                 }
+                COPIES.increment();
                 recorder.copyOwnedToOwned(
                         frameResources.realSnapshot(), frameResources.previousReal(), width, height);
             } else {
@@ -306,6 +344,8 @@ public final class ProviderFrameBridge {
         if (result.code() != ProviderResultCode.SUCCESS) {
             return false;
         }
+        COPIES.increment();
+        PIXEL_CHANGING_COPIES.increment();
         copyOutput.run();
         return true;
     }
@@ -320,6 +360,7 @@ public final class ProviderFrameBridge {
         if (!runtime.presentHookActive()) {
             return;
         }
+        COMMAND_RECORDINGS.increment();
         try (VulkanProviderCommandRecorder recorder = new VulkanProviderCommandRecorder(
                 device, frameInfo.deviceGeneration(), frameInfo.resourceGeneration())) {
             recorder.prepareProviderRead(texture.vkImage());
@@ -391,6 +432,17 @@ public final class ProviderFrameBridge {
             FrameInfo frameInfo) {
     }
 
+    public record Diagnostics(
+            long activeFrames,
+            long allocations,
+            long commandRecordings,
+            long copies,
+            long pixelChangingCopies,
+            long realPresents,
+            long generatedPresents,
+            long extraPresents) {
+    }
+
     private static final class SurfacePresenter implements ProviderPresentState.Presenter {
         private final GpuSurface surface;
         private final PendingFrame frame;
@@ -409,6 +461,12 @@ public final class ProviderFrameBridge {
             try {
                 surface.present();
                 presented = true;
+                if (kind == PresentFrameKind.GENERATED) {
+                    GENERATED_PRESENTS.increment();
+                    EXTRA_PRESENTS.increment();
+                } else {
+                    REAL_PRESENTS.increment();
+                }
             } catch (Throwable throwable) {
                 message = describe(throwable);
                 throw throwable;
@@ -430,8 +488,11 @@ public final class ProviderFrameBridge {
         @Override
         public void restoreReal() {
             VulkanProviderResources<VulkanProviderImage> frameResources = Objects.requireNonNull(resources);
+            COMMAND_RECORDINGS.increment();
             try (VulkanProviderCommandRecorder recorder = new VulkanProviderCommandRecorder(
                     device, frame.frameInfo().deviceGeneration(), frame.frameInfo().resourceGeneration())) {
+                COPIES.increment();
+                PIXEL_CHANGING_COPIES.increment();
                 recorder.copyOwnedToMinecraft(
                         frameResources.realSnapshot(),
                         frame.mainTexture().vkImage(),
