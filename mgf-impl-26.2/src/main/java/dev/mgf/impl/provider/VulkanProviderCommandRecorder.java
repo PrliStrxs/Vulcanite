@@ -129,6 +129,13 @@ final class VulkanProviderCommandRecorder implements AutoCloseable {
                 VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR, VK_ACCESS_2_TRANSFER_READ_BIT_KHR);
     }
 
+    void prepareMinecraftForBlit(long minecraftImage) {
+        requireHandle(minecraftImage, "minecraftImage");
+        barrier(minecraftImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL,
+                VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT_KHR, MEMORY_READ_WRITE,
+                VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR, VK_ACCESS_2_TRANSFER_READ_BIT_KHR);
+    }
+
     void finish() {
         ensureRecording();
         VulkanUtils.crashIfFailure(device, VK10.vkEndCommandBuffer(commandBuffer),

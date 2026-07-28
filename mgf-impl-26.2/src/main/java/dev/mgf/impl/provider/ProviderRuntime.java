@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import dev.mgf.api.framegen.FrameGenerationSession;
@@ -92,7 +93,10 @@ public final class ProviderRuntime {
         state = new RuntimeState(
                 upscaler.session(), frameGenerator.session(), presentHook.session(),
                 upscaler.failures(), frameGenerator.failures(), presentHook.failures(),
-                upscaler.session().isPresent() && frameGenerator.session().isPresent());
+                upscaler.session().isPresent() && frameGenerator.session().isPresent(),
+                selectedUpscaler.support()
+                        .flatMap(support -> support.capabilities())
+                        .flatMap(capabilities -> capabilities.qualityModes().stream().sorted().findFirst()));
         selections = new ProviderSelections(
                 upscaler.diagnostic(), frameGenerator.diagnostic(), presentHook.diagnostic());
         upscalerSucceededThisFrame = true;
@@ -137,6 +141,29 @@ public final class ProviderRuntime {
         return result;
     }
 
+    public boolean hasActiveProviders() {
+        ProviderSelections current = selections;
+        return current.upscaler().state() == ProviderSessionState.ACTIVE
+                || current.frameGeneration().state() == ProviderSessionState.ACTIVE
+                || current.presentHook().state() == ProviderSessionState.ACTIVE;
+    }
+
+    public boolean upscalerActive() {
+        return selections.upscaler().state() == ProviderSessionState.ACTIVE;
+    }
+
+    public boolean frameGenerationActive() {
+        return selections.frameGeneration().state() == ProviderSessionState.ACTIVE;
+    }
+
+    public boolean presentHookActive() {
+        return selections.presentHook().state() == ProviderSessionState.ACTIVE;
+    }
+
+    public Optional<String> upscalerQualityMode() {
+        return state.upscalerQualityMode();
+    }
+
     public ProviderResult invokeFrameGenerator(Function<FrameGenerationSession, ProviderResult> callback) {
         requireRenderThread();
         RuntimeState current = state;
@@ -153,10 +180,38 @@ public final class ProviderRuntime {
         requireRenderThread();
         Objects.requireNonNull(beforePresent, "beforePresent");
         Objects.requireNonNull(vanillaPresent, "vanillaPresent");
-        RuntimeState current = state;
-        invoke(ProviderKind.PRESENT_HOOK, current.presentHook(), current.presentHookFailures(), beforePresent,
-                ProviderResult.skipped("present_hook_inactive", "No PresentHook session is active"));
+        invokePresentHook(beforePresent);
         vanillaPresent.run();
+    }
+
+    public ProviderResult invokePresentHook(Function<PresentHookSession, ProviderResult> callback) {
+        requireRenderThread();
+        RuntimeState current = state;
+        return invoke(ProviderKind.PRESENT_HOOK, current.presentHook(), current.presentHookFailures(), callback,
+                ProviderResult.skipped("present_hook_inactive", "No PresentHook session is active"));
+    }
+
+    public void afterPresent(Consumer<PresentHookSession> callback) {
+        requireRenderThread();
+        Objects.requireNonNull(callback, "callback");
+        RuntimeState current = state;
+        invokeVoid(ProviderKind.PRESENT_HOOK, current.presentHook(), current.presentHookFailures(), callback::accept);
+    }
+
+    public void disableFrameGeneration(String reasonCode, Throwable throwable) {
+        requireRenderThread();
+        Objects.requireNonNull(reasonCode, "reasonCode");
+        Objects.requireNonNull(throwable, "throwable");
+        RuntimeState current = state;
+        if (current.frameGenerator().isEmpty() || current.frameGeneratorFailures().disabled()) {
+            return;
+        }
+        String message = throwable.getClass().getSimpleName();
+        if (throwable.getMessage() != null && !throwable.getMessage().isBlank()) {
+            message += ": " + throwable.getMessage();
+        }
+        current.frameGeneratorFailures().record(ProviderResult.fatal(reasonCode, message));
+        disableDiagnostic(ProviderKind.FRAME_GENERATION, current.frameGeneratorFailures());
     }
 
     public void close() {
@@ -364,11 +419,13 @@ public final class ProviderRuntime {
             ProviderFailureTracker upscalerFailures,
             ProviderFailureTracker frameGeneratorFailures,
             ProviderFailureTracker presentHookFailures,
-            boolean frameGeneratorDependsOnUpscaler) {
+            boolean frameGeneratorDependsOnUpscaler,
+            Optional<String> upscalerQualityMode) {
 
         static RuntimeState inactive() {
             return new RuntimeState(Optional.empty(), Optional.empty(), Optional.empty(),
-                    new ProviderFailureTracker(), new ProviderFailureTracker(), new ProviderFailureTracker(), false);
+                    new ProviderFailureTracker(), new ProviderFailureTracker(), new ProviderFailureTracker(),
+                    false, Optional.empty());
         }
 
         boolean active() {

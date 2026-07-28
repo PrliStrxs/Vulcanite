@@ -22,12 +22,12 @@ final class VulkanProviderResourcesTest {
     void unchangedDimensionsReuseResourcesAndGeneration() {
         Fixture fixture = new Fixture();
 
-        fixture.resources.ensure(FULL_HD);
+        assertTrue(fixture.resources.ensure(FULL_HD));
         FakeImage output = fixture.resources.upscaledOutput();
         long generation = fixture.resources.resourceGeneration();
         fixture.resources.markHistoryValid();
 
-        fixture.resources.ensure(FULL_HD);
+        assertFalse(fixture.resources.ensure(FULL_HD));
 
         assertSame(output, fixture.resources.upscaledOutput());
         assertEquals(generation, fixture.resources.resourceGeneration());
@@ -39,11 +39,11 @@ final class VulkanProviderResourcesTest {
     @Test
     void changedDimensionsIncrementGenerationAndInvalidateHistory() {
         Fixture fixture = new Fixture();
-        fixture.resources.ensure(FULL_HD);
+        assertTrue(fixture.resources.ensure(FULL_HD));
         fixture.resources.markHistoryValid();
         long firstGeneration = fixture.resources.resourceGeneration();
 
-        fixture.resources.ensure(QHD);
+        assertTrue(fixture.resources.ensure(QHD));
 
         assertEquals(firstGeneration + 1, fixture.resources.resourceGeneration());
         assertEquals(QHD, fixture.resources.dimensions());

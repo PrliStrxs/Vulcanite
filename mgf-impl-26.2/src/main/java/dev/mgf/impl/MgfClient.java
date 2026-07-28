@@ -16,7 +16,9 @@ import dev.mgf.impl.post.PostFxOverlays;
 import dev.mgf.impl.provider.ProviderCatalog;
 import dev.mgf.impl.provider.ProviderConfig;
 import dev.mgf.impl.provider.ProviderDiscovery;
+import dev.mgf.impl.provider.ProviderFrameBridge;
 import dev.mgf.impl.provider.ProviderRuntime;
+import dev.mgf.impl.vk.VulkanDeviceAccess;
 
 /**
  * MGF bootstrap. Installs the runtime into the API holder; everything else is
@@ -32,6 +34,11 @@ public final class MgfClient implements ClientModInitializer {
         ProviderRuntime.install(providerRuntime);
         MgfRuntimeImpl runtime = new MgfRuntimeImpl(providerRuntime);
         MgfRuntimeHolder.set(runtime);
+        try {
+            VulkanDeviceAccess.current().ifPresent(ProviderFrameBridge::onDeviceCreated);
+        } catch (Throwable throwable) {
+            MgfConstants.LOGGER.error("Existing graphics device provider attachment failed; continuing", throwable);
+        }
         ComputeAutoExposureRegistry.bootstrap();
         PostFxOverlays.bootstrap();
         MgfConstants.LOGGER.info("MGF {} initialized (Minecraft 26.2 implementation)", runtime.version());

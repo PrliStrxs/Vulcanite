@@ -40,11 +40,11 @@ final class VulkanProviderResources<T extends VulkanProviderResources.OwnedImage
                 destroy -> device.createCommandEncoder().queueForDestroy(destroy::run));
     }
 
-    void ensure(FrameDimensions dimensions) {
+    boolean ensure(FrameDimensions dimensions) {
         Objects.requireNonNull(dimensions, "dimensions");
         ensureOpen();
         if (current != null && current.dimensions().equals(dimensions)) {
-            return;
+            return false;
         }
 
         long nextGeneration = Math.addExact(resourceGeneration, 1);
@@ -56,6 +56,7 @@ final class VulkanProviderResources<T extends VulkanProviderResources.OwnedImage
         if (retired != null) {
             deferredDestroy.accept(retired::destroy);
         }
+        return true;
     }
 
     long deviceGeneration() {

@@ -124,6 +124,40 @@ final class ProviderRuntimeTest {
     }
 
     @Test
+    void activeRoleFlagsAndExternalFrameGenerationDisableAreStable() {
+        ProviderRuntime runtime = runtime(new ArrayList<>(), () -> true);
+
+        assertFalse(runtime.hasActiveProviders());
+        runtime.open(ENVIRONMENT);
+
+        assertTrue(runtime.hasActiveProviders());
+        assertTrue(runtime.upscalerActive());
+        assertTrue(runtime.frameGenerationActive());
+        assertTrue(runtime.presentHookActive());
+
+        RuntimeException failure = new RuntimeException("second acquire failed");
+        runtime.disableFrameGeneration("surface_acquire_failed", failure);
+
+        assertFalse(runtime.frameGenerationActive());
+        assertEquals(ProviderSessionState.DISABLED, runtime.selections().frameGeneration().state());
+        assertEquals("surface_acquire_failed", runtime.selections().frameGeneration().reasonCode());
+        assertTrue(runtime.selections().frameGeneration().message().contains("second acquire failed"));
+    }
+
+    @Test
+    void afterPresentExceptionIsContainedAndDisablesHook() {
+        ProviderRuntime runtime = runtime(new ArrayList<>(), () -> true);
+        runtime.open(ENVIRONMENT);
+
+        runtime.afterPresent(session -> {
+            throw new IllegalStateException("after failed");
+        });
+
+        assertFalse(runtime.presentHookActive());
+        assertEquals("provider_exception", runtime.selections().presentHook().reasonCode());
+    }
+
+    @Test
     void lifecycleMethodsRequireTheRenderThread() {
         AtomicBoolean renderThread = new AtomicBoolean(true);
         ProviderRuntime runtime = runtime(new ArrayList<>(), renderThread::get);

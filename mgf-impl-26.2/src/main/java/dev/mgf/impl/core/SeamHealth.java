@@ -23,7 +23,9 @@ public final class SeamHealth {
         /** {@code LevelRendererMixin} dispatched at least one frame-graph anchor. */
         FRAME_GRAPH_EVENTS,
         /** {@code ShaderManagerMixin} ran after a shader resource reload. */
-        PIPELINE_RELOAD_HOOK
+        PIPELINE_RELOAD_HOOK,
+        /** {@code MinecraftPresentMixin} intercepted the final composed presentation path. */
+        FINAL_PRESENT_HOOK
     }
 
     private static final Set<Seam> ENGAGED = ConcurrentHashMap.newKeySet();

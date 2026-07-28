@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.mgf.impl.core.MgfConstants;
 import dev.mgf.impl.compute.ComputeServiceRegistry;
+import dev.mgf.impl.provider.ProviderFrameBridge;
 import dev.mgf.impl.vk.VulkanBootNegotiation;
 
 /**
@@ -28,6 +29,7 @@ public abstract class VulkanDeviceMixin {
     private void mgf$afterDeviceCreated(CallbackInfo ci) {
         try {
             VulkanBootNegotiation.fireDeviceCreated((VulkanDevice) (Object) this);
+            ProviderFrameBridge.onDeviceCreated((VulkanDevice) (Object) this);
         } catch (Throwable t) {
             MgfConstants.LOGGER.error("Device-created dispatch failed; continuing", t);
         }
@@ -35,6 +37,11 @@ public abstract class VulkanDeviceMixin {
 
     @Inject(method = "close", at = @At("HEAD"))
     private void mgf$beforeDeviceClose(CallbackInfo ci) {
+        try {
+            ProviderFrameBridge.onDeviceClosing((VulkanDevice) (Object) this);
+        } catch (Throwable t) {
+            MgfConstants.LOGGER.error("Provider shutdown failed; continuing Vulkan device destruction", t);
+        }
         try {
             ComputeServiceRegistry.onDeviceClosing((VulkanDevice) (Object) this);
         } catch (Throwable t) {
