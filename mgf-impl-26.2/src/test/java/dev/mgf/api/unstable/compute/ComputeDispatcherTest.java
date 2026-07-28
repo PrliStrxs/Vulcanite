@@ -66,18 +66,6 @@ final class ComputeDispatcherTest {
                 () -> new ComputeDispatcher.Dispatch(program, List.of(buffer), 1, 1, 0));
     }
 
-    @Test
-    void autoExposureRegistrationValidatesNamesAndDuplicates() {
-        assertThrows(IllegalArgumentException.class,
-                () -> ComputeEffects.registerMainColorAutoExposure(" "));
-
-        String name = "compute-test-duplicate";
-        ComputeEffects.registerMainColorAutoExposure(name);
-
-        assertThrows(IllegalStateException.class,
-                () -> ComputeEffects.registerMainColorAutoExposure(name));
-    }
-
     private record TestProgram(String label, int storageBufferBindings)
             implements ComputeDispatcher.Program {
 

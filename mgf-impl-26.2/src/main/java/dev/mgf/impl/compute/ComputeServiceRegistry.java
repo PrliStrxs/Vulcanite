@@ -54,12 +54,8 @@ public final class ComputeServiceRegistry {
 
     /** Called at the head of {@code VulkanDevice.close()}, before VMA is destroyed. */
     public static synchronized void onDeviceClosing(VulkanDevice closingDevice) {
-        try {
-            ComputeAutoExposureRegistry.onDeviceClosing(closingDevice);
-        } finally {
-            if (device == closingDevice) {
-                closeCurrent();
-            }
+        if (device == closingDevice) {
+            closeCurrent();
         }
     }
 

@@ -40,6 +40,29 @@ final class ProviderFrameBridgeTest {
     }
 
     @Test
+    void skippedProviderDoesNotCopyOutputBackToMinecraft() {
+        AtomicInteger pixelChangingCopies = new AtomicInteger();
+
+        boolean copied = ProviderFrameBridge.copyOutputIfSuccessful(
+                ProviderResult.skipped("diagnostic_noop", "Diagnostic provider records no GPU work"),
+                pixelChangingCopies::incrementAndGet);
+
+        assertFalse(copied);
+        assertEquals(0, pixelChangingCopies.get());
+    }
+
+    @Test
+    void successfulProviderCopiesOutputBackToMinecraftOnce() {
+        AtomicInteger pixelChangingCopies = new AtomicInteger();
+
+        boolean copied = ProviderFrameBridge.copyOutputIfSuccessful(
+                ProviderResult.success(), pixelChangingCopies::incrementAndGet);
+
+        assertTrue(copied);
+        assertEquals(1, pixelChangingCopies.get());
+    }
+
+    @Test
     void realOnlyPerformsOnePresent() {
         FakePresenter presenter = new FakePresenter();
 

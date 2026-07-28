@@ -273,27 +273,41 @@ public final class ProviderFrameBridge {
                             "history_unavailable", "Frame Generation history is not ready");
                 }
 
-                if (frameGenerationResult.code() == ProviderResultCode.SUCCESS) {
-                    recorder.copyOwnedToMinecraft(
-                            frameResources.generatedOutput(), mainTexture.vkImage(), width, height);
-                } else if (upscaled) {
-                    recorder.copyOwnedToMinecraft(
-                            frameResources.realSnapshot(), mainTexture.vkImage(), width, height);
-                } else {
+                boolean copiedToMinecraft = copyOutputIfSuccessful(frameGenerationResult,
+                        () -> recorder.copyOwnedToMinecraft(
+                                frameResources.generatedOutput(), mainTexture.vkImage(), width, height));
+                if (!copiedToMinecraft) {
+                    copiedToMinecraft = copyOutputIfSuccessful(upscalerResult,
+                            () -> recorder.copyOwnedToMinecraft(
+                                    frameResources.realSnapshot(), mainTexture.vkImage(), width, height));
+                }
+                if (!copiedToMinecraft) {
                     recorder.prepareMinecraftForBlit(mainTexture.vkImage());
                 }
                 recorder.copyOwnedToOwned(
                         frameResources.realSnapshot(), frameResources.previousReal(), width, height);
-            } else if (upscaled) {
-                recorder.copyOwnedToMinecraft(
-                        frameResources.upscaledOutput(), mainTexture.vkImage(), width, height);
             } else {
-                recorder.prepareMinecraftForBlit(mainTexture.vkImage());
+                boolean copiedToMinecraft = copyOutputIfSuccessful(upscalerResult,
+                        () -> recorder.copyOwnedToMinecraft(
+                                frameResources.upscaledOutput(), mainTexture.vkImage(), width, height));
+                if (!copiedToMinecraft) {
+                    recorder.prepareMinecraftForBlit(mainTexture.vkImage());
+                }
             }
             recorder.finish();
             frameResources.markHistoryValid();
         }
         return frameGenerationResult;
+    }
+
+    static boolean copyOutputIfSuccessful(ProviderResult result, Runnable copyOutput) {
+        Objects.requireNonNull(result, "result");
+        Objects.requireNonNull(copyOutput, "copyOutput");
+        if (result.code() != ProviderResultCode.SUCCESS) {
+            return false;
+        }
+        copyOutput.run();
+        return true;
     }
 
     private static void invokeBeforePresent(

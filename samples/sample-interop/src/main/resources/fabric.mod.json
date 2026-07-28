@@ -16,6 +16,9 @@
     ],
     "mgf:vulkan_boot": [
       "dev.mgf.samples.interop.SampleVulkanBoot"
+    ],
+    "mgf:providers": [
+      "dev.mgf.samples.interop.SampleProviders"
     ]
   },
   "depends": {

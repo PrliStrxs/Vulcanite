@@ -11,7 +11,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import dev.mgf.api.internal.MgfRuntimeHolder;
 import dev.mgf.impl.core.MgfConstants;
 import dev.mgf.impl.core.MgfRuntimeImpl;
-import dev.mgf.impl.compute.ComputeAutoExposureRegistry;
 import dev.mgf.impl.post.PostFxOverlays;
 import dev.mgf.impl.provider.ProviderCatalog;
 import dev.mgf.impl.provider.ProviderConfig;
@@ -39,7 +38,6 @@ public final class MgfClient implements ClientModInitializer {
         } catch (Throwable throwable) {
             MgfConstants.LOGGER.error("Existing graphics device provider attachment failed; continuing", throwable);
         }
-        ComputeAutoExposureRegistry.bootstrap();
         PostFxOverlays.bootstrap();
         MgfConstants.LOGGER.info("MGF {} initialized (Minecraft 26.2 implementation)", runtime.version());
     }
