@@ -31,12 +31,22 @@ def smokeBackend = providers.gradleProperty("smokeBackend").getOrElse("vulkan")
 def smokeValidationProperty = providers.gradleProperty("smokeValidation")
 def smokeValidation = smokeValidationProperty.isPresent()
         && !smokeValidationProperty.get().equalsIgnoreCase("false")
+def smokeProvidersProperty = providers.gradleProperty("smokeProviders")
+def smokeProviders = smokeProvidersProperty.isPresent()
+        && !smokeProvidersProperty.get().equalsIgnoreCase("false")
+def smokeProviderMode = providers.gradleProperty("smokeProviderMode")
+        .getOrElse(smokeProviders ? "noop" : "off")
+def smokeProvidersEnabled = !smokeProviderMode.equalsIgnoreCase("off")
 
 loom {
     runs {
         client {
             vmArg "-Dmgf.smoke.expectedBackend=${smokeBackend}"
             vmArg "-Dmgf.smoke.validation=${smokeValidation}"
+            vmArg "-Dmgf.smoke.providers=${smokeProvidersEnabled}"
+            vmArg "-Dmgf.smoke.providerMode=${smokeProviderMode}"
+            vmArg "-Dmgf.sample.diagnosticProviders=${smokeProvidersEnabled}"
+            vmArg "-Dmgf.sample.providerMode=${smokeProviderMode}"
             // Forces the backend regardless of options.txt and of vanilla's
             // crash watchdog (which resets the option after an "unexpected
             // shutdown" — and our harness stopping at CLIENT_STARTED counts
@@ -69,6 +79,7 @@ dependencies {
 
 def runDir = file("run")
 def resultFile = new File(runDir, "mgf-smoke-result.txt")
+def shutdownResultFile = new File(runDir, "mgf-smoke-shutdown-result.txt")
 
 // Clears the previous result before launching (backend selection is done via
 // the --graphicsBackend launch argument above, immune to options.txt state).
@@ -79,7 +90,8 @@ tasks.register("prepareSmokeRun") {
     doLast {
         runDir.mkdirs()
         resultFile.delete()
-        logger.lifecycle("Smoke run prepared: backend=${smokeBackend}")
+        shutdownResultFile.delete()
+        logger.lifecycle("Smoke run prepared: backend=${smokeBackend} providerMode=${smokeProviderMode}")
     }
 }
 
@@ -98,6 +110,14 @@ tasks.register("smokeTest") {
         logger.lifecycle("Smoke result:\n" + lines.join("\n"))
         if (lines.isEmpty() || lines[0] != "PASS") {
             throw new GradleException("Smoke test FAILED — see details above")
+        }
+        if (!shutdownResultFile.exists()) {
+            throw new GradleException("Smoke test produced no shutdown result file")
+        }
+        def shutdownLines = shutdownResultFile.readLines()
+        logger.lifecycle("Smoke shutdown result:\n" + shutdownLines.join("\n"))
+        if (shutdownLines.isEmpty() || shutdownLines[0] != "PASS") {
+            throw new GradleException("Smoke shutdown verification FAILED — see details above")
         }
         if (smokeValidation && smokeBackend.equalsIgnoreCase("vulkan")) {
             def logFile = new File(runDir, "logs/latest.log")

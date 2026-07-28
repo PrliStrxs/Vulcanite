@@ -5,7 +5,7 @@ import java.util.Set;
 import dev.mgf.api.provider.ColorEncoding;
 import dev.mgf.api.provider.ProviderId;
 
-/** Frame-generation compatibility and output-count limits. */
+/** Frame-generation compatibility with the exactly-one 0.3 output contract. */
 public record FrameGenerationCapabilities(
         Set<ColorEncoding> colorEncodings,
         Set<ProviderId> compatibleUpscalers,

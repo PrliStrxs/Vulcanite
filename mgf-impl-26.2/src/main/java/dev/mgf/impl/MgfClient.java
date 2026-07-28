@@ -2,6 +2,8 @@ package dev.mgf.impl;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.Set;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -9,6 +11,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 
 import dev.mgf.api.internal.MgfRuntimeHolder;
+import dev.mgf.api.GraphicsBackendKind;
+import dev.mgf.api.provider.ProviderEnvironment;
 import dev.mgf.impl.core.MgfConstants;
 import dev.mgf.impl.core.MgfRuntimeImpl;
 import dev.mgf.impl.post.PostFxOverlays;
@@ -34,7 +38,10 @@ public final class MgfClient implements ClientModInitializer {
         MgfRuntimeImpl runtime = new MgfRuntimeImpl(providerRuntime);
         MgfRuntimeHolder.set(runtime);
         try {
-            VulkanDeviceAccess.current().ifPresent(ProviderFrameBridge::onDeviceCreated);
+            VulkanDeviceAccess.current().ifPresentOrElse(
+                    ProviderFrameBridge::onDeviceCreated,
+                    () -> providerRuntime.open(new ProviderEnvironment(
+                            GraphicsBackendKind.OPENGL, 1, Optional.empty(), Set.of(), false)));
         } catch (Throwable throwable) {
             MgfConstants.LOGGER.error("Existing graphics device provider attachment failed; continuing", throwable);
         }

@@ -15,11 +15,13 @@ retained beyond their declared lifetime.
 - `ImageOwnership.MGF` means Vulcanite owns the output allocation; providers may
   write only as permitted by the callback contract.
 - `ImageLifetime.CALLBACK` handles expire when the callback returns.
-- `ImageLifetime.DEVICE_SESSION` handles remain valid only until reset, resize,
-  device replacement, or session close as indicated by the supplied generation.
+- `ImageLifetime.DEVICE_SESSION` is reserved for a descriptor whose allocation
+  remains valid until the owning provider session closes.
 
-Validate `deviceGeneration` and `resourceGeneration` before reusing private
-descriptors. Never cache a Minecraft image or view across frames or resize.
+The Minecraft 26.2 adapter marks every Minecraft and MGF-owned image descriptor
+as `CALLBACK`, because resize may retire either allocation. Never cache an image
+or view across callbacks. Device and resource generations let diagnostics reject
+stale copies; matching numbers do not extend the declared lifetime.
 
 ## Command Recording and Synchronization
 
@@ -36,6 +38,9 @@ queue-family ownership outside the states supplied for the current callback.
 ## Resize and Reset
 
 Size-dependent outputs are recreated before `resize(FrameDimensions)` is sent.
+The resource generation increments on every observed dimension change, including
+when PresentHook is the only active role. The adapter rejects mismatched device
+or resource generations before constructing a provider callback.
 Temporal history is invalid after these reset reasons:
 
 ```text
@@ -51,7 +56,9 @@ DEVICE_REPLACED
 
 Treat every reset as a requirement to discard temporal state before the next
 frame. World and dimension changes invalidate previous images and matrices.
-Resource reload preserves registration but resets active sessions.
+Resource reload preserves registration but resets active sessions. The initial
+size notification does not replace `FIRST_FRAME`; providers receive `resize`
+first and then reset with `FIRST_FRAME` before their first frame callback.
 
 ## Shutdown and Threads
 

@@ -23,8 +23,9 @@ CONSTRUCTOR public dev.mgf.api.provider.ProviderSelection(dev.mgf.api.provider.P
 CONSTRUCTOR public dev.mgf.api.provider.ProviderSelections(dev.mgf.api.provider.ProviderSelection,dev.mgf.api.provider.ProviderSelection,dev.mgf.api.provider.ProviderSelection)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderSessionContext(dev.mgf.api.provider.ProviderEnvironment)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderSupport(boolean,java.lang.String,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscaleCameraParameters(dev.mgf.api.provider.FrameMatrices,float,float,float,float,float)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscaleFrame(dev.mgf.api.provider.FrameInfo,dev.mgf.api.provider.FrameDimensions,dev.mgf.api.provider.CommandRecordingContext,dev.mgf.api.upscale.UpscaleResources,dev.mgf.api.upscale.UpscaleParameters)
-CONSTRUCTOR public dev.mgf.api.upscale.UpscaleParameters(java.util.Optional<dev.mgf.api.provider.FrameMatrices>,float,float,float,float,float,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscaleParameters(java.util.Optional<dev.mgf.api.upscale.UpscaleCameraParameters>,java.lang.String)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscaleResources(dev.mgf.api.provider.BorrowedImage,dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscalerCapabilities(double,double,java.util.Set<dev.mgf.api.provider.ColorEncoding>,java.util.Set<java.lang.String>)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscalerRequirements(java.util.Set<dev.mgf.api.provider.FrameResourceKind>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>)
@@ -252,18 +253,19 @@ METHOD public dev.mgf.api.provider.ProviderSessionContext.environment() dev.mgf.
 METHOD public dev.mgf.api.provider.ProviderSupport.message() java.lang.String
 METHOD public dev.mgf.api.provider.ProviderSupport.reasonCode() java.lang.String
 METHOD public dev.mgf.api.provider.ProviderSupport.supported() boolean
+METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.farPlane() float
+METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.jitterX() float
+METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.jitterY() float
+METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.matrices() dev.mgf.api.provider.FrameMatrices
+METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.nearPlane() float
+METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.verticalFieldOfViewDegrees() float
 METHOD public dev.mgf.api.upscale.UpscaleFrame.command() dev.mgf.api.provider.CommandRecordingContext
 METHOD public dev.mgf.api.upscale.UpscaleFrame.dimensions() dev.mgf.api.provider.FrameDimensions
 METHOD public dev.mgf.api.upscale.UpscaleFrame.frameInfo() dev.mgf.api.provider.FrameInfo
 METHOD public dev.mgf.api.upscale.UpscaleFrame.parameters() dev.mgf.api.upscale.UpscaleParameters
 METHOD public dev.mgf.api.upscale.UpscaleFrame.resources() dev.mgf.api.upscale.UpscaleResources
-METHOD public dev.mgf.api.upscale.UpscaleParameters.farPlane() float
-METHOD public dev.mgf.api.upscale.UpscaleParameters.jitterX() float
-METHOD public dev.mgf.api.upscale.UpscaleParameters.jitterY() float
-METHOD public dev.mgf.api.upscale.UpscaleParameters.matrices() java.util.Optional<dev.mgf.api.provider.FrameMatrices>
-METHOD public dev.mgf.api.upscale.UpscaleParameters.nearPlane() float
+METHOD public dev.mgf.api.upscale.UpscaleParameters.camera() java.util.Optional<dev.mgf.api.upscale.UpscaleCameraParameters>
 METHOD public dev.mgf.api.upscale.UpscaleParameters.qualityMode() java.lang.String
-METHOD public dev.mgf.api.upscale.UpscaleParameters.verticalFieldOfViewDegrees() float
 METHOD public dev.mgf.api.upscale.UpscaleResources.depth() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
 METHOD public dev.mgf.api.upscale.UpscaleResources.exposure() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
 METHOD public dev.mgf.api.upscale.UpscaleResources.inputColor() dev.mgf.api.provider.BorrowedImage
@@ -354,6 +356,9 @@ METHOD public final dev.mgf.api.provider.ProviderSessionContext.toString() java.
 METHOD public final dev.mgf.api.provider.ProviderSupport.equals(java.lang.Object) boolean
 METHOD public final dev.mgf.api.provider.ProviderSupport.hashCode() int
 METHOD public final dev.mgf.api.provider.ProviderSupport.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.UpscaleCameraParameters.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.UpscaleCameraParameters.hashCode() int
+METHOD public final dev.mgf.api.upscale.UpscaleCameraParameters.toString() java.lang.String
 METHOD public final dev.mgf.api.upscale.UpscaleFrame.equals(java.lang.Object) boolean
 METHOD public final dev.mgf.api.upscale.UpscaleFrame.hashCode() int
 METHOD public final dev.mgf.api.upscale.UpscaleFrame.toString() java.lang.String
@@ -528,18 +533,19 @@ RECORD dev.mgf.api.provider.ProviderSessionContext 0 dev.mgf.api.provider.Provid
 RECORD dev.mgf.api.provider.ProviderSupport 0 boolean supported
 RECORD dev.mgf.api.provider.ProviderSupport 1 java.lang.String reasonCode
 RECORD dev.mgf.api.provider.ProviderSupport 2 java.lang.String message
+RECORD dev.mgf.api.upscale.UpscaleCameraParameters 0 dev.mgf.api.provider.FrameMatrices matrices
+RECORD dev.mgf.api.upscale.UpscaleCameraParameters 1 float jitterX
+RECORD dev.mgf.api.upscale.UpscaleCameraParameters 2 float jitterY
+RECORD dev.mgf.api.upscale.UpscaleCameraParameters 3 float nearPlane
+RECORD dev.mgf.api.upscale.UpscaleCameraParameters 4 float farPlane
+RECORD dev.mgf.api.upscale.UpscaleCameraParameters 5 float verticalFieldOfViewDegrees
 RECORD dev.mgf.api.upscale.UpscaleFrame 0 dev.mgf.api.provider.FrameInfo frameInfo
 RECORD dev.mgf.api.upscale.UpscaleFrame 1 dev.mgf.api.provider.FrameDimensions dimensions
 RECORD dev.mgf.api.upscale.UpscaleFrame 2 dev.mgf.api.provider.CommandRecordingContext command
 RECORD dev.mgf.api.upscale.UpscaleFrame 3 dev.mgf.api.upscale.UpscaleResources resources
 RECORD dev.mgf.api.upscale.UpscaleFrame 4 dev.mgf.api.upscale.UpscaleParameters parameters
-RECORD dev.mgf.api.upscale.UpscaleParameters 0 java.util.Optional<dev.mgf.api.provider.FrameMatrices> matrices
-RECORD dev.mgf.api.upscale.UpscaleParameters 1 float jitterX
-RECORD dev.mgf.api.upscale.UpscaleParameters 2 float jitterY
-RECORD dev.mgf.api.upscale.UpscaleParameters 3 float nearPlane
-RECORD dev.mgf.api.upscale.UpscaleParameters 4 float farPlane
-RECORD dev.mgf.api.upscale.UpscaleParameters 5 float verticalFieldOfViewDegrees
-RECORD dev.mgf.api.upscale.UpscaleParameters 6 java.lang.String qualityMode
+RECORD dev.mgf.api.upscale.UpscaleParameters 0 java.util.Optional<dev.mgf.api.upscale.UpscaleCameraParameters> camera
+RECORD dev.mgf.api.upscale.UpscaleParameters 1 java.lang.String qualityMode
 RECORD dev.mgf.api.upscale.UpscaleResources 0 dev.mgf.api.provider.BorrowedImage inputColor
 RECORD dev.mgf.api.upscale.UpscaleResources 1 dev.mgf.api.provider.BorrowedImage outputColor
 RECORD dev.mgf.api.upscale.UpscaleResources 2 java.util.Optional<dev.mgf.api.provider.BorrowedImage> depth
@@ -595,6 +601,7 @@ SUPER dev.mgf.api.provider.ProviderSessionContext java.lang.Record
 SUPER dev.mgf.api.provider.ProviderSessionState java.lang.Enum<dev.mgf.api.provider.ProviderSessionState>
 SUPER dev.mgf.api.provider.ProviderSupport java.lang.Record
 SUPER dev.mgf.api.provider.ResetReason java.lang.Enum<dev.mgf.api.provider.ResetReason>
+SUPER dev.mgf.api.upscale.UpscaleCameraParameters java.lang.Record
 SUPER dev.mgf.api.upscale.UpscaleFrame java.lang.Record
 SUPER dev.mgf.api.upscale.UpscaleParameters java.lang.Record
 SUPER dev.mgf.api.upscale.UpscaleResources java.lang.Record
@@ -654,6 +661,7 @@ TYPE public final record dev.mgf.api.provider.ProviderSelection
 TYPE public final record dev.mgf.api.provider.ProviderSelections
 TYPE public final record dev.mgf.api.provider.ProviderSessionContext
 TYPE public final record dev.mgf.api.provider.ProviderSupport
+TYPE public final record dev.mgf.api.upscale.UpscaleCameraParameters
 TYPE public final record dev.mgf.api.upscale.UpscaleFrame
 TYPE public final record dev.mgf.api.upscale.UpscaleParameters
 TYPE public final record dev.mgf.api.upscale.UpscaleResources

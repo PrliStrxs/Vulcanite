@@ -38,8 +38,8 @@ Run these checks before publishing a provider against the Alpha API:
 
 The API dependency-boundary test rejects Minecraft, Mojang, LWJGL, Fabric, and
 implementation references in stable API class files. `apiCompatibilityCheck`
-compares public/protected signatures with the checked Alpha baseline once the
-baseline task is enabled.
+compares public/protected signatures with the checked Alpha baseline and is part
+of the normal `check` lifecycle.
 
 Remote repository credentials are intentionally outside this project. Publishing
 to the local staging repository requires no secrets.

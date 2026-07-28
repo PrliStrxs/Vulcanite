@@ -29,9 +29,12 @@ integrations belong in independent provider mods.
   it never owns or invokes swapchain presentation.
 
 The Minecraft 26.2 adapter exposes the fully composed, native-size main target.
-It does not currently expose a separate low-resolution world image, motion
-vectors, UI mask, or fabricated temporal inputs. Providers that require missing
-resources remain registered but unsupported.
+It does not currently expose verified camera parameters, a separate
+low-resolution world image, depth, motion vectors, UI mask, or fabricated
+temporal inputs. Providers that require missing resources remain registered but
+unsupported. Because 26.2 does not expose a verified safe multi-present
+capability, Frame Generation providers remain registered but are reported as
+`UNSUPPORTED/multi_present_unsupported` by this adapter.
 
 ## Documentation
 
@@ -49,15 +52,28 @@ resources remain registered but unsupported.
 Requires JDK 25.
 
 ```text
-./gradlew build
-./gradlew check publishAllPublicationsToStagingRepository
+./gradlew clean build apiCompatibilityCheck publishAllPublicationsToStagingRepository
 ./gradlew :samples:sample-provider:compileJava
+./gradlew :smoke-test:smokeTest
+./gradlew :smoke-test:smokeTest -PsmokeProviders
+./gradlew :smoke-test:smokeTest -PsmokeProviderMode=passthrough
+./gradlew :smoke-test:smokeTest -PsmokeProviderMode=recoverable
+./gradlew :smoke-test:smokeTest -PsmokeProviderMode=fatal
+./gradlew :smoke-test:smokeTest -PsmokeBackend=opengl
+./gradlew :smoke-test:smokeTest -PwithSodium
+./gradlew :smoke-test:smokeTest -PsmokeBackend=opengl -PwithSodium
+./gradlew :smoke-test:smokeTest -PsmokeValidation -PsmokeProviderMode=passthrough
 ```
 
 Runtime checks are documented in [smoke-test/README.md](smoke-test/README.md).
-The development-only `sample-interop` module can register diagnostic providers
-with `-Dmgf.sample.diagnosticProviders=true`; their callbacks return `SKIPPED`
-and do not alter output pixels.
+`-PsmokeProviders` enables the development-only diagnostic providers in
+`sample-interop`. Active callbacks exercise selection and lifecycle paths,
+return `SKIPPED`, and do not alter output pixels or add a presentation.
+The passthrough and injected-failure modes exercise successful Vulkan output
+writeback and same-frame recoverable/fatal fallback with pixel-identical data.
+
+The 0.3 Alpha runtime matrix was executed on an NVIDIA GeForce RTX 4060 with
+NVIDIA 610.62. AMD and Intel GPUs remain unverified.
 
 ## License
 

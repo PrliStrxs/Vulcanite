@@ -37,8 +37,8 @@ types unless they independently choose to add game-specific integration.
 - Upscaler, Frame Generation, and PresentHook SPIs.
 - Plain resource descriptors containing opaque numeric native handles,
   dimensions, native format values, state snapshots, ownership, and lifetime.
-- Plain frame contexts containing frame identity, timing, dimensions, camera
-  matrices, jitter, reset state, and optional temporal inputs.
+- Plain frame contexts containing frame identity, timing, dimensions, reset
+  state, optional verified camera data, and optional temporal inputs.
 - Minecraft 26.2/Vulkan adapters that translate final scene and presentation
   resources into the stable contracts.
 - MGF-owned synchronization, borrowed-resource restoration, output resources,
@@ -102,7 +102,8 @@ The implementation module owns:
 - command-buffer acquisition and submission ordering;
 - barriers and borrowed-resource state restoration;
 - output image allocation and retirement;
-- final blit, generated/real frame sequencing, and present;
+- final blit and real-frame present; generated/real sequencing remains gated
+  until an adapter proves safe multi-present support;
 - lifecycle events, fallback, diagnostics, and performance counters.
 
 No implementation class appears in a stable API signature.
@@ -320,17 +321,20 @@ upscale operation per real frame. `UpscaleFrame` contains:
 
 - frame ID, timing, reset/history state, and device/resource generations;
 - render and display dimensions;
-- current and previous view/projection matrices;
-- jitter in render-pixel units;
-- near/far plane and vertical field of view;
+- an optional coherent camera block containing current and previous
+  view/projection matrices, jitter in render-pixel units, near/far plane, and
+  vertical field of view;
 - borrowed input color and MGF-owned output color;
 - optional depth, motion vectors, exposure, and masks;
 - the MGF-owned recording command buffer.
 
-The 26.2 adapter guarantees color. Depth is supplied when the live target has a
-compatible depth view. Other temporal inputs are optional. A provider whose
-required inputs are absent remains registered but is reported unsupported and
-is not selected.
+The 26.2 final-composite adapter guarantees color only. It does not expose a
+verified depth view or any temporal input. A provider whose required inputs are
+absent remains registered but is reported unsupported and is not selected.
+
+The current 26.2 final-composite seam cannot prove live camera values at this
+point in the frame, so it leaves the camera block empty rather than fabricating
+defaults.
 
 The provider writes only to the supplied output image. On success, MGF uses the
 output-resolution image as the real presentation source. On skip or failure,
@@ -341,7 +345,8 @@ effect.
 
 Frame Generation is probed after the upscaler selection. Capabilities declare
 compatible upscaler IDs, required temporal inputs, supported color encodings,
-and the maximum generated frames per real frame. 0.3 clamps the maximum to one.
+and the maximum generated frames per real frame. A supported 0.3 provider must
+declare exactly one; other values are rejected during contract construction.
 
 `FrameGenerationSession` records work into an MGF command buffer and writes one
 MGF-owned generated-frame image. Its context includes the current and previous
@@ -382,18 +387,16 @@ frame through its normal present path.
 The active-provider path is:
 
 1. Minecraft renders the world and later frame content into its main target.
-2. The 26.2 adapter captures fresh color/depth views and dimensions; it never
-   caches resize-sensitive Minecraft resources.
+2. The 26.2 adapter captures the fresh color view and dimensions; it never
+   caches resize-sensitive Minecraft resources and does not advertise depth.
 3. If an upscaler is active, MGF allocates or reuses an output image, inserts
    input/output barriers, and invokes the provider on the graphics queue.
 4. MGF restores borrowed image state and chooses the provider output or the
    untouched Minecraft color as the real frame.
-5. If Frame Generation is active and history is valid, MGF supplies current and
-   previous resources, records generation, and forms a real-only or
-   generated-plus-real batch.
-6. PresentHook receives each planned presentation when active.
-7. MGF performs final blit, encoder submission, pacing, and present for each
-   accepted batch item.
+5. The 26.2 adapter reports `multiPresentSupported=false`, so Frame Generation
+   remains unselected and no generated/real batch is constructed.
+6. PresentHook receives the single real presentation when active.
+7. MGF performs final blit, encoder submission, pacing, and real-frame present.
 8. MGF retires transient resources only after their in-flight use completes.
 
 The provider-free path branches before step 2 and calls the original Minecraft
@@ -523,18 +526,25 @@ documentation is version controlled.
 - Vulkan without providers: unchanged output route, one real present, zero MGF
   GPU work;
 - OpenGL without providers: unchanged output route and no Vulkan allocation;
-- Vulkan with a diagnostic no-op provider: registration, probe, session,
-  resize, reload, world transition, shutdown, and fallback callbacks;
-- Vulkan plus Sodium with and without the diagnostic provider;
+- Vulkan with diagnostic providers: Upscaler and PresentHook registration,
+  probe, session, initial-size, first-frame/reload reset, frame, receipt, and
+  shutdown callbacks; Frame Generation remains
+  `UNSUPPORTED/multi_present_unsupported`;
+- Vulkan with a development passthrough Upscaler: deterministic native-size GPU
+  copy, successful output writeback, recoverable same-frame fallback/recovery,
+  and fatal disable while real presentation continues;
+- Vulkan plus Sodium and OpenGL plus Sodium without active providers;
 - OpenGL with registered Vulkan-only providers: exact unsupported reasons and
   unchanged vanilla output;
-- Vulkan validation with resize, reload, world enter/leave, provider failure,
-  and shutdown;
-- generated/real present ordering where the 26.2 surface reports multi-present
-  support.
+- Vulkan validation across initialization, resource reload, frame work, and
+  shutdown;
+- unit coverage for resize generation and provider failure policy. Interactive
+  resize, world transitions, real vendor providers, and generated/real ordering
+  remain explicit downstream or later-adapter validation work.
 
-The diagnostic provider writes no visible effect. It records markers/counters
-only and is packaged in a development sample, never in the player JAR.
+The no-op diagnostic mode writes no visible effect. The passthrough mode copies
+the source unchanged through the provider output to verify the successful GPU
+path. Both are packaged in a development sample, never in the player JAR.
 
 ### 16.3 Release evidence
 
@@ -549,7 +559,9 @@ coverage limits.
 
 - all three stable SPIs are present in `mgf-api` and documented;
 - a downstream example compiles against `mgf-api` only;
-- the 26.2 adapter invokes each role through real frame/present lifecycle seams;
+- the 26.2 adapter invokes Upscaler and PresentHook through real frame/present
+  seams, while Frame Generation is registered and reports
+  `UNSUPPORTED/multi_present_unsupported`;
 - absent/unsupported/failing providers preserve the same-frame vanilla output;
 - the core auto-exposure implementation and registration are gone;
 - the player JAR contains no sample classes or sample assets;

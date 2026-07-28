@@ -17,7 +17,6 @@ import java.util.function.Function;
 
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.systems.GpuSurface;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vulkan.VulkanDevice;
 import com.mojang.blaze3d.vulkan.VulkanGpuTexture;
@@ -58,6 +57,7 @@ public final class ProviderFrameBridge {
     private static VulkanDevice device;
     private static VulkanProviderResources<VulkanProviderImage> resources;
     private static PendingFrame pending;
+    private static final ProviderFrameState FRAME_STATE = new ProviderFrameState();
     private static long deviceGeneration;
     private static long nextFrameId;
     private static long previousFrameNanos;
@@ -65,7 +65,7 @@ public final class ProviderFrameBridge {
     private static final LongAdder ALLOCATIONS = new LongAdder();
     private static final LongAdder COMMAND_RECORDINGS = new LongAdder();
     private static final LongAdder COPIES = new LongAdder();
-    private static final LongAdder PIXEL_CHANGING_COPIES = new LongAdder();
+    private static final LongAdder OUTPUT_COPIES = new LongAdder();
     private static final LongAdder REAL_PRESENTS = new LongAdder();
     private static final LongAdder GENERATED_PRESENTS = new LongAdder();
     private static final LongAdder EXTRA_PRESENTS = new LongAdder();
@@ -80,12 +80,13 @@ public final class ProviderFrameBridge {
         }
         device = createdDevice;
         deviceGeneration = Math.addExact(deviceGeneration, 1);
+        FRAME_STATE.openDevice(deviceGeneration);
         ProviderEnvironment environment = new ProviderEnvironment(
                 GraphicsBackendKind.VULKAN,
                 deviceGeneration,
                 Optional.of(new VkInteropImpl(createdDevice)),
                 Set.of(FrameResourceKind.COLOR),
-                true);
+                false);
         ProviderRuntime.current().open(environment);
         if (deviceGeneration > 1) {
             ProviderRuntime.current().requestReset(ResetReason.DEVICE_REPLACED);
@@ -97,7 +98,7 @@ public final class ProviderFrameBridge {
             return;
         }
         ProviderRuntime runtime = ProviderRuntime.current();
-        if (runtime.hasActiveProviders()) {
+        if (requiresDeviceDrain(runtime.hasActiveProviders(), resources != null, pending != null)) {
             closeStep("submit pending provider work", () -> closingDevice.createCommandEncoder().submit());
             closeStep("wait for provider work", () -> closingDevice.graphicsQueue().waitIdle());
         }
@@ -110,6 +111,12 @@ public final class ProviderFrameBridge {
         pending = null;
         device = null;
         previousFrameNanos = 0L;
+        FRAME_STATE.closeDevice();
+    }
+
+    static boolean requiresDeviceDrain(
+            boolean activeProviders, boolean allocatedResources, boolean pendingFrame) {
+        return activeProviders || allocatedResources || pendingFrame;
     }
 
     public static GpuTextureView beforeBlit(GpuTextureView original) {
@@ -132,7 +139,7 @@ public final class ProviderFrameBridge {
                 ALLOCATIONS.sum(),
                 COMMAND_RECORDINGS.sum(),
                 COPIES.sum(),
-                PIXEL_CHANGING_COPIES.sum(),
+                OUTPUT_COPIES.sum(),
                 REAL_PRESENTS.sum(),
                 GENERATED_PRESENTS.sum(),
                 EXTRA_PRESENTS.sum());
@@ -143,7 +150,7 @@ public final class ProviderFrameBridge {
         ALLOCATIONS.reset();
         COMMAND_RECORDINGS.reset();
         COPIES.reset();
-        PIXEL_CHANGING_COPIES.reset();
+        OUTPUT_COPIES.reset();
         REAL_PRESENTS.reset();
         GENERATED_PRESENTS.reset();
         EXTRA_PRESENTS.reset();
@@ -155,6 +162,7 @@ public final class ProviderFrameBridge {
         pending = null;
         if (current == null) {
             surface.present();
+            REAL_PRESENTS.increment();
             return;
         }
         current.state().present(new SurfacePresenter(surface, current));
@@ -172,21 +180,30 @@ public final class ProviderFrameBridge {
             ACTIVE_FRAMES.increment();
 
             ProviderRuntime runtime = ProviderRuntime.current();
+            if (runtime.frameGenerationActive()) {
+                throw new IllegalStateException(
+                        "Minecraft 26.2 selected Frame Generation without safe multi-present support");
+            }
             FrameDimensions dimensions = new FrameDimensions(
                     view.getWidth(0), view.getHeight(0), view.getWidth(0), view.getHeight(0));
+            ProviderFrameState.Snapshot frameState = FRAME_STATE.beginFrame(deviceGeneration, dimensions);
             boolean frameProviderActive = runtime.upscalerActive() || runtime.frameGenerationActive();
             VulkanProviderResources<VulkanProviderImage> frameResources = null;
             boolean historyReset = false;
-            long resourceGeneration = 1L;
+            long resourceGeneration = frameState.resourceGeneration();
             if (frameProviderActive) {
                 frameResources = ensureResources();
-                boolean resized = frameResources.ensure(dimensions);
-                if (resized) {
-                    ALLOCATIONS.add(4L);
-                    runtime.resize(dimensions);
+                boolean resourcesResized = frameResources.ensure(dimensions);
+                if (resourcesResized != frameState.resized()) {
+                    throw new IllegalStateException("provider output generation diverged from frame dimensions");
                 }
-                resourceGeneration = frameResources.resourceGeneration();
+                if (resourcesResized) {
+                    ALLOCATIONS.add(4L);
+                }
+                FRAME_STATE.validateCurrent(
+                        frameResources.deviceGeneration(), frameResources.resourceGeneration());
             }
+            notifyResize(frameState, dimensions, runtime);
 
             Optional<ResetReason> reset = runtime.applyPendingReset();
             if (frameResources != null && reset.isPresent()) {
@@ -204,10 +221,8 @@ public final class ProviderFrameBridge {
             }
 
             ProviderPresentState presentState = ProviderPresentState.fromFrameGeneration(frameGenerationResult);
-            PresentFrameKind firstKind = presentState.generated()
-                    ? PresentFrameKind.GENERATED : PresentFrameKind.REAL;
-            invokeBeforePresent(runtime, frameInfo, firstKind, 0, texture, view);
-            pending = new PendingFrame(presentState, view, texture, frameInfo);
+            invokeBeforePresent(runtime, frameInfo, PresentFrameKind.REAL, 0, texture, view);
+            pending = new PendingFrame(presentState, frameInfo);
             return original;
         } catch (Throwable throwable) {
             pending = null;
@@ -254,8 +269,7 @@ public final class ProviderFrameBridge {
                                 Optional.empty(), Optional.empty(), Optional.empty(),
                                 Optional.empty(), Optional.empty()),
                         new UpscaleParameters(
-                                Optional.empty(), 0.0f, 0.0f, 0.05f, 1024.0f, 70.0f,
-                                runtime.upscalerQualityMode().orElse("native")));
+                                Optional.empty(), runtime.upscalerQualityMode().orElse("native")));
                 upscalerResult = runtime.invokeUpscaler(session -> session.record(upscaleFrame));
                 if (upscalerResult.code() == ProviderResultCode.SUCCESS) {
                     recorder.finishProviderWrite(frameResources.upscaledOutput());
@@ -345,9 +359,21 @@ public final class ProviderFrameBridge {
             return false;
         }
         COPIES.increment();
-        PIXEL_CHANGING_COPIES.increment();
+        OUTPUT_COPIES.increment();
         copyOutput.run();
         return true;
+    }
+
+    static void notifyResize(
+            ProviderFrameState.Snapshot frameState,
+            FrameDimensions dimensions,
+            ProviderRuntime runtime) {
+        Objects.requireNonNull(frameState, "frameState");
+        Objects.requireNonNull(dimensions, "dimensions");
+        Objects.requireNonNull(runtime, "runtime");
+        if (frameState.resized()) {
+            runtime.resize(dimensions);
+        }
     }
 
     private static void invokeBeforePresent(
@@ -407,6 +433,9 @@ public final class ProviderFrameBridge {
     private static VulkanProviderResources<VulkanProviderImage> ensureResources() {
         if (resources == null) {
             resources = VulkanProviderResources.create(device, deviceGeneration);
+        } else if (resources.deviceGeneration() != deviceGeneration) {
+            throw new IllegalStateException(
+                    "stale provider resources for device generation " + resources.deviceGeneration());
         }
         return resources;
     }
@@ -427,8 +456,6 @@ public final class ProviderFrameBridge {
 
     private record PendingFrame(
             ProviderPresentState state,
-            VulkanGpuTextureView view,
-            VulkanGpuTexture mainTexture,
             FrameInfo frameInfo) {
     }
 
@@ -437,7 +464,7 @@ public final class ProviderFrameBridge {
             long allocations,
             long commandRecordings,
             long copies,
-            long pixelChangingCopies,
+            long outputCopies,
             long realPresents,
             long generatedPresents,
             long extraPresents) {
@@ -454,19 +481,16 @@ public final class ProviderFrameBridge {
 
         @Override
         public void presentCurrent(PresentFrameKind kind) {
-            int ordinal = frame.state().generated() && kind == PresentFrameKind.REAL ? 1 : 0;
+            if (kind != PresentFrameKind.REAL) {
+                throw new IllegalArgumentException("Minecraft 26.2 only supports real-frame presentation");
+            }
             long started = System.nanoTime();
             boolean presented = false;
             String message = "";
             try {
                 surface.present();
                 presented = true;
-                if (kind == PresentFrameKind.GENERATED) {
-                    GENERATED_PRESENTS.increment();
-                    EXTRA_PRESENTS.increment();
-                } else {
-                    REAL_PRESENTS.increment();
-                }
+                REAL_PRESENTS.increment();
             } catch (Throwable throwable) {
                 message = describe(throwable);
                 throw throwable;
@@ -475,45 +499,9 @@ public final class ProviderFrameBridge {
                 boolean completed = presented;
                 String receiptMessage = message;
                 ProviderRuntime.current().afterPresent(session -> session.afterPresent(
-                        new PresentReceipt(frame.frameInfo(), kind, ordinal,
+                        new PresentReceipt(frame.frameInfo(), kind, 0,
                                 completed, duration, receiptMessage)));
             }
-        }
-
-        @Override
-        public void acquireReal() throws Exception {
-            surface.acquireNextTexture();
-        }
-
-        @Override
-        public void restoreReal() {
-            VulkanProviderResources<VulkanProviderImage> frameResources = Objects.requireNonNull(resources);
-            COMMAND_RECORDINGS.increment();
-            try (VulkanProviderCommandRecorder recorder = new VulkanProviderCommandRecorder(
-                    device, frame.frameInfo().deviceGeneration(), frame.frameInfo().resourceGeneration())) {
-                COPIES.increment();
-                PIXEL_CHANGING_COPIES.increment();
-                recorder.copyOwnedToMinecraft(
-                        frameResources.realSnapshot(),
-                        frame.mainTexture().vkImage(),
-                        frame.view().getWidth(0),
-                        frame.view().getHeight(0));
-                recorder.finish();
-            }
-        }
-
-        @Override
-        public void blitAndSubmitReal() {
-            invokeBeforePresent(
-                    ProviderRuntime.current(), frame.frameInfo(), PresentFrameKind.REAL, 1,
-                    frame.mainTexture(), frame.view());
-            surface.blitFromTexture(RenderSystem.getDevice().createCommandEncoder(), frame.view());
-            RenderSystem.getDevice().createCommandEncoder().submit();
-        }
-
-        @Override
-        public void disableFrameGeneration(Throwable throwable) {
-            ProviderRuntime.current().disableFrameGeneration("surface_acquire_failed", throwable);
         }
     }
 

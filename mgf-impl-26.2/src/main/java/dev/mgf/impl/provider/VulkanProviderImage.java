@@ -37,6 +37,7 @@ import dev.mgf.api.provider.ImageState;
 /** MGF-owned device-local image exposed to providers only through an opaque descriptor. */
 final class VulkanProviderImage implements VulkanProviderResources.OwnedImage {
 
+    static final ImageLifetime DESCRIPTOR_LIFETIME = ImageLifetime.CALLBACK;
     static final int FORMAT = VK_FORMAT_R8G8B8A8_UNORM;
     static final int USAGE = VK_IMAGE_USAGE_STORAGE_BIT
             | VK_IMAGE_USAGE_SAMPLED_BIT
@@ -141,7 +142,7 @@ final class VulkanProviderImage implements VulkanProviderResources.OwnedImage {
                 colorEncoding,
                 state,
                 ImageOwnership.MGF,
-                ImageLifetime.DEVICE_SESSION,
+                DESCRIPTOR_LIFETIME,
                 deviceGeneration,
                 resourceGeneration);
     }

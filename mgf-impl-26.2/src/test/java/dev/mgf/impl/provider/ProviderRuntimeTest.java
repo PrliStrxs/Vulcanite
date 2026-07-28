@@ -75,6 +75,19 @@ final class ProviderRuntimeTest {
     }
 
     @Test
+    void initialResizePreservesFirstFrameReset() {
+        List<String> events = new ArrayList<>();
+        ProviderRuntime runtime = runtime(events, () -> true);
+
+        runtime.open(ENVIRONMENT);
+        runtime.resize(DIMENSIONS);
+
+        assertEquals(Optional.of(ResetReason.FIRST_FRAME), runtime.applyPendingReset());
+        assertTrue(events.contains("reset-upscaler:FIRST_FRAME"));
+        assertFalse(events.contains("reset-upscaler:RESIZE"));
+    }
+
+    @Test
     void upscalerFailureSkipsDependentFrameGeneratorAndUpdatesDiagnostics() {
         ProviderRuntime runtime = runtime(new ArrayList<>(), () -> true);
         runtime.open(ENVIRONMENT);
@@ -143,6 +156,25 @@ final class ProviderRuntimeTest {
         assertEquals(ProviderSessionState.DISABLED, runtime.selections().frameGeneration().state());
         assertEquals("surface_acquire_failed", runtime.selections().frameGeneration().reasonCode());
         assertTrue(runtime.selections().frameGeneration().message().contains("second acquire failed"));
+    }
+
+    @Test
+    void openGlMarksRegisteredRolesUnsupportedWithoutOpeningSessions() {
+        List<String> events = new ArrayList<>();
+        ProviderRuntime runtime = runtime(events, () -> true);
+        ProviderEnvironment openGl = new ProviderEnvironment(
+                GraphicsBackendKind.OPENGL, 1, Optional.empty(), Set.of(), false);
+
+        runtime.open(openGl);
+
+        assertFalse(runtime.hasActiveProviders());
+        assertTrue(events.isEmpty());
+        assertEquals(ProviderSessionState.UNSUPPORTED, runtime.selections().upscaler().state());
+        assertEquals(ProviderSessionState.UNSUPPORTED, runtime.selections().frameGeneration().state());
+        assertEquals(ProviderSessionState.UNSUPPORTED, runtime.selections().presentHook().state());
+        assertEquals("vulkan_required", runtime.selections().upscaler().reasonCode());
+        assertEquals("vulkan_required", runtime.selections().frameGeneration().reasonCode());
+        assertEquals("vulkan_required", runtime.selections().presentHook().reasonCode());
     }
 
     @Test

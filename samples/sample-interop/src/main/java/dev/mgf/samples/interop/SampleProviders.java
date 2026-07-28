@@ -38,6 +38,7 @@ import dev.mgf.api.upscale.UpscalerSupport;
 public final class SampleProviders implements MgfProviderRegistrar {
 
     public static final String ENABLE_PROPERTY = "mgf.sample.diagnosticProviders";
+    public static final String MODE_PROPERTY = "mgf.sample.providerMode";
 
     private static final ProviderId UPSCALER_ID = new ProviderId("mgf-sample-interop:diagnostic-upscaler");
     private static final ProviderId FRAME_GENERATOR_ID =
@@ -45,9 +46,26 @@ public final class SampleProviders implements MgfProviderRegistrar {
     private static final ProviderId PRESENT_HOOK_ID =
             new ProviderId("mgf-sample-interop:diagnostic-present-hook");
     private static final AtomicLong UPSCALER_FRAMES = new AtomicLong();
+    private static final AtomicLong UPSCALER_SUCCESSES = new AtomicLong();
+    private static final AtomicLong UPSCALER_RECOVERABLE_FAILURES = new AtomicLong();
+    private static final AtomicLong UPSCALER_FATAL_FAILURES = new AtomicLong();
     private static final AtomicLong FRAME_GENERATOR_FRAMES = new AtomicLong();
     private static final AtomicLong PRESENT_HOOK_FRAMES = new AtomicLong();
     private static final AtomicLong PRESENT_RECEIPTS = new AtomicLong();
+    private static final AtomicLong UPSCALER_OPENS = new AtomicLong();
+    private static final AtomicLong UPSCALER_RESIZES = new AtomicLong();
+    private static final AtomicLong UPSCALER_RESETS = new AtomicLong();
+    private static final AtomicLong UPSCALER_RESET_REASONS = new AtomicLong();
+    private static final AtomicLong UPSCALER_CLOSES = new AtomicLong();
+    private static final AtomicLong FRAME_GENERATOR_OPENS = new AtomicLong();
+    private static final AtomicLong FRAME_GENERATOR_RESIZES = new AtomicLong();
+    private static final AtomicLong FRAME_GENERATOR_RESETS = new AtomicLong();
+    private static final AtomicLong FRAME_GENERATOR_RESET_REASONS = new AtomicLong();
+    private static final AtomicLong FRAME_GENERATOR_CLOSES = new AtomicLong();
+    private static final AtomicLong PRESENT_HOOK_OPENS = new AtomicLong();
+    private static final AtomicLong PRESENT_HOOK_RESETS = new AtomicLong();
+    private static final AtomicLong PRESENT_HOOK_RESET_REASONS = new AtomicLong();
+    private static final AtomicLong PRESENT_HOOK_CLOSES = new AtomicLong();
 
     @Override
     public void registerProviders(ProviderRegistry registry) {
@@ -59,9 +77,26 @@ public final class SampleProviders implements MgfProviderRegistrar {
     public static Counters counters() {
         return new Counters(
                 UPSCALER_FRAMES.get(),
+                UPSCALER_SUCCESSES.get(),
+                UPSCALER_RECOVERABLE_FAILURES.get(),
+                UPSCALER_FATAL_FAILURES.get(),
                 FRAME_GENERATOR_FRAMES.get(),
                 PRESENT_HOOK_FRAMES.get(),
-                PRESENT_RECEIPTS.get());
+                PRESENT_RECEIPTS.get(),
+                UPSCALER_OPENS.get(),
+                UPSCALER_RESIZES.get(),
+                UPSCALER_RESETS.get(),
+                UPSCALER_RESET_REASONS.get(),
+                UPSCALER_CLOSES.get(),
+                FRAME_GENERATOR_OPENS.get(),
+                FRAME_GENERATOR_RESIZES.get(),
+                FRAME_GENERATOR_RESETS.get(),
+                FRAME_GENERATOR_RESET_REASONS.get(),
+                FRAME_GENERATOR_CLOSES.get(),
+                PRESENT_HOOK_OPENS.get(),
+                PRESENT_HOOK_RESETS.get(),
+                PRESENT_HOOK_RESET_REASONS.get(),
+                PRESENT_HOOK_CLOSES.get());
     }
 
     private static boolean enabled() {
@@ -76,7 +111,7 @@ public final class SampleProviders implements MgfProviderRegistrar {
 
         @Override
         public ProviderDescriptor descriptor() {
-            return SampleProviders.descriptor(UPSCALER_ID, "Diagnostic No-op Upscaler");
+            return SampleProviders.descriptor(UPSCALER_ID, "Diagnostic Upscaler");
         }
 
         @Override
@@ -92,14 +127,43 @@ public final class SampleProviders implements MgfProviderRegistrar {
 
         @Override
         public UpscalerSession open(ProviderSessionContext context) {
+            UPSCALER_OPENS.incrementAndGet();
+            VulkanPassthroughUpscaler passthrough = outputEnabled()
+                    ? new VulkanPassthroughUpscaler(context) : null;
             return new UpscalerSession() {
-                @Override public void resize(FrameDimensions dimensions) { }
-                @Override public void reset(ResetReason reason) { }
+                private boolean closed;
+
+                @Override public void resize(FrameDimensions dimensions) {
+                    UPSCALER_RESIZES.incrementAndGet();
+                }
+                @Override public void reset(ResetReason reason) {
+                    UPSCALER_RESETS.incrementAndGet();
+                    UPSCALER_RESET_REASONS.getAndUpdate(mask -> mask | resetMask(reason));
+                }
                 @Override public ProviderResult record(UpscaleFrame frame) {
-                    UPSCALER_FRAMES.incrementAndGet();
+                    long frameNumber = UPSCALER_FRAMES.incrementAndGet();
+                    if (frameNumber == 2 && "recoverable".equalsIgnoreCase(providerMode())) {
+                        UPSCALER_RECOVERABLE_FAILURES.incrementAndGet();
+                        return ProviderResult.recoverable(
+                                "diagnostic_recoverable", "Injected recoverable smoke failure");
+                    }
+                    if (frameNumber == 2 && "fatal".equalsIgnoreCase(providerMode())) {
+                        UPSCALER_FATAL_FAILURES.incrementAndGet();
+                        return ProviderResult.fatal("diagnostic_fatal", "Injected fatal smoke failure");
+                    }
+                    if (passthrough != null) {
+                        passthrough.record(frame);
+                        UPSCALER_SUCCESSES.incrementAndGet();
+                        return ProviderResult.success();
+                    }
                     return skipped();
                 }
-                @Override public void close() { }
+                @Override public void close() {
+                    if (!closed) {
+                        closed = true;
+                        UPSCALER_CLOSES.incrementAndGet();
+                    }
+                }
             };
         }
     }
@@ -126,14 +190,27 @@ public final class SampleProviders implements MgfProviderRegistrar {
 
         @Override
         public FrameGenerationSession open(ProviderSessionContext context) {
+            FRAME_GENERATOR_OPENS.incrementAndGet();
             return new FrameGenerationSession() {
-                @Override public void resize(FrameDimensions dimensions) { }
-                @Override public void reset(ResetReason reason) { }
+                private boolean closed;
+
+                @Override public void resize(FrameDimensions dimensions) {
+                    FRAME_GENERATOR_RESIZES.incrementAndGet();
+                }
+                @Override public void reset(ResetReason reason) {
+                    FRAME_GENERATOR_RESETS.incrementAndGet();
+                    FRAME_GENERATOR_RESET_REASONS.getAndUpdate(mask -> mask | resetMask(reason));
+                }
                 @Override public ProviderResult record(FrameGenerationFrame frame) {
                     FRAME_GENERATOR_FRAMES.incrementAndGet();
                     return skipped();
                 }
-                @Override public void close() { }
+                @Override public void close() {
+                    if (!closed) {
+                        closed = true;
+                        FRAME_GENERATOR_CLOSES.incrementAndGet();
+                    }
+                }
             };
         }
     }
@@ -157,8 +234,14 @@ public final class SampleProviders implements MgfProviderRegistrar {
 
         @Override
         public PresentHookSession open(ProviderSessionContext context) {
+            PRESENT_HOOK_OPENS.incrementAndGet();
             return new PresentHookSession() {
-                @Override public void reset(ResetReason reason) { }
+                private boolean closed;
+
+                @Override public void reset(ResetReason reason) {
+                    PRESENT_HOOK_RESETS.incrementAndGet();
+                    PRESENT_HOOK_RESET_REASONS.getAndUpdate(mask -> mask | resetMask(reason));
+                }
                 @Override public ProviderResult beforePresent(PresentFrame frame) {
                     PRESENT_HOOK_FRAMES.incrementAndGet();
                     return skipped();
@@ -166,7 +249,12 @@ public final class SampleProviders implements MgfProviderRegistrar {
                 @Override public void afterPresent(PresentReceipt receipt) {
                     PRESENT_RECEIPTS.incrementAndGet();
                 }
-                @Override public void close() { }
+                @Override public void close() {
+                    if (!closed) {
+                        closed = true;
+                        PRESENT_HOOK_CLOSES.incrementAndGet();
+                    }
+                }
             };
         }
     }
@@ -175,10 +263,79 @@ public final class SampleProviders implements MgfProviderRegistrar {
         return ProviderResult.skipped("diagnostic_noop", "Diagnostic provider records no GPU work");
     }
 
+    private static boolean outputEnabled() {
+        return Set.of("passthrough", "recoverable", "fatal").stream()
+                .anyMatch(providerMode()::equalsIgnoreCase);
+    }
+
+    private static String providerMode() {
+        return System.getProperty(MODE_PROPERTY, "noop");
+    }
+
+    private static long resetMask(ResetReason reason) {
+        return 1L << reason.ordinal();
+    }
+
     public record Counters(
             long upscalerFrames,
+            long upscalerSuccesses,
+            long upscalerRecoverableFailures,
+            long upscalerFatalFailures,
             long frameGeneratorFrames,
             long presentHookFrames,
-            long presentReceipts) {
+            long presentReceipts,
+            long upscalerOpens,
+            long upscalerResizes,
+            long upscalerResets,
+            long upscalerResetReasons,
+            long upscalerCloses,
+            long frameGeneratorOpens,
+            long frameGeneratorResizes,
+            long frameGeneratorResets,
+            long frameGeneratorResetReasons,
+            long frameGeneratorCloses,
+            long presentHookOpens,
+            long presentHookResets,
+            long presentHookResetReasons,
+            long presentHookCloses) {
+
+        public boolean upscalerSawReset(ResetReason reason) {
+            return (upscalerResetReasons & resetMask(reason)) != 0;
+        }
+
+        public boolean frameGeneratorSawReset(ResetReason reason) {
+            return (frameGeneratorResetReasons & resetMask(reason)) != 0;
+        }
+
+        public boolean presentHookSawReset(ResetReason reason) {
+            return (presentHookResetReasons & resetMask(reason)) != 0;
+        }
+
+        public String upscalerResetReasonNames() {
+            return resetReasonNames(upscalerResetReasons);
+        }
+
+        public String frameGeneratorResetReasonNames() {
+            return resetReasonNames(frameGeneratorResetReasons);
+        }
+
+        public String presentHookResetReasonNames() {
+            return resetReasonNames(presentHookResetReasons);
+        }
+
+        public long totalLifecycleCallbacks() {
+            return upscalerFrames + frameGeneratorFrames + presentHookFrames + presentReceipts
+                    + upscalerOpens + upscalerResizes + upscalerResets + upscalerCloses
+                    + frameGeneratorOpens + frameGeneratorResizes + frameGeneratorResets
+                    + frameGeneratorCloses + presentHookOpens + presentHookResets + presentHookCloses;
+        }
+
+        private static String resetReasonNames(long reasons) {
+            return java.util.Arrays.stream(ResetReason.values())
+                    .filter(reason -> (reasons & resetMask(reason)) != 0)
+                    .map(Enum::name)
+                    .toList()
+                    .toString();
+        }
     }
 }

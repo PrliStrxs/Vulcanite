@@ -51,6 +51,9 @@ final class SmokeChecks {
         for (SmokeComputeProbe.Check check : computeChecks) {
             checks.check(check.passed(), check.detail());
         }
+        for (SmokeComputeProbe.Check check : SmokeProviderProbe.run(runtime, expectedBackend)) {
+            checks.check(check.passed(), check.detail());
+        }
         checks.runFrameGraphChecks(generationBeforeReload);
         return checks;
     }

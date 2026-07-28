@@ -2,8 +2,8 @@
 
 This document defines the Vulkan ownership, resource-state, synchronization,
 and lifecycle contract for MGF compute work. It applies to the generic M4
-compute dispatcher, the visible luminance-histogram auto-exposure sample, and
-the 0.3 provider adapter.
+compute dispatcher and the 0.3 provider adapter. Vulcanite 0.3 does not register
+or execute a bundled compute effect.
 
 ## Non-negotiable rules
 
@@ -26,10 +26,8 @@ the 0.3 provider adapter.
 | Main color texture view | Minecraft `MainTarget` | Borrow for the current pass only. Push a fresh descriptor after every resize. |
 | Clamp-to-edge sampler | `RenderSystem.getSamplerCache()` | Borrow and never close. |
 | Graphics queue and command encoder | Minecraft `VulkanDevice` | Record through the live encoder. Do not submit a parallel frame timeline. |
-| Histogram and exposure buffers | MGF compute effect | Device-scoped. Destroy before the owning VMA allocator. |
-| Compute pipelines and layouts | MGF compute dispatcher/effect | Device-scoped. Close after queued uses complete. |
-| Auto-exposure output storage image and view | MGF compute effect | Match the current main-target dimensions; retire old allocations through deferred destruction. |
-| Provider outputs, snapshots, and history | MGF provider adapter | Device-scoped `RGBA8_UNORM` storage/sampled/transfer images; retire resized generations through deferred destruction. |
+| Generic compute buffers, pipelines, and layouts | MGF compute dispatcher caller | Device-scoped. Close after queued uses complete and before the owning VMA allocator. |
+| Provider outputs, snapshots, and history | MGF provider adapter | Size-dependent `RGBA8_UNORM` storage/sampled/transfer images; expose callback-scoped descriptors and retire resized generations through deferred destruction. |
 | Frame-graph resource handles | Minecraft frame graph | Valid for one graph build/execution only. Replace `targets.main` with every `readsAndWrites` result. |
 
 Public `ComputeDispatcher.Program` and `ComputeDispatcher.Buffer` objects are
@@ -43,11 +41,12 @@ Minecraft 26.2 creates the main color target as `RGBA8_UNORM` with usage bits
 for transfer destination, transfer source, sampled texture, and render
 attachment. It does not have `VK_IMAGE_USAGE_STORAGE_BIT`. Therefore:
 
-- Histogram compute may sample the main color image.
-- Copy-back may write the main color image as a transfer destination.
+- Provider compute may read the main color image through the advertised sampled
+  or transfer state.
+- Successful provider output may be copied to the main image as a transfer
+  destination.
 - Compute must not bind the main color image as a storage image.
-- A visible compute effect writes a separate storage image, then copies that
-  image back to main.
+- Algorithms that require storage writes use an MGF-owned output image.
 
 The Vulkan backend initializes textures in `VK_IMAGE_LAYOUT_GENERAL` and uses
 that layout for render attachments, sampled descriptors, clears, and copies.
@@ -73,22 +72,10 @@ handles. A resize can replace the first two before the next frame.
 
 ## Frame-graph ordering
 
-Auto exposure is an internal `BEFORE_EXECUTE` finalizer. MGF dispatches ordinary
-frame-graph listeners before internal finalizers, and registers auto exposure
-before the M2 PostFx finalizer. The intended order is:
-
-1. Vanilla world passes.
-2. Ordinary MGF/consumer frame-graph passes, including M3 world geometry.
-3. Auto-exposure histogram, reduction, application, and copy-back.
-4. M2 PostFx overlays.
-5. Frame-graph execution returns to the rest of `GameRenderer`.
-
-The auto-exposure pass declares `readsAndWrites(targets.main)` and stores the
-returned handle back in `targets.main`. This makes the write visible to the
-frame graph and forces later PostFx passes to consume the exposed image.
-
-This hook affects world rendering. First-person hands, screen effects, entity
-outlines, the selected vanilla post chain, and the GUI are rendered later.
+Vulcanite 0.3 registers no core frame-graph effect. Development samples may
+register explicit listeners, but they are not packaged in the player JAR. The
+Provider adapter runs later at the final composed main-target blit/present seam,
+after GUI rendering, and does not claim access to a separate world-only image.
 
 ## Resource states and barriers
 
@@ -97,16 +84,12 @@ vanilla render pass to provide a broad memory barrier for the next frame.
 
 | Transition | Source scope | Destination scope |
 |---|---|---|
-| Previous histogram reduction read -> histogram clear | compute shader / storage read | transfer / transfer write |
-| Histogram clear -> histogram dispatch | transfer / transfer write | compute shader / storage read and write |
-| Prior main rendering -> histogram sample | all commands / memory write | compute shader / sampled read |
-| Histogram dispatch -> reduction | compute shader / storage write | compute shader / storage read |
-| Previous exposure read -> current reduction write | compute or transfer / storage or transfer read | compute shader / storage read and write |
-| Reduction -> exposure application | compute shader / storage write | compute shader / storage read |
-| Previous output copy -> output storage write | transfer / transfer read | compute shader / storage write |
-| Exposure application -> output copy | compute shader / storage write | transfer / transfer read |
-| Main histogram sample -> main copy-back | compute shader / sampled read | transfer / transfer write |
-| Main copy-back -> PostFx/render/transfer consumers | transfer / transfer write | color output, fragment shader, and transfer / attachment read-write, sampled read, and transfer read |
+| Prior main rendering -> provider read | all commands / memory write | provider-declared shader or transfer read |
+| New MGF output -> provider write | top of pipe / none | provider-declared shader write |
+| Provider output write -> copy source | provider-declared shader write | transfer / transfer read |
+| Main provider read -> copy destination | provider-declared read | transfer / transfer write |
+| Provider output copy -> final blit | transfer / transfer write | transfer / transfer read |
+| Real snapshot copy -> history/provider read | transfer / transfer write | provider-declared shader or transfer read |
 
 Image barriers cover color aspect, mip level zero, and array layer zero. Queue
 family indices remain `VK_QUEUE_FAMILY_IGNORED` because all work stays on the
@@ -126,17 +109,20 @@ Vanilla uniform buffers are not storage buffers. Do not bind one as an SSBO.
 
 The Minecraft 26.2 provider adapter runs after the fully composed main target,
 including GUI rendering. The adapter reports equal render and display sizes and
-does not claim motion vectors, a separate low-resolution scene, or a UI mask.
-Providers that require those inputs remain registered but unsupported.
+guarantees only the final color image. It does not claim depth, motion vectors,
+a separate low-resolution scene, or a UI mask. Providers that require those
+inputs remain registered but unsupported.
 
 Minecraft's main image has no storage-image usage. Provider algorithms write
 only to MGF-owned images created with storage, sampled, transfer-source, and
-transfer-destination usage. MGF records these exact copies as needed:
+transfer-destination usage. The 26.2 Upscaler path records this copy after a
+successful callback:
 
-1. Minecraft main to the MGF real snapshot.
-2. Provider output to Minecraft main.
-3. MGF generated output to Minecraft main.
-4. MGF real snapshot back to Minecraft main.
+1. Provider output to Minecraft main.
+
+Frame Generation remains `UNSUPPORTED/multi_present_unsupported` in this
+adapter. Snapshot, generated-output, and real-restore copies belong to a later
+adapter that can prove a safe multi-present contract.
 
 All provider images remain in `VK_IMAGE_LAYOUT_GENERAL` after their first
 initialization barrier. MGF records provider preconditions and postconditions,
@@ -146,8 +132,8 @@ not begin, end, reset, submit, or add barriers for an MGF command buffer.
 
 The adapter allocates transient command buffers through the live
 `VulkanCommandEncoder`, ends them, and enqueues them with `execute(...)`.
-It never calls `submit()` from the per-frame provider bridge. Generated-frame
-presentation restores the saved real image before the second, real present.
+It never calls `submit()` from the per-frame provider bridge. Minecraft 26.2
+performs exactly one real present; no second acquire or present is attempted.
 
 ## Graphics-queue policy
 
@@ -191,10 +177,9 @@ instead of destroying resources that an in-flight frame may still reference.
 ### World transition
 
 The level frame graph does not run on title screens. Device-scoped programs and
-allocations may remain alive while disconnected, but temporal exposure state
-must reset before the first frame of a new world. Exposure history must not leak
-between servers or dimensions when the desired visual contract calls for a new
-adaptation sequence.
+allocations may remain alive while disconnected, but active provider temporal
+state resets before the first frame of a new world. Previous-frame images and
+matrices must not leak between servers or dimensions.
 
 ### Shutdown and device replacement
 
@@ -208,8 +193,8 @@ Never destroy borrowed main-target or sampler-cache objects.
 
 Registration is backend-independent, but execution is not. On OpenGL, the
 compute service reports unavailable, emits one concise disabled reason, allocates
-no Vulkan resources, and adds no auto-exposure write pass. Existing M2 PostFx and
-M3 graphics pipelines continue through the OpenGL backend unchanged.
+no Vulkan resources, and opens no Provider session. Existing graphics pipelines
+continue through the OpenGL backend unchanged.
 
 An unsupported backend is an expected capability result, not an exception and
 not a reason to fail client startup.
@@ -231,6 +216,6 @@ actually enabled, and fails on `VUID-`, `SYNC-HAZARD-`, `UNASSIGNED-`,
 
 The automated smoke run verifies generic compute dispatch/readback, repeated
 dispatch barriers, survival across a resource reload, and OpenGL fail-soft
-reporting. It does not enter a world, so visible auto exposure, frame-graph
-ordering, resize, world reset, and shutdown still require an in-world run with
-validation enabled before release.
+reporting. It does not enter a world, so in-world resources, interactive resize,
+world transition resets, and a real downstream Provider require a separate run
+with validation enabled.

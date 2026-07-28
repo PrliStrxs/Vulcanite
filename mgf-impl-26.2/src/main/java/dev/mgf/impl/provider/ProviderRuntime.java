@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import dev.mgf.api.GraphicsBackendKind;
 import dev.mgf.api.framegen.FrameGenerationSession;
 import dev.mgf.api.present.PresentHookSession;
 import dev.mgf.api.provider.FrameDimensions;
@@ -73,6 +74,16 @@ public final class ProviderRuntime {
         if (state.active()) {
             closeSessions();
         }
+        if (environment.backend() != GraphicsBackendKind.VULKAN) {
+            state = RuntimeState.inactive();
+            selections = unsupportedBackendSelections(catalog, config);
+            upscalerSucceededThisFrame = true;
+            synchronized (this) {
+                pendingReset = null;
+            }
+            logSelections("unsupported backend", selections);
+            return;
+        }
 
         ProviderSessionContext context = new ProviderSessionContext(environment);
         ProviderSelector.SelectedUpscaler selectedUpscaler = ProviderSelector.selectUpscaler(
@@ -137,6 +148,9 @@ public final class ProviderRuntime {
 
     public synchronized void requestReset(ResetReason reason) {
         Objects.requireNonNull(reason, "reason");
+        if (pendingReset == ResetReason.FIRST_FRAME && reason == ResetReason.RESIZE) {
+            return;
+        }
         if (pendingReset == null || resetPriority(reason) > resetPriority(pendingReset)) {
             pendingReset = reason;
         }
@@ -395,6 +409,34 @@ public final class ProviderRuntime {
                 awaitingDevice(ProviderKind.PRESENT_HOOK,
                         catalog.presentHooks().stream().map(provider -> provider.descriptor().id()).toList(),
                         config.presentHook()));
+    }
+
+    private static ProviderSelections unsupportedBackendSelections(
+            ProviderCatalog catalog, ProviderConfig config) {
+        return new ProviderSelections(
+                unsupportedBackend(ProviderKind.UPSCALER,
+                        catalog.upscalers().stream().map(provider -> provider.descriptor().id()).toList(),
+                        config.upscaler()),
+                unsupportedBackend(ProviderKind.FRAME_GENERATION,
+                        catalog.frameGenerators().stream().map(provider -> provider.descriptor().id()).toList(),
+                        config.frameGeneration()),
+                unsupportedBackend(ProviderKind.PRESENT_HOOK,
+                        catalog.presentHooks().stream().map(provider -> provider.descriptor().id()).toList(),
+                        config.presentHook()));
+    }
+
+    private static ProviderSelection unsupportedBackend(
+            ProviderKind kind, List<ProviderId> registered, ProviderConfig.Choice choice) {
+        if (choice.mode() == ProviderConfig.Mode.OFF) {
+            return new ProviderSelection(kind, registered, Optional.empty(), ProviderSessionState.OFF,
+                    choice.reasonCode(), choice.message());
+        }
+        if (registered.isEmpty()) {
+            return new ProviderSelection(kind, registered, Optional.empty(), ProviderSessionState.UNSUPPORTED,
+                    "no_provider", "No providers are registered");
+        }
+        return new ProviderSelection(kind, registered, Optional.empty(), ProviderSessionState.UNSUPPORTED,
+                "vulkan_required", "The Minecraft 26.2 provider adapter requires Vulkan");
     }
 
     private static ProviderSelection awaitingDevice(

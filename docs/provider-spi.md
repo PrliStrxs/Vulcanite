@@ -27,8 +27,11 @@ and close run on Minecraft's render thread.
 
 `UpscalerProvider.probe` declares scale limits, encodings, quality modes, and
 resource requirements. `UpscalerSession.record` receives an `UpscaleFrame` with
-the real input color, an MGF-owned output, dimensions, timing, matrices, optional
-temporal resources, parameters, and an already-recording command buffer.
+the real input color, an MGF-owned output, dimensions, timing, optional verified
+camera data, optional temporal resources, parameters, and an already-recording
+command buffer. `UpscaleParameters.camera()` is empty unless the active adapter
+can supply live matrices, jitter, clip planes, and field of view as one coherent
+`UpscaleCameraParameters` value.
 
 Write only to the supplied output. Return `SUCCESS` only when it is valid for
 the current frame. On any other result, Vulcanite presents the untouched real
@@ -77,8 +80,14 @@ message. Do not use exceptions for expected unsupported or skipped conditions.
 ## Minecraft 26.2 Input Limits
 
 The 26.2 adapter currently reports the fully composed main render target at
-native display size. It does not separate world and UI rendering and does not
-provide motion vectors, optical flow, UI masks, reactive masks, or a separate
-low-resolution scene image. Providers requiring those resources remain visible
-but unsupported. Future Minecraft drops receive separate adapter modules while
-the pure-Java SPI remains stable.
+native display size with SRGB encoding. Selection therefore requires support for
+scale `1.0` and SRGB. It does not separate world and UI rendering and does not
+provide verified depth, camera parameters, motion vectors, optical flow, UI
+masks, reactive masks, or a separate low-resolution scene image. Providers
+requiring those resources remain visible but unsupported.
+
+Minecraft 26.2 does not report a capability that proves repeated surface acquire
+and present is safe. The adapter reports `multiPresentSupported=false`, so Frame
+Generation providers remain registered but are `UNSUPPORTED` with reason
+`multi_present_unsupported`. A later adapter may activate the same stable SPI
+after it verifies the two-item `[GENERATED, REAL]` presentation contract.

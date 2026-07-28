@@ -11,12 +11,18 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import dev.mgf.api.provider.FrameDimensions;
+import dev.mgf.api.provider.ImageLifetime;
 import dev.mgf.api.provider.ResetReason;
 
 final class VulkanProviderResourcesTest {
 
     private static final FrameDimensions FULL_HD = new FrameDimensions(1920, 1080, 1920, 1080);
     private static final FrameDimensions QHD = new FrameDimensions(2560, 1440, 2560, 1440);
+
+    @Test
+    void adapterOwnedImageDescriptorsAreCallbackScoped() {
+        assertEquals(ImageLifetime.CALLBACK, VulkanProviderImage.DESCRIPTOR_LIFETIME);
+    }
 
     @Test
     void unchangedDimensionsReuseResourcesAndGeneration() {

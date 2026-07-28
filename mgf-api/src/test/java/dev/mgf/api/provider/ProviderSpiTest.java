@@ -26,6 +26,8 @@ import dev.mgf.api.present.PresentHookSession;
 import dev.mgf.api.present.PresentHookSupport;
 import dev.mgf.api.present.PresentReceipt;
 import dev.mgf.api.upscale.UpscaleFrame;
+import dev.mgf.api.upscale.UpscaleCameraParameters;
+import dev.mgf.api.upscale.UpscaleParameters;
 import dev.mgf.api.upscale.UpscalerCapabilities;
 import dev.mgf.api.upscale.UpscalerProvider;
 import dev.mgf.api.upscale.UpscalerRequirements;
@@ -82,6 +84,22 @@ final class ProviderSpiTest {
                         .map(PresentFrame::kind).toList());
         assertEquals(PresentFrameKind.REAL,
                 new PresentBatch(List.of(presentFrame(PresentFrameKind.REAL, 0))).frames().getFirst().kind());
+    }
+
+    @Test
+    void cameraParametersAreExplicitlyOptionalAndValidatedAsOneUnit() {
+        UpscaleParameters unavailable = new UpscaleParameters(Optional.empty(), "quality");
+        assertEquals(Optional.empty(), unavailable.camera());
+
+        FrameMatrices matrices = new FrameMatrices(
+                Matrix4.identity(), Matrix4.identity(), Matrix4.identity(), Matrix4.identity());
+        UpscaleCameraParameters camera = new UpscaleCameraParameters(
+                matrices, 0.0F, 0.0F, 0.05F, 1024.0F, 70.0F);
+        UpscaleParameters available = new UpscaleParameters(Optional.of(camera), "quality");
+        assertEquals(Optional.of(camera), available.camera());
+        assertThrows(IllegalArgumentException.class,
+                () -> new UpscaleCameraParameters(
+                        matrices, 0.0F, 0.0F, 1.0F, 0.5F, 70.0F));
     }
 
     private static PresentFrame presentFrame(PresentFrameKind kind, int ordinal) {

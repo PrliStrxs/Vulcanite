@@ -38,7 +38,7 @@ final class ProviderFastPathTest {
         assertEquals(0, diagnostics.allocations());
         assertEquals(0, diagnostics.commandRecordings());
         assertEquals(0, diagnostics.copies());
-        assertEquals(0, diagnostics.pixelChangingCopies());
+        assertEquals(0, diagnostics.outputCopies());
         assertEquals(0, diagnostics.extraPresents());
         reporter.publishEntry("inactiveBridgeNanoseconds", Long.toString(elapsed));
     }

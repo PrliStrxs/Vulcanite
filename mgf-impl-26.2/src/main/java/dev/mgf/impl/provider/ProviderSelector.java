@@ -10,6 +10,7 @@ import dev.mgf.api.framegen.FrameGenerationProvider;
 import dev.mgf.api.framegen.FrameGenerationSupport;
 import dev.mgf.api.present.PresentHookProvider;
 import dev.mgf.api.present.PresentHookSupport;
+import dev.mgf.api.provider.ColorEncoding;
 import dev.mgf.api.provider.FrameResourceKind;
 import dev.mgf.api.provider.ProviderDescriptor;
 import dev.mgf.api.provider.ProviderEnvironment;
@@ -42,6 +43,7 @@ public final class ProviderSelector {
                 provider -> provider.probe(environment),
                 support -> support.status(),
                 support -> support.requirements().orElseThrow().requiredResources(),
+                ProviderSelector::validateUpscalerCapabilities,
                 environment);
         return new SelectedUpscaler(selected.provider, selected.support, selected.diagnostic);
     }
@@ -57,6 +59,8 @@ public final class ProviderSelector {
                 provider -> provider.probe(environment, selectedUpscaler),
                 support -> support.status(),
                 support -> support.requirements().orElseThrow().requiredResources(),
+                support -> validateFrameGenerationCapabilities(
+                        support, selectedUpscaler, environment.multiPresentSupported()),
                 environment);
         return new SelectedFrameGenerator(selected.provider, selected.support, selected.diagnostic);
     }
@@ -72,6 +76,7 @@ public final class ProviderSelector {
                 provider -> provider.probe(environment, selectedFrameGenerator),
                 support -> support.status(),
                 support -> java.util.Set.of(),
+                support -> ProviderSupport.available(),
                 environment);
         if (selected.provider.isPresent() && selectedFrameGenerator.isPresent()
                 && !selected.support.orElseThrow().capabilities().orElseThrow().supportsGeneratedFrames()) {
@@ -90,6 +95,7 @@ public final class ProviderSelector {
             Function<T, S> probe,
             Function<S, ProviderSupport> status,
             Function<S, java.util.Set<FrameResourceKind>> requirements,
+            Function<S, ProviderSupport> adapterCompatibility,
             ProviderEnvironment environment) {
         Objects.requireNonNull(choice, "choice");
         if (choice.mode() == ProviderConfig.Mode.OFF) {
@@ -135,6 +141,11 @@ public final class ProviderSelector {
                         "Required frame resources are unavailable: " + missing);
                 continue;
             }
+            ProviderSupport compatibility = adapterCompatibility.apply(probed);
+            if (!compatibility.supported()) {
+                lastFailure = compatibility;
+                continue;
+            }
             ProviderId id = descriptor(provider).id();
             return new Selection<>(Optional.of(provider), Optional.of(probed), diagnostic(
                     kind, providers, Optional.of(id), ProviderSessionState.READY,
@@ -147,6 +158,41 @@ public final class ProviderSelector {
         return new Selection<>(Optional.empty(), Optional.empty(), diagnostic(
                 kind, providers, Optional.empty(), ProviderSessionState.UNSUPPORTED,
                 failure.reasonCode(), failure.message()));
+    }
+
+    private static ProviderSupport validateUpscalerCapabilities(UpscalerSupport support) {
+        var capabilities = support.capabilities().orElseThrow();
+        if (capabilities.minimumScale() > 1.0 || capabilities.maximumScale() < 1.0) {
+            return ProviderSupport.unsupported(
+                    "unsupported_scale", "Provider does not support the native 1.0 scale exposed by 26.2");
+        }
+        if (!capabilities.colorEncodings().contains(ColorEncoding.SRGB)) {
+            return ProviderSupport.unsupported(
+                    "unsupported_color_encoding", "Provider does not support the SRGB input exposed by 26.2");
+        }
+        return ProviderSupport.available();
+    }
+
+    private static ProviderSupport validateFrameGenerationCapabilities(
+            FrameGenerationSupport support,
+            Optional<ProviderId> selectedUpscaler,
+            boolean multiPresentSupported) {
+        if (!multiPresentSupported) {
+            return ProviderSupport.unsupported(
+                    "multi_present_unsupported", "The active surface cannot safely present generated and real frames");
+        }
+        var capabilities = support.capabilities().orElseThrow();
+        if (!capabilities.colorEncodings().contains(ColorEncoding.SRGB)) {
+            return ProviderSupport.unsupported(
+                    "unsupported_color_encoding", "Provider does not support the SRGB frame plan exposed by 26.2");
+        }
+        if (!capabilities.compatibleUpscalers().isEmpty()
+                && (selectedUpscaler.isEmpty()
+                        || !capabilities.acceptsUpscaler(selectedUpscaler.orElseThrow()))) {
+            return ProviderSupport.unsupported(
+                    "incompatible_upscaler", "Provider does not accept the selected upscaler");
+        }
+        return ProviderSupport.available();
     }
 
     private static ProviderSelection diagnostic(

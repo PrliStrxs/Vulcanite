@@ -32,6 +32,7 @@ public final class SmokeTestClient implements ClientModInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("MGF-Smoke");
     private static final String RESULT_FILE = "mgf-smoke-result.txt";
+    private static final String SHUTDOWN_RESULT_FILE = "mgf-smoke-shutdown-result.txt";
     private static final Identifier READINESS_PROBE = Identifier.withDefaultNamespace("core/screenquad");
     private static final int TIMEOUT_TICKS = 1200;
 
@@ -43,6 +44,10 @@ public final class SmokeTestClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         String expectedBackend = System.getProperty("mgf.smoke.expectedBackend", "vulkan");
+        Runtime.getRuntime().addShutdownHook(new Thread(
+                () -> SmokeProviderProbe.writeShutdownResult(
+                        Path.of(SHUTDOWN_RESULT_FILE), expectedBackend),
+                "MGF smoke shutdown verifier"));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (finished) {
                 return;
