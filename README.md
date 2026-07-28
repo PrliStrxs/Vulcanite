@@ -9,6 +9,19 @@ Vulcanite does not enable a visual preset by itself. With no supported provider
 selected, Minecraft follows its original rendering and presentation path with no
 MGF image allocation, command recording, copy, or extra present.
 
+## Current Release
+
+| Item | Value |
+|---|---|
+| Vulcanite | `0.3.0-alpha.1` |
+| Minecraft adapter | `26.2` |
+| Fabric Loader | `0.19.3` or newer |
+| Java | `25` or newer |
+| Validated GPU | NVIDIA GeForce RTX 4060, driver 610.62 |
+
+This is an Alpha API and a version-specific adapter. Do not use the 26.2 player
+JAR as a 26.3-compatible binary.
+
 ## Artifacts
 
 | Audience | Coordinate or file | Purpose |
@@ -20,6 +33,17 @@ MGF image allocation, command recording, copy, or extra present.
 Downstream providers compile against `mgf-api` only and declare the
 `mgf:providers` Fabric entrypoint. DLSS, FSR, XeSS, optical-flow, and vendor SDK
 integrations belong in independent provider mods.
+
+## Installation
+
+1. Install Fabric Loader 0.19.3 or newer for Minecraft 26.2.
+2. Place `mgf-0.3.0-alpha.1+mc26.2.jar` in the client `mods` directory.
+3. Install a provider mod that declares Vulcanite as a dependency.
+4. Select Minecraft's Vulkan backend when the provider requires Vulkan.
+
+The player JAR embeds `mgf-api` and does not require Fabric API. OpenGL remains
+a supported fail-soft backend for compatible APIs, while Vulkan-only providers
+report an explicit unsupported reason.
 
 ## Provider Roles
 
@@ -46,6 +70,11 @@ capability, Frame Generation providers remain registered but are reported as
 - [Migration from 0.2](docs/migration-0.2-to-0.3.md)
 - [Compile-tested minimal provider](docs/examples/minimal-provider.md)
 - [Compute synchronization](docs/compute-synchronization.md)
+
+The compile-tested provider example is available in
+[`samples/sample-provider`](samples/sample-provider). Provider projects should
+depend on `dev.mgf:mgf-api:0.3.0-alpha.1`, not on Minecraft implementation
+classes.
 
 ## Build and Verify
 
