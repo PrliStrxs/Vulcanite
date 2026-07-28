@@ -2,6 +2,7 @@ package dev.mgf.api;
 
 import java.util.Optional;
 
+import dev.mgf.api.provider.ProviderSelections;
 import dev.mgf.api.vk.VkInterop;
 
 /**
@@ -26,6 +27,9 @@ public interface MgfRuntime {
      *         interop seam initialized successfully
      */
     Optional<VkInterop> vkInterop();
+
+    /** @return immutable provider registration, selection, and session diagnostics */
+    ProviderSelections providers();
 
     /** @return the MGF implementation version string */
     String version();

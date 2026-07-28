@@ -22,6 +22,7 @@ bin/
 run/
 runs/
 remappedSrc/
+mgf-impl-26.2/logs/
 
 # Misc
 hs_err_pid*.log
