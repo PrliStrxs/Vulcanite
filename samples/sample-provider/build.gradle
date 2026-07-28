@@ -1,0 +1,33 @@
+plugins {
+    id "java"
+}
+
+base {
+    archivesName = "mgf-sample-provider"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    maven {
+        name = "Fabric"
+        url = "https://maven.fabricmc.net/"
+    }
+}
+
+dependencies {
+    compileOnly project(":mgf-api")
+    compileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}

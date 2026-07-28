@@ -1,107 +1,66 @@
-# MGF — Minecraft Graphics Framework
+# Vulcanite
 
-A Fabric-prerequisite rendering framework for the Minecraft 26.x Vulkan era.
+Vulcanite (`mgf`) is a client-side Fabric prerequisite mod and graphics provider
+framework for Minecraft 26.x. It exposes stable, pure-Java APIs for upscaling,
+frame generation, and controlled present hooks while keeping Minecraft, Fabric,
+LWJGL, and version-specific rendering types out of downstream provider code.
 
-MGF is an **augmentation layer over vanilla's Blaze3D abstraction** (`GpuDevice` /
-`FrameGraphBuilder` / dual GL+Vulkan backends), not a replacement RHI. It adds the
-seams vanilla lacks — Vulkan extension negotiation, native interop, frame-graph
-events, compute, presentation hooks — behind a semver-stable API that insulates
-consumer mods from per-drop churn. See the design document
-(`docs/MGF_技术设计文档_V2.0.docx`, kept out of version control) for the full
-architecture, roadmap, and rationale.
+Vulcanite does not enable a visual preset by itself. With no supported provider
+selected, Minecraft follows its original rendering and presentation path with no
+MGF image allocation, command recording, copy, or extra present.
 
-## Modules
+## Artifacts
 
-| Project | Artifact | What it is |
+| Audience | Coordinate or file | Purpose |
 |---|---|---|
-| `:mgf-api` | `mgf-api` | Stable consumer API. Pure Java — no Minecraft, LWJGL, or loader types. |
-| `:mgf-impl-26.2` | `mgf` | The mod players install. All mixins, access wideners, and 26.2-specific adapters. Bundles `mgf-api`. |
-| `:samples:sample-interop` | dev-only | Exercises extension negotiation, frame-graph hooks, custom pipelines, compute, generated/resource shaders, world-space geometry, and visible auto exposure. |
-| `smoke-test/` | — | Launch-and-assert harness; wired into the build in M1 (see its README). |
+| Provider developers | `dev.mgf:mgf-api:0.3.0-alpha.1` | Stable, dependency-free Java contracts |
+| Fabric development/runtime | `dev.mgf:mgf-fabric-26.2:0.3.0-alpha.1` | Minecraft 26.2 adapter |
+| Players and modpacks | `mgf-0.3.0-alpha.1+mc26.2.jar` | Installable client mod with embedded API |
 
-Consumer mods depend on `mgf-api` only. Each Minecraft drop gets its own
-`mgf-impl-<drop>` project; the API stays put.
+Downstream providers compile against `mgf-api` only and declare the
+`mgf:providers` Fabric entrypoint. DLSS, FSR, XeSS, optical-flow, and vendor SDK
+integrations belong in independent provider mods.
 
-## Building
+## Provider Roles
 
-```
+- `UpscalerProvider` records one real-frame upscale into an MGF-owned output.
+- `FrameGenerationProvider` may produce at most one generated frame per real frame.
+- `PresentHookProvider` receives bounded callbacks around MGF-owned presentation;
+  it never owns or invokes swapchain presentation.
+
+The Minecraft 26.2 adapter exposes the fully composed, native-size main target.
+It does not currently expose a separate low-resolution world image, motion
+vectors, UI mask, or fabricated temporal inputs. Providers that require missing
+resources remain registered but unsupported.
+
+## Documentation
+
+- [Developer documentation](docs/README.md)
+- [Getting started](docs/getting-started.md)
+- [Provider SPI reference](docs/provider-spi.md)
+- [Resource and lifecycle contract](docs/resource-lifecycle.md)
+- [Publishing artifacts](docs/publishing.md)
+- [Migration from 0.2](docs/migration-0.2-to-0.3.md)
+- [Compile-tested minimal provider](docs/examples/minimal-provider.md)
+- [Compute synchronization](docs/compute-synchronization.md)
+
+## Build and Verify
+
+Requires JDK 25.
+
+```text
 ./gradlew build
+./gradlew check publishAllPublicationsToStagingRepository
+./gradlew :samples:sample-provider:compileJava
 ```
 
-Requires JDK 25 (Gradle toolchains will fetch one if missing). No mappings are
-involved — 26.x is unobfuscated and code targets Mojang's real names.
-
-## Running the interop sample
-
-```
-./gradlew :samples:sample-interop:runClient
-```
-
-Then in the generated run directory set `preferredGraphicsBackend:"vulkan"` in
-`options.txt` (or switch Graphics API in video settings) and check the log for:
-
-- `MGF seam engaged: EXTENSION_NEGOTIATION`
-- `Mod 'mgf-sample-interop': enabling Vulkan device extension VK_NV_optical_flow`
-- `Requested extension ... -> enabled=true`
-- `VkInterop: instance=0x... device=0x...` with non-zero handles
-- `MGF seam engaged: PIPELINE_RELOAD_HOOK`
-- `M3 world-geometry sample registered`; enter a world to see the rotating,
-  depth-tested custom-shader pyramid in front of the camera
-- `Compute: available=true reason=available`; on Vulkan, entering a world also
-  runs the M4 luminance-histogram auto-exposure sample before M2 PostFx
-
-Acceptance criteria and the fail-soft policy are defined in design doc §10 (M0)
-and §7. Test **both** backends every session — vanilla's auto-fallback can
-switch backends silently.
-
-Minecraft-specific pipeline helpers live under the unstable 26.2 API:
-`MgfPipelines` builds and warms custom render pipelines, while `ShaderSources`
-composes generated and resource-pack GLSL with 26.3-compatible includes and
-explicit stage locations. Consumer code that needs these helpers depends on the
-installed implementation artifact; the stable `mgf-api` surface remains free of
-Mojang types.
-
-## M4 compute
-
-`ComputeServices` exposes the render-thread Vulkan compute dispatcher for
-MGF-owned storage buffers. `ComputeEffects.registerMainColorAutoExposure(...)`
-registers the visible sample path: it samples the world main color image,
-computes a luminance histogram and temporal exposure, writes an owned storage
-image, and copies the result back before M2 PostFx. OpenGL reports compute as
-unavailable and leaves the frame graph unchanged.
-
-Main-color compute must use vanilla's graphics queue and keep borrowed images in
-`VK_IMAGE_LAYOUT_GENERAL`; dedicated compute-queue scheduling is deferred. The
-full ownership, barrier, resize/reload, world-transition, and shutdown contract
-is documented in [Compute synchronization and lifecycle](docs/compute-synchronization.md).
-
-Run the automated backend checks and Khronos synchronization validation with:
-
-```
-./gradlew :smoke-test:smokeTest
-./gradlew :smoke-test:smokeTest -PsmokeBackend=opengl
-./gradlew :smoke-test:smokeTest -PsmokeValidation
-```
-
-The smoke harness does not enter a world. Verify visible auto exposure manually
-in the interop sample after the automated runs pass.
+Runtime checks are documented in [smoke-test/README.md](smoke-test/README.md).
+The development-only `sample-interop` module can register diagnostic providers
+with `-Dmgf.sample.diagnosticProviders=true`; their callbacks return `SKIPPED`
+and do not alter output pixels.
 
 ## License
 
-Vulcanite (the mod, everything outside `mgf-api/`) is licensed under the
-[PolyForm Shield License 1.0.0](https://polyformproject.org/licenses/shield/1.0.0/):
-source-available — read it, debug against it, send patches, include it in
-modpacks — but it may not be used to provide a competing product. See
-[LICENSE](LICENSE).
-
-`mgf-api` is MIT-licensed ([mgf-api/LICENSE](mgf-api/LICENSE)) so consumer
-mods can depend on and bundle the API without restrictions.
-
-## Code layout rules
-
-- One concern per file; no god classes. Mixins live in `dev.mgf.impl.mixin`,
-  one target class per mixin.
-- `mgf-api` public signatures never reference `com.mojang.blaze3d` types.
-- Every fragile vanilla seam reports to `SeamHealth` and degrades instead of
-  crashing — nothing may throw during device creation (vanilla's watchdog
-  would force players back to OpenGL).
+The stable `mgf-api` artifact is MIT licensed. The player mod and version-specific
+implementation use PolyForm Shield 1.0.0. See [LICENSE](LICENSE) and
+[mgf-api/LICENSE](mgf-api/LICENSE).

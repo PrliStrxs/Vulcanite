@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "mgf-sample-provider",
+  "version": "${version}",
+  "name": "MGF Minimal Provider",
+  "description": "Compile-tested provider skeleton for the Vulcanite 0.3 API.",
+  "authors": [
+    "PrliStrxs"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "mgf:providers": [
+      "dev.mgf.samples.provider.MinimalProvider"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "mgf": ">=0.3.0-alpha.1"
+  }
+}
