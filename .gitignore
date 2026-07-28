@@ -3,6 +3,7 @@ docs/*.docx
 
 # Gradle
 .gradle/
+.worktrees/
 build/
 out/
 
