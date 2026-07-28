@@ -33,6 +33,7 @@ public final class ProviderRuntime {
     private volatile RuntimeState state;
     private volatile ProviderSelections selections;
     private boolean upscalerSucceededThisFrame = true;
+    private ResetReason pendingReset;
 
     public ProviderRuntime(
             ProviderCatalog catalog, ProviderConfig config, BooleanSupplier renderThread) {
@@ -100,6 +101,9 @@ public final class ProviderRuntime {
         selections = new ProviderSelections(
                 upscaler.diagnostic(), frameGenerator.diagnostic(), presentHook.diagnostic());
         upscalerSucceededThisFrame = true;
+        synchronized (this) {
+            pendingReset = ResetReason.FIRST_FRAME;
+        }
         logSelections("opened", selections);
     }
 
@@ -113,6 +117,7 @@ public final class ProviderRuntime {
             invokeVoid(ProviderKind.FRAME_GENERATION, current.frameGenerator(), current.frameGeneratorFailures(),
                     session -> session.resize(dimensions));
         }
+        requestReset(ResetReason.RESIZE);
     }
 
     public void reset(ResetReason reason) {
@@ -128,6 +133,27 @@ public final class ProviderRuntime {
         invokeVoid(ProviderKind.PRESENT_HOOK, current.presentHook(), current.presentHookFailures(),
                 session -> session.reset(reason));
         upscalerSucceededThisFrame = true;
+    }
+
+    public synchronized void requestReset(ResetReason reason) {
+        Objects.requireNonNull(reason, "reason");
+        if (pendingReset == null || resetPriority(reason) > resetPriority(pendingReset)) {
+            pendingReset = reason;
+        }
+    }
+
+    public Optional<ResetReason> applyPendingReset() {
+        requireRenderThread();
+        ResetReason reason;
+        synchronized (this) {
+            reason = pendingReset;
+            pendingReset = null;
+        }
+        if (reason == null) {
+            return Optional.empty();
+        }
+        reset(reason);
+        return Optional.of(reason);
     }
 
     public ProviderResult invokeUpscaler(Function<UpscalerSession, ProviderResult> callback) {
@@ -219,6 +245,9 @@ public final class ProviderRuntime {
         closeSessions();
         selections = awaitingDeviceSelections(catalog, config);
         upscalerSucceededThisFrame = true;
+        synchronized (this) {
+            pendingReset = null;
+        }
     }
 
     private void closeSessions() {
@@ -405,6 +434,19 @@ public final class ProviderRuntime {
         if (!renderThread.getAsBoolean()) {
             throw new IllegalStateException("provider lifecycle must run on the render thread");
         }
+    }
+
+    private static int resetPriority(ResetReason reason) {
+        return switch (reason) {
+            case FIRST_FRAME -> 0;
+            case CAMERA_DISCONTINUITY -> 1;
+            case RESOURCE_RELOAD -> 2;
+            case RESIZE -> 3;
+            case WORLD_CHANGE -> 4;
+            case DIMENSION_CHANGE -> 5;
+            case PROVIDER_CHANGE -> 6;
+            case DEVICE_REPLACED -> 7;
+        };
     }
 
     @FunctionalInterface

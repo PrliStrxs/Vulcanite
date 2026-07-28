@@ -39,6 +39,7 @@ import dev.mgf.api.provider.ImageState;
 import dev.mgf.api.provider.ProviderEnvironment;
 import dev.mgf.api.provider.ProviderResult;
 import dev.mgf.api.provider.ProviderResultCode;
+import dev.mgf.api.provider.ResetReason;
 import dev.mgf.api.upscale.UpscaleFrame;
 import dev.mgf.api.upscale.UpscaleParameters;
 import dev.mgf.api.upscale.UpscaleResources;
@@ -77,6 +78,9 @@ public final class ProviderFrameBridge {
                 Set.of(FrameResourceKind.COLOR),
                 true);
         ProviderRuntime.current().open(environment);
+        if (deviceGeneration > 1) {
+            ProviderRuntime.current().requestReset(ResetReason.DEVICE_REPLACED);
+        }
     }
 
     public static void onDeviceClosing(VulkanDevice closingDevice) {
@@ -148,8 +152,14 @@ public final class ProviderFrameBridge {
                     runtime.resize(dimensions);
                 }
                 resourceGeneration = frameResources.resourceGeneration();
-                historyReset = !frameResources.historyValid();
             }
+
+            Optional<ResetReason> reset = runtime.applyPendingReset();
+            if (frameResources != null && reset.isPresent()) {
+                frameResources.reset(reset.orElseThrow());
+            }
+            historyReset = reset.isPresent()
+                    || frameResources != null && !frameResources.historyValid();
 
             FrameInfo frameInfo = nextFrameInfo(historyReset, resourceGeneration);
             ProviderResult frameGenerationResult = ProviderResult.skipped(

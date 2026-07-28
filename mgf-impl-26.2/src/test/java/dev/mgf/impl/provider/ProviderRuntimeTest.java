@@ -58,6 +58,7 @@ final class ProviderRuntimeTest {
         runtime.resize(DIMENSIONS);
         runtime.reset(ResetReason.WORLD_CHANGE);
         runtime.close();
+        runtime.close();
 
         assertEquals(List.of(
                 "open-upscaler",

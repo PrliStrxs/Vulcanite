@@ -10,7 +10,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.mgf.impl.core.SeamHealth;
+import dev.mgf.impl.core.MgfConstants;
 import dev.mgf.impl.pipeline.PipelineWarmupRegistry;
+import dev.mgf.impl.provider.ProviderRuntime;
+import dev.mgf.api.provider.ResetReason;
 
 /** Recompiles registered custom-source pipelines after vanilla clears its cache. */
 @Mixin(ShaderManager.class)
@@ -28,5 +31,10 @@ public abstract class ShaderManagerMixin {
             CallbackInfo ci) {
         SeamHealth.markEngaged(SeamHealth.Seam.PIPELINE_RELOAD_HOOK);
         PipelineWarmupRegistry.warmUpRegistered();
+        try {
+            ProviderRuntime.current().requestReset(ResetReason.RESOURCE_RELOAD);
+        } catch (Throwable throwable) {
+            MgfConstants.LOGGER.error("Provider resource-reload signal failed; continuing reload", throwable);
+        }
     }
 }

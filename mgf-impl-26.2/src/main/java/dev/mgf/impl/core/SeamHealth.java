@@ -25,7 +25,9 @@ public final class SeamHealth {
         /** {@code ShaderManagerMixin} ran after a shader resource reload. */
         PIPELINE_RELOAD_HOOK,
         /** {@code MinecraftPresentMixin} intercepted the final composed presentation path. */
-        FINAL_PRESENT_HOOK
+        FINAL_PRESENT_HOOK,
+        /** {@code MinecraftLifecycleMixin} observed a world, dimension, or camera transition. */
+        CLIENT_LIFECYCLE_HOOK
     }
 
     private static final Set<Seam> ENGAGED = ConcurrentHashMap.newKeySet();
