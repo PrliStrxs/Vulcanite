@@ -1,6 +1,6 @@
 # Vulcanite 0.3 Provider API Design
 
-**Status:** Approved direction, written specification pending final review
+**Status:** Approved
 
 **Target:** `0.3.0-alpha.1`
 
@@ -399,6 +399,14 @@ The active-provider path is:
 The provider-free path branches before step 2 and calls the original Minecraft
 final blit, submit, and present code unchanged. It creates no frame descriptor
 and allocates no output image.
+
+The 26.2 Alpha adapter operates on the fully composed `mainRenderTarget` after
+the GUI has rendered. It reports equal render and display dimensions and does
+not alter Minecraft's internal world render resolution. Providers that require
+a separate low-resolution world image, UI mask, motion vectors, or other inputs
+remain registered but unsupported until a downstream integration supplies those
+inputs or a later per-drop adapter adds them. MGF never substitutes fabricated
+temporal data.
 
 ## 12. Synchronization and Lifecycle
 
