@@ -2,7 +2,8 @@
 
 This document defines the Vulkan ownership, resource-state, synchronization,
 and lifecycle contract for MGF compute work. It applies to the generic M4
-compute dispatcher and to the visible luminance-histogram auto-exposure sample.
+compute dispatcher, the visible luminance-histogram auto-exposure sample, and
+the 0.3 provider adapter.
 
 ## Non-negotiable rules
 
@@ -28,6 +29,7 @@ compute dispatcher and to the visible luminance-histogram auto-exposure sample.
 | Histogram and exposure buffers | MGF compute effect | Device-scoped. Destroy before the owning VMA allocator. |
 | Compute pipelines and layouts | MGF compute dispatcher/effect | Device-scoped. Close after queued uses complete. |
 | Auto-exposure output storage image and view | MGF compute effect | Match the current main-target dimensions; retire old allocations through deferred destruction. |
+| Provider outputs, snapshots, and history | MGF provider adapter | Device-scoped `RGBA8_UNORM` storage/sampled/transfer images; retire resized generations through deferred destruction. |
 | Frame-graph resource handles | Minecraft frame graph | Valid for one graph build/execution only. Replace `targets.main` with every `readsAndWrites` result. |
 
 Public `ComputeDispatcher.Program` and `ComputeDispatcher.Buffer` objects are
@@ -119,6 +121,33 @@ both sides of the transfer explicitly:
 4. Transfer write -> fragment uniform read.
 
 Vanilla uniform buffers are not storage buffers. Do not bind one as an SSBO.
+
+## Provider final-composite contract
+
+The Minecraft 26.2 provider adapter runs after the fully composed main target,
+including GUI rendering. The adapter reports equal render and display sizes and
+does not claim motion vectors, a separate low-resolution scene, or a UI mask.
+Providers that require those inputs remain registered but unsupported.
+
+Minecraft's main image has no storage-image usage. Provider algorithms write
+only to MGF-owned images created with storage, sampled, transfer-source, and
+transfer-destination usage. MGF records these exact copies as needed:
+
+1. Minecraft main to the MGF real snapshot.
+2. Provider output to Minecraft main.
+3. MGF generated output to Minecraft main.
+4. MGF real snapshot back to Minecraft main.
+
+All provider images remain in `VK_IMAGE_LAYOUT_GENERAL` after their first
+initialization barrier. MGF records provider preconditions and postconditions,
+owns every command buffer and barrier, and restores the Minecraft main image to
+transfer-read access before `GpuSurface.blitFromTexture(...)`. Providers must
+not begin, end, reset, submit, or add barriers for an MGF command buffer.
+
+The adapter allocates transient command buffers through the live
+`VulkanCommandEncoder`, ends them, and enqueues them with `execute(...)`.
+It never calls `submit()` from the per-frame provider bridge. Generated-frame
+presentation restores the saved real image before the second, real present.
 
 ## Graphics-queue policy
 
