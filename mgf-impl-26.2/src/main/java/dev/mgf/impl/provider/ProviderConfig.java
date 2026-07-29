@@ -14,7 +14,8 @@ import dev.mgf.api.provider.ProviderId;
 public record ProviderConfig(
         Choice upscaler,
         Choice frameGeneration,
-        Choice presentHook) {
+        Choice presentHook,
+        boolean experimentalFrameGeneration) {
 
     public ProviderConfig {
         upscaler = Objects.requireNonNull(upscaler, "upscaler");
@@ -22,8 +23,15 @@ public record ProviderConfig(
         presentHook = Objects.requireNonNull(presentHook, "presentHook");
     }
 
+    public ProviderConfig(
+            Choice upscaler,
+            Choice frameGeneration,
+            Choice presentHook) {
+        this(upscaler, frameGeneration, presentHook, false);
+    }
+
     public static ProviderConfig defaults() {
-        return new ProviderConfig(Choice.auto(), Choice.auto(), Choice.auto());
+        return new ProviderConfig(Choice.auto(), Choice.auto(), Choice.auto(), false);
     }
 
     public static ProviderConfig load(Path path) throws IOException {
@@ -38,7 +46,9 @@ public record ProviderConfig(
         return new ProviderConfig(
                 parse(properties.getProperty("upscaler", "auto")),
                 parse(properties.getProperty("frame_generation", "auto")),
-                parse(properties.getProperty("present_hook", "auto")));
+                parse(properties.getProperty("present_hook", "auto")),
+                Boolean.parseBoolean(properties.getProperty(
+                        "experimental_frame_generation", "false")));
     }
 
     private static Choice parse(String raw) {

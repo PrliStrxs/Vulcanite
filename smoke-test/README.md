@@ -13,9 +13,12 @@ client shutdown callback. The Gradle task fails unless both files say `PASS`.
 ```
 ./gradlew :smoke-test:smokeTest                      # Vulkan (default)
 ./gradlew :smoke-test:smokeTest -PsmokeProviders    # Vulkan diagnostic providers
+./gradlew :smoke-test:smokeTest -PsmokeProviderMode=requires-all-temporal-upscaling-inputs
 ./gradlew :smoke-test:smokeTest -PsmokeProviderMode=passthrough
 ./gradlew :smoke-test:smokeTest -PsmokeProviderMode=recoverable
 ./gradlew :smoke-test:smokeTest -PsmokeProviderMode=fatal
+./gradlew :smoke-test:smokeTest -PsmokeProviderMode=nvidia-experimental-frame-generation
+./gradlew :smoke-test:smokeTest -PsmokeProviderMode=nvidia-experimental-frame-generation -PsmokeExperimentalFrameGeneration
 ./gradlew :smoke-test:smokeTest -PsmokeBackend=opengl
 ./gradlew :smoke-test:smokeTest -PwithSodium         # Sodium coexistence run
 ./gradlew :smoke-test:smokeTest -PsmokeValidation -PsmokeProviderMode=passthrough
@@ -44,6 +47,20 @@ frame and verifies same-frame fallback followed by recovery. `fatal` injects one
 fatal result after a successful frame and verifies Upscaler disable while the
 PresentHook and one-real-present path continue.
 
+`-PsmokeProviderMode=nvidia-experimental-frame-generation` marks the diagnostic
+frame generator as an NVIDIA experimental provider. Without
+`-PsmokeExperimentalFrameGeneration` it must be rejected with
+`experimental_frame_generation_disabled`; with the flag enabled it can progress
+only as far as the currently verified surface safety, so 26.2 expects
+`multi_present_unsupported`.
+
+Conformance modes `requires-depth`, `requires-motion-vectors`,
+`requires-matrices`, `requires-depth-motion-matrices`, and
+`requires-all-temporal-upscaling-inputs` keep the diagnostic upscaler registered
+but unsupported on the current 26.2 adapter. They assert stable reason codes
+such as `depth_unavailable`, `motion_vectors_unavailable`, and
+`matrices_unavailable`.
+
 `-PsmokeValidation` is meaningful for Vulkan runs. It adds
 `--vulkanValidation`, requires the log to confirm `Enabling Vulkan validation
 layers`, and fails if `latest.log` contains a Vulkan `VUID-`, `SYNC-HAZARD-`,
@@ -60,7 +77,7 @@ file also records `validationRequested=true`.
   stress result with zero mismatches.
 - OpenGL runs: clean degradation — OPENGL_COMPAT tier, empty interop, no
   callback fired, compute unavailable, all provider roles reported as
-  `UNSUPPORTED` with reason `vulkan_required`, and all Provider GPU/lifecycle
+  `UNSUPPORTED` with reason `backend_not_vulkan`, and all Provider GPU/lifecycle
   counters zero.
 - Provider-free Vulkan runs: registered providers remain inactive, while image
   allocations, command recordings, internal copies, output copies, and
@@ -90,5 +107,5 @@ required ownership and barrier contract.
 Run it against every new Minecraft snapshot before declaring MGF compatible
 (release gating, design doc §11).
 
-The recorded 0.3 Alpha runtime matrix uses an NVIDIA GeForce RTX 4060 with
-NVIDIA 610.62. AMD and Intel runtime behavior has not been validated.
+The recorded 1.0 runtime matrix is NVIDIA-first. AMD and Intel runtime behavior
+has not been validated for the 26.2 adapter.

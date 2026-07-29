@@ -1,4 +1,5 @@
 CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationCapabilities(java.util.Set<dev.mgf.api.provider.ColorEncoding>,java.util.Set<dev.mgf.api.provider.ProviderId>,int)
+CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationCapabilities(java.util.Set<dev.mgf.api.provider.ColorEncoding>,java.util.Set<dev.mgf.api.provider.ProviderId>,int,dev.mgf.api.framegen.FrameGenerationMode)
 CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationFrame(dev.mgf.api.provider.FrameInfo,dev.mgf.api.provider.FrameDimensions,dev.mgf.api.provider.CommandRecordingContext,dev.mgf.api.framegen.FrameGenerationResources,java.util.Optional<dev.mgf.api.provider.FrameMatrices>)
 CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationRequirements(java.util.Set<dev.mgf.api.provider.FrameResourceKind>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>)
 CONSTRUCTOR public dev.mgf.api.framegen.FrameGenerationResources(dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>)
@@ -17,25 +18,40 @@ CONSTRUCTOR public dev.mgf.api.provider.ImageState(int,long,long,int)
 CONSTRUCTOR public dev.mgf.api.provider.Matrix4(float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderDescriptor(dev.mgf.api.provider.ProviderId,java.lang.String,java.lang.String,int,int,int)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderEnvironment(dev.mgf.api.GraphicsBackendKind,long,java.util.Optional<dev.mgf.api.vk.VkInterop>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>,boolean)
+CONSTRUCTOR public dev.mgf.api.provider.ProviderEnvironment(dev.mgf.api.GraphicsBackendKind,long,java.util.Optional<dev.mgf.api.vk.VkInterop>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>,boolean,dev.mgf.api.GraphicsAdapterVendor)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderId(java.lang.String)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderResult(dev.mgf.api.provider.ProviderResultCode,java.lang.String,java.lang.String)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderSelection(dev.mgf.api.provider.ProviderKind,java.util.List<dev.mgf.api.provider.ProviderId>,java.util.Optional<dev.mgf.api.provider.ProviderId>,dev.mgf.api.provider.ProviderSessionState,java.lang.String,java.lang.String)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderSelections(dev.mgf.api.provider.ProviderSelection,dev.mgf.api.provider.ProviderSelection,dev.mgf.api.provider.ProviderSelection)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderSessionContext(dev.mgf.api.provider.ProviderEnvironment)
 CONSTRUCTOR public dev.mgf.api.provider.ProviderSupport(boolean,java.lang.String,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.upscale.DepthConvention(boolean,float,float)
+CONSTRUCTOR public dev.mgf.api.upscale.JitterSequence(int,int,float,float)
+CONSTRUCTOR public dev.mgf.api.upscale.MotionVectorConvention(dev.mgf.api.upscale.MotionVectorUnits,dev.mgf.api.upscale.MotionVectorDirection,dev.mgf.api.upscale.MotionVectorYAxis,float,float)
+CONSTRUCTOR public dev.mgf.api.upscale.TemporalUpscalingHints(boolean,float,float,dev.mgf.api.upscale.ExposureMode,dev.mgf.api.upscale.UiCompositionHint)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscaleCameraParameters(dev.mgf.api.provider.FrameMatrices,float,float,float,float,float)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscaleFrame(dev.mgf.api.provider.FrameInfo,dev.mgf.api.provider.FrameDimensions,dev.mgf.api.provider.CommandRecordingContext,dev.mgf.api.upscale.UpscaleResources,dev.mgf.api.upscale.UpscaleParameters)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscaleParameters(java.util.Optional<dev.mgf.api.upscale.UpscaleCameraParameters>,java.lang.String)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscaleParameters(java.util.Optional<dev.mgf.api.upscale.UpscaleCameraParameters>,java.lang.String,dev.mgf.api.upscale.JitterSequence,dev.mgf.api.upscale.TemporalUpscalingHints)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscaleResources(dev.mgf.api.provider.BorrowedImage,dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscaleResources(dev.mgf.api.provider.BorrowedImage,dev.mgf.api.provider.BorrowedImage,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.provider.BorrowedImage>,java.util.Optional<dev.mgf.api.upscale.DepthConvention>,java.util.Optional<dev.mgf.api.upscale.MotionVectorConvention>)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscalerCapabilities(double,double,java.util.Set<dev.mgf.api.provider.ColorEncoding>,java.util.Set<java.lang.String>)
+CONSTRUCTOR public dev.mgf.api.upscale.UpscalerCapabilities(double,double,java.util.Set<java.lang.Double>,java.util.Set<dev.mgf.api.provider.ColorEncoding>,java.util.Set<java.lang.String>)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscalerRequirements(java.util.Set<dev.mgf.api.provider.FrameResourceKind>,java.util.Set<dev.mgf.api.provider.FrameResourceKind>)
 CONSTRUCTOR public dev.mgf.api.upscale.UpscalerSupport(dev.mgf.api.provider.ProviderSupport,java.util.Optional<dev.mgf.api.upscale.UpscalerCapabilities>,java.util.Optional<dev.mgf.api.upscale.UpscalerRequirements>)
 FIELD public static final dev.mgf.api.CapsTier.OPENGL_COMPAT dev.mgf.api.CapsTier
 FIELD public static final dev.mgf.api.CapsTier.VULKAN_BASIC dev.mgf.api.CapsTier
 FIELD public static final dev.mgf.api.CapsTier.VULKAN_FULL dev.mgf.api.CapsTier
+FIELD public static final dev.mgf.api.GraphicsAdapterVendor.AMD dev.mgf.api.GraphicsAdapterVendor
+FIELD public static final dev.mgf.api.GraphicsAdapterVendor.INTEL dev.mgf.api.GraphicsAdapterVendor
+FIELD public static final dev.mgf.api.GraphicsAdapterVendor.NVIDIA dev.mgf.api.GraphicsAdapterVendor
+FIELD public static final dev.mgf.api.GraphicsAdapterVendor.SOFTWARE dev.mgf.api.GraphicsAdapterVendor
+FIELD public static final dev.mgf.api.GraphicsAdapterVendor.UNKNOWN dev.mgf.api.GraphicsAdapterVendor
 FIELD public static final dev.mgf.api.GraphicsBackendKind.OPENGL dev.mgf.api.GraphicsBackendKind
 FIELD public static final dev.mgf.api.GraphicsBackendKind.UNKNOWN dev.mgf.api.GraphicsBackendKind
 FIELD public static final dev.mgf.api.GraphicsBackendKind.VULKAN dev.mgf.api.GraphicsBackendKind
+FIELD public static final dev.mgf.api.framegen.FrameGenerationMode.NVIDIA_EXPERIMENTAL dev.mgf.api.framegen.FrameGenerationMode
+FIELD public static final dev.mgf.api.framegen.FrameGenerationMode.STANDARD dev.mgf.api.framegen.FrameGenerationMode
 FIELD public static final dev.mgf.api.graph.FrameGraphAnchor.AFTER_MAIN dev.mgf.api.graph.FrameGraphAnchor
 FIELD public static final dev.mgf.api.graph.FrameGraphAnchor.AFTER_SKY dev.mgf.api.graph.FrameGraphAnchor
 FIELD public static final dev.mgf.api.graph.FrameGraphAnchor.AFTER_WEATHER dev.mgf.api.graph.FrameGraphAnchor
@@ -78,6 +94,19 @@ FIELD public static final dev.mgf.api.provider.ResetReason.PROVIDER_CHANGE dev.m
 FIELD public static final dev.mgf.api.provider.ResetReason.RESIZE dev.mgf.api.provider.ResetReason
 FIELD public static final dev.mgf.api.provider.ResetReason.RESOURCE_RELOAD dev.mgf.api.provider.ResetReason
 FIELD public static final dev.mgf.api.provider.ResetReason.WORLD_CHANGE dev.mgf.api.provider.ResetReason
+FIELD public static final dev.mgf.api.upscale.ExposureMode.ADAPTER_METADATA dev.mgf.api.upscale.ExposureMode
+FIELD public static final dev.mgf.api.upscale.ExposureMode.IDENTITY dev.mgf.api.upscale.ExposureMode
+FIELD public static final dev.mgf.api.upscale.ExposureMode.PROVIDER_RESOURCE dev.mgf.api.upscale.ExposureMode
+FIELD public static final dev.mgf.api.upscale.MotionVectorDirection.CURRENT_TO_PREVIOUS dev.mgf.api.upscale.MotionVectorDirection
+FIELD public static final dev.mgf.api.upscale.MotionVectorDirection.PREVIOUS_TO_CURRENT dev.mgf.api.upscale.MotionVectorDirection
+FIELD public static final dev.mgf.api.upscale.MotionVectorUnits.NORMALIZED_RENDER_SIZE dev.mgf.api.upscale.MotionVectorUnits
+FIELD public static final dev.mgf.api.upscale.MotionVectorUnits.PIXELS dev.mgf.api.upscale.MotionVectorUnits
+FIELD public static final dev.mgf.api.upscale.MotionVectorYAxis.DOWN dev.mgf.api.upscale.MotionVectorYAxis
+FIELD public static final dev.mgf.api.upscale.MotionVectorYAxis.UP dev.mgf.api.upscale.MotionVectorYAxis
+FIELD public static final dev.mgf.api.upscale.UiCompositionHint.UI_ALREADY_IN_INPUT dev.mgf.api.upscale.UiCompositionHint
+FIELD public static final dev.mgf.api.upscale.UiCompositionHint.UI_COMPOSED_AFTER_UPSCALE dev.mgf.api.upscale.UiCompositionHint
+FIELD public static final dev.mgf.api.upscale.UiCompositionHint.UI_MASK_RESOURCE dev.mgf.api.upscale.UiCompositionHint
+FIELD public static final dev.mgf.api.upscale.UiCompositionHint.UNKNOWN dev.mgf.api.upscale.UiCompositionHint
 INTERFACE dev.mgf.api.framegen.FrameGenerationSession java.lang.AutoCloseable
 INTERFACE dev.mgf.api.present.PresentHookSession java.lang.AutoCloseable
 INTERFACE dev.mgf.api.provider.ProviderId java.lang.Comparable<dev.mgf.api.provider.ProviderId>
@@ -142,6 +171,8 @@ METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.acceptsUpscaler(d
 METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.colorEncodings() java.util.Set<dev.mgf.api.provider.ColorEncoding>
 METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.compatibleUpscalers() java.util.Set<dev.mgf.api.provider.ProviderId>
 METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.maximumGeneratedFrames() int
+METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.mode() dev.mgf.api.framegen.FrameGenerationMode
+METHOD public dev.mgf.api.framegen.FrameGenerationCapabilities.nvidiaExperimental() boolean
 METHOD public dev.mgf.api.framegen.FrameGenerationFrame.command() dev.mgf.api.provider.CommandRecordingContext
 METHOD public dev.mgf.api.framegen.FrameGenerationFrame.dimensions() dev.mgf.api.provider.FrameDimensions
 METHOD public dev.mgf.api.framegen.FrameGenerationFrame.frameInfo() dev.mgf.api.provider.FrameInfo
@@ -229,6 +260,7 @@ METHOD public dev.mgf.api.provider.ProviderDescriptor.minimumApiMajor() int
 METHOD public dev.mgf.api.provider.ProviderDescriptor.minimumApiMinor() int
 METHOD public dev.mgf.api.provider.ProviderDescriptor.priority() int
 METHOD public dev.mgf.api.provider.ProviderDescriptor.providerVersion() java.lang.String
+METHOD public dev.mgf.api.provider.ProviderEnvironment.adapterVendor() dev.mgf.api.GraphicsAdapterVendor
 METHOD public dev.mgf.api.provider.ProviderEnvironment.availableResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
 METHOD public dev.mgf.api.provider.ProviderEnvironment.backend() dev.mgf.api.GraphicsBackendKind
 METHOD public dev.mgf.api.provider.ProviderEnvironment.deviceGeneration() long
@@ -253,6 +285,23 @@ METHOD public dev.mgf.api.provider.ProviderSessionContext.environment() dev.mgf.
 METHOD public dev.mgf.api.provider.ProviderSupport.message() java.lang.String
 METHOD public dev.mgf.api.provider.ProviderSupport.reasonCode() java.lang.String
 METHOD public dev.mgf.api.provider.ProviderSupport.supported() boolean
+METHOD public dev.mgf.api.upscale.DepthConvention.maxDepth() float
+METHOD public dev.mgf.api.upscale.DepthConvention.minDepth() float
+METHOD public dev.mgf.api.upscale.DepthConvention.reversed() boolean
+METHOD public dev.mgf.api.upscale.JitterSequence.index() int
+METHOD public dev.mgf.api.upscale.JitterSequence.offsetX() float
+METHOD public dev.mgf.api.upscale.JitterSequence.offsetY() float
+METHOD public dev.mgf.api.upscale.JitterSequence.period() int
+METHOD public dev.mgf.api.upscale.MotionVectorConvention.direction() dev.mgf.api.upscale.MotionVectorDirection
+METHOD public dev.mgf.api.upscale.MotionVectorConvention.scaleX() float
+METHOD public dev.mgf.api.upscale.MotionVectorConvention.scaleY() float
+METHOD public dev.mgf.api.upscale.MotionVectorConvention.units() dev.mgf.api.upscale.MotionVectorUnits
+METHOD public dev.mgf.api.upscale.MotionVectorConvention.yAxis() dev.mgf.api.upscale.MotionVectorYAxis
+METHOD public dev.mgf.api.upscale.TemporalUpscalingHints.exposureMode() dev.mgf.api.upscale.ExposureMode
+METHOD public dev.mgf.api.upscale.TemporalUpscalingHints.mipBias() float
+METHOD public dev.mgf.api.upscale.TemporalUpscalingHints.resetHistory() boolean
+METHOD public dev.mgf.api.upscale.TemporalUpscalingHints.sharpness() float
+METHOD public dev.mgf.api.upscale.TemporalUpscalingHints.uiCompositionHint() dev.mgf.api.upscale.UiCompositionHint
 METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.farPlane() float
 METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.jitterX() float
 METHOD public dev.mgf.api.upscale.UpscaleCameraParameters.jitterY() float
@@ -265,18 +314,24 @@ METHOD public dev.mgf.api.upscale.UpscaleFrame.frameInfo() dev.mgf.api.provider.
 METHOD public dev.mgf.api.upscale.UpscaleFrame.parameters() dev.mgf.api.upscale.UpscaleParameters
 METHOD public dev.mgf.api.upscale.UpscaleFrame.resources() dev.mgf.api.upscale.UpscaleResources
 METHOD public dev.mgf.api.upscale.UpscaleParameters.camera() java.util.Optional<dev.mgf.api.upscale.UpscaleCameraParameters>
+METHOD public dev.mgf.api.upscale.UpscaleParameters.jitter() dev.mgf.api.upscale.JitterSequence
 METHOD public dev.mgf.api.upscale.UpscaleParameters.qualityMode() java.lang.String
+METHOD public dev.mgf.api.upscale.UpscaleParameters.temporalHints() dev.mgf.api.upscale.TemporalUpscalingHints
 METHOD public dev.mgf.api.upscale.UpscaleResources.depth() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.upscale.UpscaleResources.depthConvention() java.util.Optional<dev.mgf.api.upscale.DepthConvention>
 METHOD public dev.mgf.api.upscale.UpscaleResources.exposure() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
 METHOD public dev.mgf.api.upscale.UpscaleResources.inputColor() dev.mgf.api.provider.BorrowedImage
+METHOD public dev.mgf.api.upscale.UpscaleResources.motionVectorConvention() java.util.Optional<dev.mgf.api.upscale.MotionVectorConvention>
 METHOD public dev.mgf.api.upscale.UpscaleResources.motionVectors() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
 METHOD public dev.mgf.api.upscale.UpscaleResources.outputColor() dev.mgf.api.provider.BorrowedImage
 METHOD public dev.mgf.api.upscale.UpscaleResources.reactiveMask() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
 METHOD public dev.mgf.api.upscale.UpscaleResources.transparencyMask() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
+METHOD public dev.mgf.api.upscale.UpscaleResources.uiMask() java.util.Optional<dev.mgf.api.provider.BorrowedImage>
 METHOD public dev.mgf.api.upscale.UpscalerCapabilities.colorEncodings() java.util.Set<dev.mgf.api.provider.ColorEncoding>
 METHOD public dev.mgf.api.upscale.UpscalerCapabilities.maximumScale() double
 METHOD public dev.mgf.api.upscale.UpscalerCapabilities.minimumScale() double
 METHOD public dev.mgf.api.upscale.UpscalerCapabilities.qualityModes() java.util.Set<java.lang.String>
+METHOD public dev.mgf.api.upscale.UpscalerCapabilities.renderScales() java.util.Set<java.lang.Double>
 METHOD public dev.mgf.api.upscale.UpscalerRequirements.optionalResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
 METHOD public dev.mgf.api.upscale.UpscalerRequirements.requiredResources() java.util.Set<dev.mgf.api.provider.FrameResourceKind>
 METHOD public dev.mgf.api.upscale.UpscalerSupport.capabilities() java.util.Optional<dev.mgf.api.upscale.UpscalerCapabilities>
@@ -356,6 +411,18 @@ METHOD public final dev.mgf.api.provider.ProviderSessionContext.toString() java.
 METHOD public final dev.mgf.api.provider.ProviderSupport.equals(java.lang.Object) boolean
 METHOD public final dev.mgf.api.provider.ProviderSupport.hashCode() int
 METHOD public final dev.mgf.api.provider.ProviderSupport.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.DepthConvention.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.DepthConvention.hashCode() int
+METHOD public final dev.mgf.api.upscale.DepthConvention.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.JitterSequence.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.JitterSequence.hashCode() int
+METHOD public final dev.mgf.api.upscale.JitterSequence.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.MotionVectorConvention.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.MotionVectorConvention.hashCode() int
+METHOD public final dev.mgf.api.upscale.MotionVectorConvention.toString() java.lang.String
+METHOD public final dev.mgf.api.upscale.TemporalUpscalingHints.equals(java.lang.Object) boolean
+METHOD public final dev.mgf.api.upscale.TemporalUpscalingHints.hashCode() int
+METHOD public final dev.mgf.api.upscale.TemporalUpscalingHints.toString() java.lang.String
 METHOD public final dev.mgf.api.upscale.UpscaleCameraParameters.equals(java.lang.Object) boolean
 METHOD public final dev.mgf.api.upscale.UpscaleCameraParameters.hashCode() int
 METHOD public final dev.mgf.api.upscale.UpscaleCameraParameters.toString() java.lang.String
@@ -379,10 +446,14 @@ METHOD public final dev.mgf.api.upscale.UpscalerSupport.hashCode() int
 METHOD public final dev.mgf.api.upscale.UpscalerSupport.toString() java.lang.String
 METHOD public static dev.mgf.api.CapsTier.valueOf(java.lang.String) dev.mgf.api.CapsTier
 METHOD public static dev.mgf.api.CapsTier.values() dev.mgf.api.CapsTier[]
+METHOD public static dev.mgf.api.GraphicsAdapterVendor.valueOf(java.lang.String) dev.mgf.api.GraphicsAdapterVendor
+METHOD public static dev.mgf.api.GraphicsAdapterVendor.values() dev.mgf.api.GraphicsAdapterVendor[]
 METHOD public static dev.mgf.api.GraphicsBackendKind.valueOf(java.lang.String) dev.mgf.api.GraphicsBackendKind
 METHOD public static dev.mgf.api.GraphicsBackendKind.values() dev.mgf.api.GraphicsBackendKind[]
 METHOD public static dev.mgf.api.Mgf.isAvailable() boolean
 METHOD public static dev.mgf.api.Mgf.runtime() dev.mgf.api.MgfRuntime
+METHOD public static dev.mgf.api.framegen.FrameGenerationMode.valueOf(java.lang.String) dev.mgf.api.framegen.FrameGenerationMode
+METHOD public static dev.mgf.api.framegen.FrameGenerationMode.values() dev.mgf.api.framegen.FrameGenerationMode[]
 METHOD public static dev.mgf.api.framegen.FrameGenerationSupport.available(dev.mgf.api.framegen.FrameGenerationCapabilities,dev.mgf.api.framegen.FrameGenerationRequirements) dev.mgf.api.framegen.FrameGenerationSupport
 METHOD public static dev.mgf.api.framegen.FrameGenerationSupport.unavailable(java.lang.String,java.lang.String) dev.mgf.api.framegen.FrameGenerationSupport
 METHOD public static dev.mgf.api.graph.FrameGraphAnchor.valueOf(java.lang.String) dev.mgf.api.graph.FrameGraphAnchor
@@ -418,12 +489,28 @@ METHOD public static dev.mgf.api.provider.ProviderSupport.available() dev.mgf.ap
 METHOD public static dev.mgf.api.provider.ProviderSupport.unsupported(java.lang.String,java.lang.String) dev.mgf.api.provider.ProviderSupport
 METHOD public static dev.mgf.api.provider.ResetReason.valueOf(java.lang.String) dev.mgf.api.provider.ResetReason
 METHOD public static dev.mgf.api.provider.ResetReason.values() dev.mgf.api.provider.ResetReason[]
+METHOD public static dev.mgf.api.upscale.DepthConvention.reversedZeroToOne() dev.mgf.api.upscale.DepthConvention
+METHOD public static dev.mgf.api.upscale.DepthConvention.zeroToOne() dev.mgf.api.upscale.DepthConvention
+METHOD public static dev.mgf.api.upscale.ExposureMode.valueOf(java.lang.String) dev.mgf.api.upscale.ExposureMode
+METHOD public static dev.mgf.api.upscale.ExposureMode.values() dev.mgf.api.upscale.ExposureMode[]
+METHOD public static dev.mgf.api.upscale.JitterSequence.none() dev.mgf.api.upscale.JitterSequence
+METHOD public static dev.mgf.api.upscale.MotionVectorConvention.normalizedCurrentToPreviousYDown() dev.mgf.api.upscale.MotionVectorConvention
+METHOD public static dev.mgf.api.upscale.MotionVectorDirection.valueOf(java.lang.String) dev.mgf.api.upscale.MotionVectorDirection
+METHOD public static dev.mgf.api.upscale.MotionVectorDirection.values() dev.mgf.api.upscale.MotionVectorDirection[]
+METHOD public static dev.mgf.api.upscale.MotionVectorUnits.valueOf(java.lang.String) dev.mgf.api.upscale.MotionVectorUnits
+METHOD public static dev.mgf.api.upscale.MotionVectorUnits.values() dev.mgf.api.upscale.MotionVectorUnits[]
+METHOD public static dev.mgf.api.upscale.MotionVectorYAxis.valueOf(java.lang.String) dev.mgf.api.upscale.MotionVectorYAxis
+METHOD public static dev.mgf.api.upscale.MotionVectorYAxis.values() dev.mgf.api.upscale.MotionVectorYAxis[]
+METHOD public static dev.mgf.api.upscale.TemporalUpscalingHints.neutral() dev.mgf.api.upscale.TemporalUpscalingHints
+METHOD public static dev.mgf.api.upscale.UiCompositionHint.valueOf(java.lang.String) dev.mgf.api.upscale.UiCompositionHint
+METHOD public static dev.mgf.api.upscale.UiCompositionHint.values() dev.mgf.api.upscale.UiCompositionHint[]
 METHOD public static dev.mgf.api.upscale.UpscalerSupport.available(dev.mgf.api.upscale.UpscalerCapabilities,dev.mgf.api.upscale.UpscalerRequirements) dev.mgf.api.upscale.UpscalerSupport
 METHOD public static dev.mgf.api.upscale.UpscalerSupport.unavailable(java.lang.String,java.lang.String) dev.mgf.api.upscale.UpscalerSupport
 METHOD public volatile dev.mgf.api.provider.ProviderId.compareTo(java.lang.Object) int
 RECORD dev.mgf.api.framegen.FrameGenerationCapabilities 0 java.util.Set<dev.mgf.api.provider.ColorEncoding> colorEncodings
 RECORD dev.mgf.api.framegen.FrameGenerationCapabilities 1 java.util.Set<dev.mgf.api.provider.ProviderId> compatibleUpscalers
 RECORD dev.mgf.api.framegen.FrameGenerationCapabilities 2 int maximumGeneratedFrames
+RECORD dev.mgf.api.framegen.FrameGenerationCapabilities 3 dev.mgf.api.framegen.FrameGenerationMode mode
 RECORD dev.mgf.api.framegen.FrameGenerationFrame 0 dev.mgf.api.provider.FrameInfo frameInfo
 RECORD dev.mgf.api.framegen.FrameGenerationFrame 1 dev.mgf.api.provider.FrameDimensions dimensions
 RECORD dev.mgf.api.framegen.FrameGenerationFrame 2 dev.mgf.api.provider.CommandRecordingContext command
@@ -516,6 +603,7 @@ RECORD dev.mgf.api.provider.ProviderEnvironment 1 long deviceGeneration
 RECORD dev.mgf.api.provider.ProviderEnvironment 2 java.util.Optional<dev.mgf.api.vk.VkInterop> vulkanInterop
 RECORD dev.mgf.api.provider.ProviderEnvironment 3 java.util.Set<dev.mgf.api.provider.FrameResourceKind> availableResources
 RECORD dev.mgf.api.provider.ProviderEnvironment 4 boolean multiPresentSupported
+RECORD dev.mgf.api.provider.ProviderEnvironment 5 dev.mgf.api.GraphicsAdapterVendor adapterVendor
 RECORD dev.mgf.api.provider.ProviderId 0 java.lang.String value
 RECORD dev.mgf.api.provider.ProviderResult 0 dev.mgf.api.provider.ProviderResultCode code
 RECORD dev.mgf.api.provider.ProviderResult 1 java.lang.String reasonCode
@@ -533,6 +621,23 @@ RECORD dev.mgf.api.provider.ProviderSessionContext 0 dev.mgf.api.provider.Provid
 RECORD dev.mgf.api.provider.ProviderSupport 0 boolean supported
 RECORD dev.mgf.api.provider.ProviderSupport 1 java.lang.String reasonCode
 RECORD dev.mgf.api.provider.ProviderSupport 2 java.lang.String message
+RECORD dev.mgf.api.upscale.DepthConvention 0 boolean reversed
+RECORD dev.mgf.api.upscale.DepthConvention 1 float minDepth
+RECORD dev.mgf.api.upscale.DepthConvention 2 float maxDepth
+RECORD dev.mgf.api.upscale.JitterSequence 0 int index
+RECORD dev.mgf.api.upscale.JitterSequence 1 int period
+RECORD dev.mgf.api.upscale.JitterSequence 2 float offsetX
+RECORD dev.mgf.api.upscale.JitterSequence 3 float offsetY
+RECORD dev.mgf.api.upscale.MotionVectorConvention 0 dev.mgf.api.upscale.MotionVectorUnits units
+RECORD dev.mgf.api.upscale.MotionVectorConvention 1 dev.mgf.api.upscale.MotionVectorDirection direction
+RECORD dev.mgf.api.upscale.MotionVectorConvention 2 dev.mgf.api.upscale.MotionVectorYAxis yAxis
+RECORD dev.mgf.api.upscale.MotionVectorConvention 3 float scaleX
+RECORD dev.mgf.api.upscale.MotionVectorConvention 4 float scaleY
+RECORD dev.mgf.api.upscale.TemporalUpscalingHints 0 boolean resetHistory
+RECORD dev.mgf.api.upscale.TemporalUpscalingHints 1 float mipBias
+RECORD dev.mgf.api.upscale.TemporalUpscalingHints 2 float sharpness
+RECORD dev.mgf.api.upscale.TemporalUpscalingHints 3 dev.mgf.api.upscale.ExposureMode exposureMode
+RECORD dev.mgf.api.upscale.TemporalUpscalingHints 4 dev.mgf.api.upscale.UiCompositionHint uiCompositionHint
 RECORD dev.mgf.api.upscale.UpscaleCameraParameters 0 dev.mgf.api.provider.FrameMatrices matrices
 RECORD dev.mgf.api.upscale.UpscaleCameraParameters 1 float jitterX
 RECORD dev.mgf.api.upscale.UpscaleCameraParameters 2 float jitterY
@@ -546,6 +651,8 @@ RECORD dev.mgf.api.upscale.UpscaleFrame 3 dev.mgf.api.upscale.UpscaleResources r
 RECORD dev.mgf.api.upscale.UpscaleFrame 4 dev.mgf.api.upscale.UpscaleParameters parameters
 RECORD dev.mgf.api.upscale.UpscaleParameters 0 java.util.Optional<dev.mgf.api.upscale.UpscaleCameraParameters> camera
 RECORD dev.mgf.api.upscale.UpscaleParameters 1 java.lang.String qualityMode
+RECORD dev.mgf.api.upscale.UpscaleParameters 2 dev.mgf.api.upscale.JitterSequence jitter
+RECORD dev.mgf.api.upscale.UpscaleParameters 3 dev.mgf.api.upscale.TemporalUpscalingHints temporalHints
 RECORD dev.mgf.api.upscale.UpscaleResources 0 dev.mgf.api.provider.BorrowedImage inputColor
 RECORD dev.mgf.api.upscale.UpscaleResources 1 dev.mgf.api.provider.BorrowedImage outputColor
 RECORD dev.mgf.api.upscale.UpscaleResources 2 java.util.Optional<dev.mgf.api.provider.BorrowedImage> depth
@@ -553,20 +660,26 @@ RECORD dev.mgf.api.upscale.UpscaleResources 3 java.util.Optional<dev.mgf.api.pro
 RECORD dev.mgf.api.upscale.UpscaleResources 4 java.util.Optional<dev.mgf.api.provider.BorrowedImage> exposure
 RECORD dev.mgf.api.upscale.UpscaleResources 5 java.util.Optional<dev.mgf.api.provider.BorrowedImage> reactiveMask
 RECORD dev.mgf.api.upscale.UpscaleResources 6 java.util.Optional<dev.mgf.api.provider.BorrowedImage> transparencyMask
+RECORD dev.mgf.api.upscale.UpscaleResources 7 java.util.Optional<dev.mgf.api.provider.BorrowedImage> uiMask
+RECORD dev.mgf.api.upscale.UpscaleResources 8 java.util.Optional<dev.mgf.api.upscale.DepthConvention> depthConvention
+RECORD dev.mgf.api.upscale.UpscaleResources 9 java.util.Optional<dev.mgf.api.upscale.MotionVectorConvention> motionVectorConvention
 RECORD dev.mgf.api.upscale.UpscalerCapabilities 0 double minimumScale
 RECORD dev.mgf.api.upscale.UpscalerCapabilities 1 double maximumScale
-RECORD dev.mgf.api.upscale.UpscalerCapabilities 2 java.util.Set<dev.mgf.api.provider.ColorEncoding> colorEncodings
-RECORD dev.mgf.api.upscale.UpscalerCapabilities 3 java.util.Set<java.lang.String> qualityModes
+RECORD dev.mgf.api.upscale.UpscalerCapabilities 2 java.util.Set<java.lang.Double> renderScales
+RECORD dev.mgf.api.upscale.UpscalerCapabilities 3 java.util.Set<dev.mgf.api.provider.ColorEncoding> colorEncodings
+RECORD dev.mgf.api.upscale.UpscalerCapabilities 4 java.util.Set<java.lang.String> qualityModes
 RECORD dev.mgf.api.upscale.UpscalerRequirements 0 java.util.Set<dev.mgf.api.provider.FrameResourceKind> requiredResources
 RECORD dev.mgf.api.upscale.UpscalerRequirements 1 java.util.Set<dev.mgf.api.provider.FrameResourceKind> optionalResources
 RECORD dev.mgf.api.upscale.UpscalerSupport 0 dev.mgf.api.provider.ProviderSupport status
 RECORD dev.mgf.api.upscale.UpscalerSupport 1 java.util.Optional<dev.mgf.api.upscale.UpscalerCapabilities> capabilities
 RECORD dev.mgf.api.upscale.UpscalerSupport 2 java.util.Optional<dev.mgf.api.upscale.UpscalerRequirements> requirements
 SUPER dev.mgf.api.CapsTier java.lang.Enum<dev.mgf.api.CapsTier>
+SUPER dev.mgf.api.GraphicsAdapterVendor java.lang.Enum<dev.mgf.api.GraphicsAdapterVendor>
 SUPER dev.mgf.api.GraphicsBackendKind java.lang.Enum<dev.mgf.api.GraphicsBackendKind>
 SUPER dev.mgf.api.Mgf java.lang.Object
 SUPER dev.mgf.api.framegen.FrameGenerationCapabilities java.lang.Record
 SUPER dev.mgf.api.framegen.FrameGenerationFrame java.lang.Record
+SUPER dev.mgf.api.framegen.FrameGenerationMode java.lang.Enum<dev.mgf.api.framegen.FrameGenerationMode>
 SUPER dev.mgf.api.framegen.FrameGenerationRequirements java.lang.Record
 SUPER dev.mgf.api.framegen.FrameGenerationResources java.lang.Record
 SUPER dev.mgf.api.framegen.FrameGenerationSupport java.lang.Record
@@ -601,6 +714,15 @@ SUPER dev.mgf.api.provider.ProviderSessionContext java.lang.Record
 SUPER dev.mgf.api.provider.ProviderSessionState java.lang.Enum<dev.mgf.api.provider.ProviderSessionState>
 SUPER dev.mgf.api.provider.ProviderSupport java.lang.Record
 SUPER dev.mgf.api.provider.ResetReason java.lang.Enum<dev.mgf.api.provider.ResetReason>
+SUPER dev.mgf.api.upscale.DepthConvention java.lang.Record
+SUPER dev.mgf.api.upscale.ExposureMode java.lang.Enum<dev.mgf.api.upscale.ExposureMode>
+SUPER dev.mgf.api.upscale.JitterSequence java.lang.Record
+SUPER dev.mgf.api.upscale.MotionVectorConvention java.lang.Record
+SUPER dev.mgf.api.upscale.MotionVectorDirection java.lang.Enum<dev.mgf.api.upscale.MotionVectorDirection>
+SUPER dev.mgf.api.upscale.MotionVectorUnits java.lang.Enum<dev.mgf.api.upscale.MotionVectorUnits>
+SUPER dev.mgf.api.upscale.MotionVectorYAxis java.lang.Enum<dev.mgf.api.upscale.MotionVectorYAxis>
+SUPER dev.mgf.api.upscale.TemporalUpscalingHints java.lang.Record
+SUPER dev.mgf.api.upscale.UiCompositionHint java.lang.Enum<dev.mgf.api.upscale.UiCompositionHint>
 SUPER dev.mgf.api.upscale.UpscaleCameraParameters java.lang.Record
 SUPER dev.mgf.api.upscale.UpscaleFrame java.lang.Record
 SUPER dev.mgf.api.upscale.UpscaleParameters java.lang.Record
@@ -625,7 +747,9 @@ TYPE public abstract interface interface dev.mgf.api.vk.VulkanBootResult
 TYPE public final class dev.mgf.api.Mgf
 TYPE public final class dev.mgf.api.internal.MgfRuntimeHolder
 TYPE public final enum dev.mgf.api.CapsTier
+TYPE public final enum dev.mgf.api.GraphicsAdapterVendor
 TYPE public final enum dev.mgf.api.GraphicsBackendKind
+TYPE public final enum dev.mgf.api.framegen.FrameGenerationMode
 TYPE public final enum dev.mgf.api.graph.FrameGraphAnchor
 TYPE public final enum dev.mgf.api.present.PresentFrameKind
 TYPE public final enum dev.mgf.api.provider.ColorEncoding
@@ -636,6 +760,11 @@ TYPE public final enum dev.mgf.api.provider.ProviderKind
 TYPE public final enum dev.mgf.api.provider.ProviderResultCode
 TYPE public final enum dev.mgf.api.provider.ProviderSessionState
 TYPE public final enum dev.mgf.api.provider.ResetReason
+TYPE public final enum dev.mgf.api.upscale.ExposureMode
+TYPE public final enum dev.mgf.api.upscale.MotionVectorDirection
+TYPE public final enum dev.mgf.api.upscale.MotionVectorUnits
+TYPE public final enum dev.mgf.api.upscale.MotionVectorYAxis
+TYPE public final enum dev.mgf.api.upscale.UiCompositionHint
 TYPE public final record dev.mgf.api.framegen.FrameGenerationCapabilities
 TYPE public final record dev.mgf.api.framegen.FrameGenerationFrame
 TYPE public final record dev.mgf.api.framegen.FrameGenerationRequirements
@@ -661,6 +790,10 @@ TYPE public final record dev.mgf.api.provider.ProviderSelection
 TYPE public final record dev.mgf.api.provider.ProviderSelections
 TYPE public final record dev.mgf.api.provider.ProviderSessionContext
 TYPE public final record dev.mgf.api.provider.ProviderSupport
+TYPE public final record dev.mgf.api.upscale.DepthConvention
+TYPE public final record dev.mgf.api.upscale.JitterSequence
+TYPE public final record dev.mgf.api.upscale.MotionVectorConvention
+TYPE public final record dev.mgf.api.upscale.TemporalUpscalingHints
 TYPE public final record dev.mgf.api.upscale.UpscaleCameraParameters
 TYPE public final record dev.mgf.api.upscale.UpscaleFrame
 TYPE public final record dev.mgf.api.upscale.UpscaleParameters

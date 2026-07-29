@@ -5,7 +5,7 @@
 - Java 25
 - Fabric Loader 0.19.3 or newer
 - Minecraft 26.2 for the current adapter
-- Vulcanite player mod `mgf-0.3.0-alpha.1+mc26.2.jar`
+- Vulcanite player mod `mgf-1.0.0+mc26.2.jar`
 
 Provider code compiles against the stable API, not the player implementation:
 
@@ -16,18 +16,18 @@ repositories {
 }
 
 dependencies {
-    compileOnly "dev.mgf:mgf-api:0.3.0-alpha.1"
+    compileOnly "dev.mgf:mgf-api:1.0.0"
     compileOnly "net.fabricmc:fabric-loader:0.19.3"
 }
 ```
 
 The local repository is produced by `publishAllPublicationsToStagingRepository`.
-Do not add `mgf-fabric-26.2`, Minecraft, or LWJGL to provider API source unless a
-separate, explicitly version-specific integration module needs them.
+Do not add `mgf-fabric-26.2`, Minecraft, Mojang, or LWJGL to provider API source
+unless a separate, version-specific integration module intentionally needs them.
 
 ## Fabric Registration
 
-Implement `MgfProviderRegistrar` and register any supported roles through the
+Implement `MgfProviderRegistrar` and register supported roles through the
 provided `ProviderRegistry`. Add the registrar to `fabric.mod.json`:
 
 ```json
@@ -41,7 +41,7 @@ provided `ProviderRegistry`. Add the registrar to `fabric.mod.json`:
     "fabricloader": ">=0.19.3",
     "minecraft": "26.2",
     "java": ">=25",
-    "mgf": ">=0.3.0-alpha.1"
+    "mgf": ">=1.0.0"
   }
 }
 ```
@@ -65,17 +65,22 @@ Users can create `config/mgf-providers.properties`:
 upscaler=auto
 frame_generation=off
 present_hook=example:present-hook
+experimental_frame_generation=false
 ```
 
-Each value is `auto`, `off`, or an exact `namespace:path` provider ID. Invalid or
-missing exact IDs fail soft and remain visible in provider diagnostics.
+Each provider value is `auto`, `off`, or an exact `namespace:path` provider ID.
+Invalid or missing exact IDs fail soft and remain visible in provider
+diagnostics. `experimental_frame_generation=true` is required before an
+`NVIDIA_EXPERIMENTAL` Frame Generation provider can pass its first gate.
 
 ## Runtime Diagnostics
 
 `Mgf.runtime().providers()` returns an immutable snapshot for the three roles,
-including the selected provider ID, session state, and reason text. This API is
-read-only; selection and native resource ownership remain inside Vulcanite.
+including the selected provider ID, session state, reason code, and message.
+`ProviderEnvironment` reports backend, available resources, Vulkan interop
+handles, multi-present support, and adapter vendor classification.
 
 Start from the [compile-tested provider](examples/minimal-provider.md), then read
-the [SPI](provider-spi.md) and [resource lifecycle](resource-lifecycle.md)
-contracts before returning a supported probe result.
+the [SPI](provider-spi.md), [temporal upscaling](temporal-upscaling.md), and
+[resource lifecycle](resource-lifecycle.md) contracts before returning a
+supported probe result.

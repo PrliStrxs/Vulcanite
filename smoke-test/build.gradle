@@ -37,6 +37,9 @@ def smokeProviders = smokeProvidersProperty.isPresent()
 def smokeProviderMode = providers.gradleProperty("smokeProviderMode")
         .getOrElse(smokeProviders ? "noop" : "off")
 def smokeProvidersEnabled = !smokeProviderMode.equalsIgnoreCase("off")
+def smokeExperimentalFrameGenerationProperty = providers.gradleProperty("smokeExperimentalFrameGeneration")
+def smokeExperimentalFrameGeneration = smokeExperimentalFrameGenerationProperty.isPresent()
+        && !smokeExperimentalFrameGenerationProperty.get().equalsIgnoreCase("false")
 
 loom {
     runs {
@@ -45,6 +48,7 @@ loom {
             vmArg "-Dmgf.smoke.validation=${smokeValidation}"
             vmArg "-Dmgf.smoke.providers=${smokeProvidersEnabled}"
             vmArg "-Dmgf.smoke.providerMode=${smokeProviderMode}"
+            vmArg "-Dmgf.smoke.experimentalFrameGeneration=${smokeExperimentalFrameGeneration}"
             vmArg "-Dmgf.sample.diagnosticProviders=${smokeProvidersEnabled}"
             vmArg "-Dmgf.sample.providerMode=${smokeProviderMode}"
             // Forces the backend regardless of options.txt and of vanilla's
@@ -80,17 +84,25 @@ dependencies {
 def runDir = file("run")
 def resultFile = new File(runDir, "mgf-smoke-result.txt")
 def shutdownResultFile = new File(runDir, "mgf-smoke-shutdown-result.txt")
+def providerConfigFile = new File(runDir, "config/mgf-providers.properties")
 
 // Clears the previous result before launching (backend selection is done via
 // the --graphicsBackend launch argument above, immune to options.txt state).
 tasks.register("prepareSmokeRun") {
     inputs.property "backend", smokeBackend
     inputs.property "validation", smokeValidation
+    inputs.property "experimentalFrameGeneration", smokeExperimentalFrameGeneration
     outputs.upToDateWhen { false }
     doLast {
         runDir.mkdirs()
         resultFile.delete()
         shutdownResultFile.delete()
+        if (smokeExperimentalFrameGeneration) {
+            providerConfigFile.parentFile.mkdirs()
+            providerConfigFile.text = "experimental_frame_generation=true\n"
+        } else {
+            providerConfigFile.delete()
+        }
         logger.lifecycle("Smoke run prepared: backend=${smokeBackend} providerMode=${smokeProviderMode}")
     }
 }

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import dev.mgf.api.framegen.FrameGenerationCapabilities;
 import dev.mgf.api.framegen.FrameGenerationFrame;
+import dev.mgf.api.framegen.FrameGenerationMode;
 import dev.mgf.api.framegen.FrameGenerationProvider;
 import dev.mgf.api.framegen.FrameGenerationRequirements;
 import dev.mgf.api.framegen.FrameGenerationSession;
@@ -104,7 +105,7 @@ public final class SampleProviders implements MgfProviderRegistrar {
     }
 
     private static ProviderDescriptor descriptor(ProviderId id, String displayName) {
-        return new ProviderDescriptor(id, displayName, "0.3.0-alpha.1", 0, 0, 3);
+        return new ProviderDescriptor(id, displayName, "1.0.0", 1, 0, 0);
     }
 
     private static final class DiagnosticUpscaler implements UpscalerProvider {
@@ -120,9 +121,10 @@ public final class SampleProviders implements MgfProviderRegistrar {
                 return UpscalerSupport.unavailable(
                         "development_disabled", "Enable " + ENABLE_PROPERTY + " for diagnostics");
             }
+            Set<FrameResourceKind> requiredResources = requiredUpscalerResources(providerMode());
             return UpscalerSupport.available(
                     new UpscalerCapabilities(1.0, 1.0, Set.of(ColorEncoding.SRGB), Set.of("native")),
-                    new UpscalerRequirements(Set.of(FrameResourceKind.COLOR), Set.of()));
+                    new UpscalerRequirements(requiredResources, Set.of()));
         }
 
         @Override
@@ -184,7 +186,8 @@ public final class SampleProviders implements MgfProviderRegistrar {
             }
             return FrameGenerationSupport.available(
                     new FrameGenerationCapabilities(
-                            Set.of(ColorEncoding.SRGB), Set.of(UPSCALER_ID), 1),
+                            Set.of(ColorEncoding.SRGB), Set.of(UPSCALER_ID), 1,
+                            frameGenerationMode()),
                     new FrameGenerationRequirements(Set.of(FrameResourceKind.COLOR), Set.of()));
         }
 
@@ -268,8 +271,37 @@ public final class SampleProviders implements MgfProviderRegistrar {
                 .anyMatch(providerMode()::equalsIgnoreCase);
     }
 
+    private static Set<FrameResourceKind> requiredUpscalerResources(String mode) {
+        return switch (mode.toLowerCase(java.util.Locale.ROOT)) {
+            case "requires-depth" -> Set.of(FrameResourceKind.COLOR, FrameResourceKind.DEPTH);
+            case "requires-motion-vectors" -> Set.of(FrameResourceKind.COLOR, FrameResourceKind.MOTION_VECTORS);
+            case "requires-matrices" -> Set.of(FrameResourceKind.COLOR, FrameResourceKind.MATRICES);
+            case "requires-depth-motion-matrices" -> Set.of(
+                    FrameResourceKind.COLOR,
+                    FrameResourceKind.DEPTH,
+                    FrameResourceKind.MOTION_VECTORS,
+                    FrameResourceKind.MATRICES);
+            case "requires-all-temporal-upscaling-inputs" -> Set.of(
+                    FrameResourceKind.COLOR,
+                    FrameResourceKind.DEPTH,
+                    FrameResourceKind.MOTION_VECTORS,
+                    FrameResourceKind.MATRICES,
+                    FrameResourceKind.EXPOSURE,
+                    FrameResourceKind.REACTIVE_MASK,
+                    FrameResourceKind.TRANSPARENCY_MASK,
+                    FrameResourceKind.UI_MASK);
+            default -> Set.of(FrameResourceKind.COLOR);
+        };
+    }
+
     private static String providerMode() {
         return System.getProperty(MODE_PROPERTY, "noop");
+    }
+
+    private static FrameGenerationMode frameGenerationMode() {
+        return "nvidia-experimental-frame-generation".equalsIgnoreCase(providerMode())
+                ? FrameGenerationMode.NVIDIA_EXPERIMENTAL
+                : FrameGenerationMode.STANDARD;
     }
 
     private static long resetMask(ResetReason reason) {

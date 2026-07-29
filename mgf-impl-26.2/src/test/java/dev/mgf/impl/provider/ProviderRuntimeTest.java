@@ -172,9 +172,9 @@ final class ProviderRuntimeTest {
         assertEquals(ProviderSessionState.UNSUPPORTED, runtime.selections().upscaler().state());
         assertEquals(ProviderSessionState.UNSUPPORTED, runtime.selections().frameGeneration().state());
         assertEquals(ProviderSessionState.UNSUPPORTED, runtime.selections().presentHook().state());
-        assertEquals("vulkan_required", runtime.selections().upscaler().reasonCode());
-        assertEquals("vulkan_required", runtime.selections().frameGeneration().reasonCode());
-        assertEquals("vulkan_required", runtime.selections().presentHook().reasonCode());
+        assertEquals("backend_not_vulkan", runtime.selections().upscaler().reasonCode());
+        assertEquals("backend_not_vulkan", runtime.selections().frameGeneration().reasonCode());
+        assertEquals("backend_not_vulkan", runtime.selections().presentHook().reasonCode());
     }
 
     @Test

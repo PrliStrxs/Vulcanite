@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import dev.mgf.api.framegen.FrameGenerationCapabilities;
 import dev.mgf.api.framegen.FrameGenerationFrame;
+import dev.mgf.api.framegen.FrameGenerationMode;
 import dev.mgf.api.framegen.FrameGenerationProvider;
 import dev.mgf.api.framegen.FrameGenerationRequirements;
 import dev.mgf.api.framegen.FrameGenerationSession;
@@ -28,6 +29,7 @@ import dev.mgf.api.present.PresentReceipt;
 import dev.mgf.api.upscale.UpscaleFrame;
 import dev.mgf.api.upscale.UpscaleCameraParameters;
 import dev.mgf.api.upscale.UpscaleParameters;
+import dev.mgf.api.upscale.ExposureMode;
 import dev.mgf.api.upscale.UpscalerCapabilities;
 import dev.mgf.api.upscale.UpscalerProvider;
 import dev.mgf.api.upscale.UpscalerRequirements;
@@ -90,6 +92,7 @@ final class ProviderSpiTest {
     void cameraParametersAreExplicitlyOptionalAndValidatedAsOneUnit() {
         UpscaleParameters unavailable = new UpscaleParameters(Optional.empty(), "quality");
         assertEquals(Optional.empty(), unavailable.camera());
+        assertEquals(ExposureMode.IDENTITY, unavailable.temporalHints().exposureMode());
 
         FrameMatrices matrices = new FrameMatrices(
                 Matrix4.identity(), Matrix4.identity(), Matrix4.identity(), Matrix4.identity());
@@ -100,6 +103,15 @@ final class ProviderSpiTest {
         assertThrows(IllegalArgumentException.class,
                 () -> new UpscaleCameraParameters(
                         matrices, 0.0F, 0.0F, 1.0F, 0.5F, 70.0F));
+    }
+
+    @Test
+    void frameGenerationCapabilitiesCanDeclareNvidiaExperimentalMode() {
+        FrameGenerationCapabilities capabilities = new FrameGenerationCapabilities(
+                Set.of(ColorEncoding.SRGB), Set.of(), 1,
+                FrameGenerationMode.NVIDIA_EXPERIMENTAL);
+        assertEquals(FrameGenerationMode.NVIDIA_EXPERIMENTAL, capabilities.mode());
+        assertEquals(true, capabilities.nvidiaExperimental());
     }
 
     private static PresentFrame presentFrame(PresentFrameKind kind, int ordinal) {

@@ -2,7 +2,7 @@
 
 This document defines the Vulkan ownership, resource-state, synchronization,
 and lifecycle contract for MGF compute work. It applies to the generic M4
-compute dispatcher and the 0.3 provider adapter. Vulcanite 0.3 does not register
+compute dispatcher and the 1.0 provider adapter. Vulcanite 1.0 does not register
 or execute a bundled compute effect.
 
 ## Non-negotiable rules
@@ -72,7 +72,7 @@ handles. A resize can replace the first two before the next frame.
 
 ## Frame-graph ordering
 
-Vulcanite 0.3 registers no core frame-graph effect. Development samples may
+Vulcanite 1.0 registers no core frame-graph effect. Development samples may
 register explicit listeners, but they are not packaged in the player JAR. The
 Provider adapter runs later at the final composed main-target blit/present seam,
 after GUI rendering, and does not claim access to a separate world-only image.

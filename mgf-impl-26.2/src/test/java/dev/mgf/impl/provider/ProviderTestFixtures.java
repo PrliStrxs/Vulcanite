@@ -37,7 +37,11 @@ final class ProviderTestFixtures {
     }
 
     static ProviderDescriptor descriptor(String id, int priority) {
-        return new ProviderDescriptor(new ProviderId(id), id, "1.0.0", priority, 0, 3);
+        return descriptor(id, priority, 1, 0);
+    }
+
+    static ProviderDescriptor descriptor(String id, int priority, int apiMajor, int apiMinor) {
+        return new ProviderDescriptor(new ProviderId(id), id, "1.0.0", priority, apiMajor, apiMinor);
     }
 
     static UpscalerProvider upscaler(String id, int priority, boolean supported) {

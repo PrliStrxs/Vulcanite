@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import dev.mgf.api.GraphicsAdapterVendor;
 import dev.mgf.api.GraphicsBackendKind;
 import dev.mgf.api.vk.VkInterop;
 
@@ -13,7 +14,8 @@ public record ProviderEnvironment(
         long deviceGeneration,
         Optional<VkInterop> vulkanInterop,
         Set<FrameResourceKind> availableResources,
-        boolean multiPresentSupported) {
+        boolean multiPresentSupported,
+        GraphicsAdapterVendor adapterVendor) {
 
     public ProviderEnvironment {
         backend = Objects.requireNonNull(backend, "backend");
@@ -22,5 +24,16 @@ public record ProviderEnvironment(
         }
         vulkanInterop = Objects.requireNonNull(vulkanInterop, "vulkanInterop");
         availableResources = Set.copyOf(availableResources);
+        adapterVendor = Objects.requireNonNull(adapterVendor, "adapterVendor");
+    }
+
+    public ProviderEnvironment(
+            GraphicsBackendKind backend,
+            long deviceGeneration,
+            Optional<VkInterop> vulkanInterop,
+            Set<FrameResourceKind> availableResources,
+            boolean multiPresentSupported) {
+        this(backend, deviceGeneration, vulkanInterop, availableResources,
+                multiPresentSupported, GraphicsAdapterVendor.UNKNOWN);
     }
 }

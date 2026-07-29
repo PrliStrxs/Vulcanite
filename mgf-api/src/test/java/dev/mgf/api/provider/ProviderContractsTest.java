@@ -11,7 +11,18 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import dev.mgf.api.GraphicsAdapterVendor;
 import dev.mgf.api.GraphicsBackendKind;
+import dev.mgf.api.upscale.DepthConvention;
+import dev.mgf.api.upscale.ExposureMode;
+import dev.mgf.api.upscale.JitterSequence;
+import dev.mgf.api.upscale.MotionVectorConvention;
+import dev.mgf.api.upscale.MotionVectorDirection;
+import dev.mgf.api.upscale.MotionVectorUnits;
+import dev.mgf.api.upscale.MotionVectorYAxis;
+import dev.mgf.api.upscale.TemporalUpscalingHints;
+import dev.mgf.api.upscale.UiCompositionHint;
+import dev.mgf.api.upscale.UpscaleResources;
 
 final class ProviderContractsTest {
 
@@ -93,6 +104,7 @@ final class ProviderContractsTest {
                 GraphicsBackendKind.VULKAN, 2, Optional.empty(), resources, true);
         resources.add(FrameResourceKind.MOTION_VECTORS);
         assertEquals(Set.of(FrameResourceKind.COLOR), environment.availableResources());
+        assertEquals(GraphicsAdapterVendor.UNKNOWN, environment.adapterVendor());
 
         ProviderId id = new ProviderId("example:upscaler");
         List<ProviderId> registered = new java.util.ArrayList<>(List.of(id));
@@ -107,5 +119,80 @@ final class ProviderContractsTest {
                 ProviderSelection.off(ProviderKind.FRAME_GENERATION),
                 ProviderSelection.off(ProviderKind.PRESENT_HOOK));
         assertEquals(selection, selections.upscaler());
+    }
+
+    @Test
+    void validatesTemporalUpscalingContracts() {
+        DepthConvention depth = DepthConvention.zeroToOne();
+        assertFalse(depth.reversed());
+        assertThrows(IllegalArgumentException.class,
+                () -> new DepthConvention(false, -0.1F, 1.0F));
+        assertThrows(IllegalArgumentException.class,
+                () -> new DepthConvention(false, 0.5F, 0.5F));
+
+        MotionVectorConvention motion = new MotionVectorConvention(
+                MotionVectorUnits.NORMALIZED_RENDER_SIZE,
+                MotionVectorDirection.CURRENT_TO_PREVIOUS,
+                MotionVectorYAxis.DOWN,
+                1.0F,
+                -1.0F);
+        assertEquals(MotionVectorUnits.NORMALIZED_RENDER_SIZE, motion.units());
+        assertThrows(IllegalArgumentException.class,
+                () -> new MotionVectorConvention(
+                        MotionVectorUnits.PIXELS,
+                        MotionVectorDirection.CURRENT_TO_PREVIOUS,
+                        MotionVectorYAxis.DOWN,
+                        0.0F,
+                        1.0F));
+
+        JitterSequence jitter = new JitterSequence(1, 8, 0.25F, -0.25F);
+        assertEquals(8, jitter.period());
+        assertThrows(IllegalArgumentException.class,
+                () -> new JitterSequence(8, 8, 0.0F, 0.0F));
+        assertThrows(IllegalArgumentException.class,
+                () -> new JitterSequence(0, 1, Float.NaN, 0.0F));
+
+        TemporalUpscalingHints hints = new TemporalUpscalingHints(
+                true, -0.5F, 0.25F,
+                ExposureMode.IDENTITY, UiCompositionHint.UI_COMPOSED_AFTER_UPSCALE);
+        assertTrue(hints.resetHistory());
+        assertEquals(ExposureMode.IDENTITY, hints.exposureMode());
+        assertThrows(IllegalArgumentException.class,
+                () -> new TemporalUpscalingHints(
+                        false, 0.0F, 1.5F,
+                        ExposureMode.IDENTITY, UiCompositionHint.UNKNOWN));
+    }
+
+    @Test
+    void upscaleResourcesRequireConventionsForTemporalImages() {
+        ImageState state = new ImageState(1, 2, 4, -1);
+        BorrowedImage input = new BorrowedImage(10, 11, 1280, 720, 37, 7,
+                ColorEncoding.SRGB, state, ImageOwnership.MINECRAFT,
+                ImageLifetime.CALLBACK, 2, 3);
+        BorrowedImage output = new BorrowedImage(12, 13, 1920, 1080, 37, 7,
+                ColorEncoding.SRGB, state, ImageOwnership.MGF,
+                ImageLifetime.CALLBACK, 2, 3);
+        BorrowedImage temporal = new BorrowedImage(14, 15, 1280, 720, 37, 7,
+                ColorEncoding.LINEAR, state, ImageOwnership.MINECRAFT,
+                ImageLifetime.CALLBACK, 2, 3);
+
+        UpscaleResources resources = new UpscaleResources(input, output,
+                Optional.of(temporal), Optional.of(temporal),
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.of(DepthConvention.zeroToOne()),
+                Optional.of(MotionVectorConvention.normalizedCurrentToPreviousYDown()));
+        assertEquals(Optional.of(temporal), resources.depth());
+        assertEquals(Optional.empty(), resources.uiMask());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new UpscaleResources(input, output,
+                        Optional.of(temporal), Optional.empty(),
+                        Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                        Optional.empty(), Optional.empty()));
+        assertThrows(IllegalArgumentException.class,
+                () -> new UpscaleResources(input, output,
+                        Optional.empty(), Optional.of(temporal),
+                        Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                        Optional.empty(), Optional.empty()));
     }
 }

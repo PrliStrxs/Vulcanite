@@ -8,8 +8,10 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import dev.mgf.api.GraphicsAdapterVendor;
 import dev.mgf.api.GraphicsBackendKind;
 import dev.mgf.api.framegen.FrameGenerationCapabilities;
+import dev.mgf.api.framegen.FrameGenerationMode;
 import dev.mgf.api.framegen.FrameGenerationProvider;
 import dev.mgf.api.framegen.FrameGenerationRequirements;
 import dev.mgf.api.framegen.FrameGenerationSupport;
@@ -81,7 +83,7 @@ final class ProviderSelectorTest {
         catalog.freeze();
 
         ProviderSelector.SelectedFrameGenerator selected = ProviderSelector.selectFrameGenerator(
-                catalog, ProviderConfig.defaults().frameGeneration(), ENVIRONMENT, Optional.of(upscaler));
+                catalog, ProviderConfig.defaults().frameGeneration(), ENVIRONMENT, Optional.of(upscaler), false);
 
         assertEquals(new ProviderId("example:fg"), selected.provider().orElseThrow().descriptor().id());
     }
@@ -96,7 +98,7 @@ final class ProviderSelectorTest {
         ProviderSelector.SelectedUpscaler wrongScale = ProviderSelector.selectUpscaler(
                 scaleCatalog, ProviderConfig.defaults().upscaler(), ENVIRONMENT);
         assertTrue(wrongScale.provider().isEmpty());
-        assertEquals("unsupported_scale", wrongScale.diagnostic().reasonCode());
+        assertEquals("render_scale_unsupported", wrongScale.diagnostic().reasonCode());
 
         ProviderCatalog colorCatalog = new ProviderCatalog();
         colorCatalog.registerUpscaler(upscalerWithCapabilities(
@@ -123,7 +125,7 @@ final class ProviderSelectorTest {
 
         ProviderSelector.SelectedFrameGenerator unsafe = ProviderSelector.selectFrameGenerator(
                 unsafeSurfaceCatalog, ProviderConfig.defaults().frameGeneration(),
-                unsafeSurface, Optional.of(selectedUpscaler));
+                unsafeSurface, Optional.of(selectedUpscaler), false);
 
         assertTrue(unsafe.provider().isEmpty());
         assertEquals("multi_present_unsupported", unsafe.diagnostic().reasonCode());
@@ -137,7 +139,7 @@ final class ProviderSelectorTest {
 
         ProviderSelector.SelectedFrameGenerator incompatible = ProviderSelector.selectFrameGenerator(
                 incompatibleCatalog, ProviderConfig.defaults().frameGeneration(),
-                ENVIRONMENT, Optional.of(selectedUpscaler));
+                ENVIRONMENT, Optional.of(selectedUpscaler), false);
 
         assertTrue(incompatible.provider().isEmpty());
         assertEquals("incompatible_upscaler", incompatible.diagnostic().reasonCode());
@@ -151,10 +153,68 @@ final class ProviderSelectorTest {
 
         ProviderSelector.SelectedFrameGenerator wrongColor = ProviderSelector.selectFrameGenerator(
                 colorCatalog, ProviderConfig.defaults().frameGeneration(),
-                ENVIRONMENT, Optional.of(selectedUpscaler));
+                ENVIRONMENT, Optional.of(selectedUpscaler), false);
 
         assertTrue(wrongColor.provider().isEmpty());
         assertEquals("unsupported_color_encoding", wrongColor.diagnostic().reasonCode());
+    }
+
+    @Test
+    void requiredTemporalResourcesReturnStableReasonCodes() {
+        ProviderCatalog depthCatalog = new ProviderCatalog();
+        depthCatalog.registerUpscaler(upscalerWithRequirements(
+                "example:depth", Set.of(FrameResourceKind.COLOR, FrameResourceKind.DEPTH)));
+        depthCatalog.freeze();
+
+        ProviderSelector.SelectedUpscaler depth = ProviderSelector.selectUpscaler(
+                depthCatalog, ProviderConfig.defaults().upscaler(), ENVIRONMENT);
+
+        assertTrue(depth.provider().isEmpty());
+        assertEquals("depth_unavailable", depth.diagnostic().reasonCode());
+
+        ProviderCatalog matricesCatalog = new ProviderCatalog();
+        matricesCatalog.registerUpscaler(upscalerWithRequirements(
+                "example:matrices", Set.of(FrameResourceKind.COLOR, FrameResourceKind.MATRICES)));
+        matricesCatalog.freeze();
+
+        ProviderSelector.SelectedUpscaler matrices = ProviderSelector.selectUpscaler(
+                matricesCatalog, ProviderConfig.defaults().upscaler(), ENVIRONMENT);
+
+        assertTrue(matrices.provider().isEmpty());
+        assertEquals("matrices_unavailable", matrices.diagnostic().reasonCode());
+    }
+
+    @Test
+    void frameGeneratorNvidiaExperimentalModeIsExplicitlyGated() {
+        ProviderId selectedUpscaler = new ProviderId("example:selected-upscaler");
+        ProviderCatalog catalog = new ProviderCatalog();
+        catalog.registerFrameGenerator(frameGeneratorWithCapabilities(
+                "example:nvidia-fg",
+                new FrameGenerationCapabilities(
+                        Set.of(ColorEncoding.SRGB), Set.of(selectedUpscaler), 1,
+                        FrameGenerationMode.NVIDIA_EXPERIMENTAL)));
+        catalog.freeze();
+        ProviderEnvironment nvidiaWithoutMultiPresent = new ProviderEnvironment(
+                GraphicsBackendKind.VULKAN, 1, Optional.empty(),
+                Set.of(FrameResourceKind.COLOR), false, GraphicsAdapterVendor.NVIDIA);
+        ProviderEnvironment amdWithMultiPresent = new ProviderEnvironment(
+                GraphicsBackendKind.VULKAN, 1, Optional.empty(),
+                Set.of(FrameResourceKind.COLOR), true, GraphicsAdapterVendor.AMD);
+
+        ProviderSelector.SelectedFrameGenerator disabled = ProviderSelector.selectFrameGenerator(
+                catalog, ProviderConfig.defaults().frameGeneration(),
+                nvidiaWithoutMultiPresent, Optional.of(selectedUpscaler), false);
+        assertEquals("experimental_frame_generation_disabled", disabled.diagnostic().reasonCode());
+
+        ProviderSelector.SelectedFrameGenerator wrongVendor = ProviderSelector.selectFrameGenerator(
+                catalog, ProviderConfig.defaults().frameGeneration(),
+                amdWithMultiPresent, Optional.of(selectedUpscaler), true);
+        assertEquals("nvidia_adapter_required", wrongVendor.diagnostic().reasonCode());
+
+        ProviderSelector.SelectedFrameGenerator unsafeSurface = ProviderSelector.selectFrameGenerator(
+                catalog, ProviderConfig.defaults().frameGeneration(),
+                nvidiaWithoutMultiPresent, Optional.of(selectedUpscaler), true);
+        assertEquals("multi_present_unsupported", unsafeSurface.diagnostic().reasonCode());
     }
 
     private static UpscalerProvider upscalerWithCapabilities(String id, UpscalerCapabilities capabilities) {
@@ -166,6 +226,26 @@ final class ProviderSelectorTest {
             @Override public UpscalerSupport probe(ProviderEnvironment environment) {
                 return UpscalerSupport.available(capabilities,
                         new UpscalerRequirements(Set.of(FrameResourceKind.COLOR), Set.of()));
+            }
+            @Override public dev.mgf.api.upscale.UpscalerSession open(
+                    dev.mgf.api.provider.ProviderSessionContext context) {
+                return delegate.open(context);
+            }
+        };
+    }
+
+    private static UpscalerProvider upscalerWithRequirements(
+            String id, Set<FrameResourceKind> requiredResources) {
+        UpscalerProvider delegate = ProviderTestFixtures.upscaler(id, 100, true);
+        return new UpscalerProvider() {
+            @Override public dev.mgf.api.provider.ProviderDescriptor descriptor() {
+                return delegate.descriptor();
+            }
+            @Override public UpscalerSupport probe(ProviderEnvironment environment) {
+                return UpscalerSupport.available(
+                        new UpscalerCapabilities(1.0, 1.0,
+                                Set.of(ColorEncoding.SRGB), Set.of("native")),
+                        new UpscalerRequirements(requiredResources, Set.of()));
             }
             @Override public dev.mgf.api.upscale.UpscalerSession open(
                     dev.mgf.api.provider.ProviderSessionContext context) {

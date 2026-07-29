@@ -24,6 +24,7 @@ final class ProviderConfigTest {
         assertEquals(ProviderConfig.Mode.AUTO, config.upscaler().mode());
         assertEquals(ProviderConfig.Mode.AUTO, config.frameGeneration().mode());
         assertEquals(ProviderConfig.Mode.AUTO, config.presentHook().mode());
+        assertEquals(false, config.experimentalFrameGeneration());
     }
 
     @Test
@@ -33,6 +34,7 @@ final class ProviderConfigTest {
                 upscaler=example:upscale
                 frame_generation=off
                 present_hook=auto
+                experimental_frame_generation=true
                 """);
 
         ProviderConfig config = ProviderConfig.load(file);
@@ -41,6 +43,7 @@ final class ProviderConfigTest {
         assertEquals(new ProviderId("example:upscale"), config.upscaler().providerId().orElseThrow());
         assertEquals(ProviderConfig.Mode.OFF, config.frameGeneration().mode());
         assertEquals(ProviderConfig.Mode.AUTO, config.presentHook().mode());
+        assertEquals(true, config.experimentalFrameGeneration());
     }
 
     @Test

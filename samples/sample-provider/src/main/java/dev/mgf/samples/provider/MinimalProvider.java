@@ -37,7 +37,7 @@ public final class MinimalProvider implements MgfProviderRegistrar {
 
     private static ProviderDescriptor descriptor(String path, String name) {
         return new ProviderDescriptor(
-                new ProviderId("example:" + path), name, "1.0.0", 0, 0, 3);
+                new ProviderId("example:" + path), name, "1.0.0", 0, 1, 0);
     }
 
     private static final class MinimalUpscaler implements UpscalerProvider {

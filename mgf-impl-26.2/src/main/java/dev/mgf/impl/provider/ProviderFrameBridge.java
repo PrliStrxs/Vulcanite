@@ -44,7 +44,9 @@ import dev.mgf.api.upscale.UpscaleFrame;
 import dev.mgf.api.upscale.UpscaleParameters;
 import dev.mgf.api.upscale.UpscaleResources;
 import dev.mgf.impl.core.MgfConstants;
+import dev.mgf.impl.upscale.TemporalResourceDiagnostics;
 import dev.mgf.impl.vk.VkInteropImpl;
+import dev.mgf.impl.vk.VulkanDeviceAccess;
 
 /** Final-composite provider adapter for Minecraft 26.2's blit/present path. */
 public final class ProviderFrameBridge {
@@ -85,8 +87,9 @@ public final class ProviderFrameBridge {
                 GraphicsBackendKind.VULKAN,
                 deviceGeneration,
                 Optional.of(new VkInteropImpl(createdDevice)),
-                Set.of(FrameResourceKind.COLOR),
-                false);
+                TemporalResourceDiagnostics.verifiedResources(),
+                false,
+                VulkanDeviceAccess.adapterVendor(createdDevice));
         ProviderRuntime.current().open(environment);
         if (deviceGeneration > 1) {
             ProviderRuntime.current().requestReset(ResetReason.DEVICE_REPLACED);
@@ -267,9 +270,13 @@ public final class ProviderFrameBridge {
                         recorder.context(),
                         new UpscaleResources(input, output,
                                 Optional.empty(), Optional.empty(), Optional.empty(),
-                                Optional.empty(), Optional.empty()),
+                                Optional.empty(), Optional.empty(),
+                                Optional.empty(), Optional.empty(), Optional.empty()),
                         new UpscaleParameters(
-                                Optional.empty(), runtime.upscalerQualityMode().orElse("native")));
+                                Optional.empty(), runtime.upscalerQualityMode().orElse("native"),
+                                dev.mgf.api.upscale.JitterSequence.none(),
+                                TemporalResourceDiagnostics.identityExposureHints(
+                                        frameInfo.historyReset())));
                 upscalerResult = runtime.invokeUpscaler(session -> session.record(upscaleFrame));
                 if (upscalerResult.code() == ProviderResultCode.SUCCESS) {
                     recorder.finishProviderWrite(frameResources.upscaledOutput());

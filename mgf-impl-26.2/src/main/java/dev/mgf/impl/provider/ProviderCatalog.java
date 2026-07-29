@@ -15,8 +15,8 @@ import dev.mgf.api.upscale.UpscalerProvider;
 /** Mutable-at-bootstrap provider catalog that freezes before device probing. */
 public final class ProviderCatalog implements ProviderRegistry {
 
-    static final int API_MAJOR = 0;
-    static final int API_MINOR = 3;
+    static final int API_MAJOR = 1;
+    static final int API_MINOR = 0;
 
     private final Map<ProviderId, UpscalerProvider> upscalers = new LinkedHashMap<>();
     private final Map<ProviderId, FrameGenerationProvider> frameGenerators = new LinkedHashMap<>();

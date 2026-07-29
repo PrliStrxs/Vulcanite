@@ -2,13 +2,15 @@
 
 All stable provider contracts live under `dev.mgf.api.provider`,
 `dev.mgf.api.upscale`, `dev.mgf.api.framegen`, and `dev.mgf.api.present`.
-Signatures contain only Java types and opaque numeric native handles.
+Signatures contain only Java platform types, Vulcanite API types, and opaque
+numeric native handles.
 
 ## Common Contract
 
 Every provider exposes a `ProviderDescriptor` with a validated `namespace:path`
 ID, display name, provider version, selection priority, and minimum API version.
-For Vulcanite 0.3, use minimum API major `0` and minor `3`.
+For Vulcanite 1.0, use minimum API major `1` and minor `0` once your provider
+requires the new temporal contracts.
 
 `probe(...)` reports support before `open(...)` is called. A supported role must
 state capabilities and required/optional `FrameResourceKind` values. Never claim
@@ -25,13 +27,31 @@ and close run on Minecraft's render thread.
 
 ## Upscaler
 
-`UpscalerProvider.probe` declares scale limits, encodings, quality modes, and
-resource requirements. `UpscalerSession.record` receives an `UpscaleFrame` with
-the real input color, an MGF-owned output, dimensions, timing, optional verified
-camera data, optional temporal resources, parameters, and an already-recording
-command buffer. `UpscaleParameters.camera()` is empty unless the active adapter
-can supply live matrices, jitter, clip planes, and field of view as one coherent
-`UpscaleCameraParameters` value.
+`UpscalerProvider.probe` declares:
+
+- `minimumScale` and `maximumScale`;
+- explicit `renderScales`, such as `0.5`, `0.6666667`, `0.75`, and `1.0`;
+- accepted `ColorEncoding` values;
+- quality mode strings;
+- required and optional `FrameResourceKind` values.
+
+`UpscalerSession.record` receives an `UpscaleFrame` with input/output images,
+dimensions, timing, command recorder, resources, quality mode, jitter, and
+temporal hints.
+
+The 1.0 resources are:
+
+| Kind | Meaning | Availability rule | Missing reason |
+|---|---|---|---|
+| `COLOR` | Render-resolution input color | Only when the adapter has a verified color descriptor | `low_res_color_unavailable` |
+| `DEPTH` | Depth matching input color | Must include `DepthConvention` | `depth_unavailable` |
+| `MOTION_VECTORS` | Motion vectors matching input color | Must include `MotionVectorConvention` | `motion_vectors_unavailable` |
+| `MATRICES` | Current/previous camera transforms | Must be coherent with jitter and reset | `matrices_unavailable` |
+| `EXPOSURE` | Exposure image resource | Not verified in 26.2; identity exposure is reported through `TemporalUpscalingHints` without enabling this resource | `exposure_unavailable` |
+| `REACTIVE_MASK` | Low temporal-trust content | Only when verified per frame | `reactive_mask_unavailable` |
+| `TRANSPARENCY_MASK` | Translucent/composition mask | Only when verified per frame | `transparency_mask_unavailable` |
+| `UI_MASK` | UI separation/composition mask | Only when UI is native or a mask is verified | `ui_composition_unavailable` |
+| `OPTICAL_FLOW` | Provider or adapter optical flow | Core adapter does not provide it | `optical_flow_unavailable` |
 
 Write only to the supplied output. Return `SUCCESS` only when it is valid for
 the current frame. On any other result, Vulcanite presents the untouched real
@@ -40,11 +60,20 @@ Minecraft image.
 ## Frame Generation
 
 `FrameGenerationProvider.probe` receives the selected upscaler ID. Capabilities
-declare accepted upscalers and a maximum generated-frame count; 0.3 permits at
-most one generated frame per real frame.
+declare accepted upscalers, color encodings, maximum generated frames, and a
+mode:
 
-`FrameGenerationSession.record` receives current and previous real images,
-an MGF-owned generated output, timing, matrices, and optional depth, motion,
+- `STANDARD`: future non-vendor-specific capability lane.
+- `NVIDIA_EXPERIMENTAL`: NVIDIA-only experimental lane for provider mods.
+
+The 26.2 adapter keeps `multiPresentSupported=false`, so Frame Generation stays
+`UNSUPPORTED/multi_present_unsupported` even if a provider probes successfully.
+An `NVIDIA_EXPERIMENTAL` provider is also gated by
+`experimental_frame_generation=true` and adapter vendor classification before
+multi-present is considered.
+
+`FrameGenerationSession.record` receives current/previous real images, an
+MGF-owned generated output, timing, matrices, and optional depth, motion,
 optical-flow, or UI-mask inputs. Vulcanite never fabricates missing temporal
 data. Success forms `[GENERATED, REAL]`; skip or failure forms `[REAL]`.
 
@@ -76,18 +105,3 @@ unrelated roles continue when their declared compatibility permits it.
 
 Non-success results require a stable short reason code and a human-readable
 message. Do not use exceptions for expected unsupported or skipped conditions.
-
-## Minecraft 26.2 Input Limits
-
-The 26.2 adapter currently reports the fully composed main render target at
-native display size with SRGB encoding. Selection therefore requires support for
-scale `1.0` and SRGB. It does not separate world and UI rendering and does not
-provide verified depth, camera parameters, motion vectors, optical flow, UI
-masks, reactive masks, or a separate low-resolution scene image. Providers
-requiring those resources remain visible but unsupported.
-
-Minecraft 26.2 does not report a capability that proves repeated surface acquire
-and present is safe. The adapter reports `multiPresentSupported=false`, so Frame
-Generation providers remain registered but are `UNSUPPORTED` with reason
-`multi_present_unsupported`. A later adapter may activate the same stable SPI
-after it verifies the two-item `[GENERATED, REAL]` presentation contract.

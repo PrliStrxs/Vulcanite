@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vulkan.VulkanDevice;
 import com.mojang.blaze3d.vulkan.VulkanPhysicalDevice;
 import com.mojang.blaze3d.vulkan.init.VulkanFeature;
 
+import dev.mgf.api.GraphicsAdapterVendor;
 import dev.mgf.api.vk.VulkanBootResult;
 import dev.mgf.impl.core.MgfConstants;
 import dev.mgf.impl.core.SeamHealth;
@@ -32,11 +33,13 @@ public final class VulkanBootNegotiation {
      * @param deviceExtensions the exact extension list the device was created with —
      *        the authoritative clean source ({@code DeviceInfo.underlyingExtensions}
      *        is a debug list with {@code " (I)"}/{@code " (D)"} suffixes)
+     * @param adapterVendor conservative pure-Java vendor classification
      * @param missingRequiredByMod per mod id, its required-but-unavailable extensions
      */
     public record Outcome(Map<String, Boolean> requestedExtensions,
                           long vkPhysicalDevice,
                           Set<String> deviceExtensions,
+                          GraphicsAdapterVendor adapterVendor,
                           Map<String, Set<String>> missingRequiredByMod) {
     }
 
@@ -86,7 +89,8 @@ public final class VulkanBootNegotiation {
         }
 
         outcome = new Outcome(Map.copyOf(requested), physicalDevice.vkPhysicalDevice().address(),
-                Set.copyOf(vanillaExtensions), deepCopy(missingRequiredByMod));
+                Set.copyOf(vanillaExtensions), VulkanDeviceAccess.classifyVendor(physicalDevice.vendorName()),
+                deepCopy(missingRequiredByMod));
         MgfConstants.LOGGER.info("Vulkan boot negotiation done: {} extension(s) requested, device extension list = {}",
                 requested.size(), vanillaExtensions);
     }

@@ -6,8 +6,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import dev.mgf.api.GraphicsAdapterVendor;
 import dev.mgf.api.framegen.FrameGenerationProvider;
 import dev.mgf.api.framegen.FrameGenerationSupport;
+import dev.mgf.api.framegen.FrameGenerationMode;
 import dev.mgf.api.present.PresentHookProvider;
 import dev.mgf.api.present.PresentHookSupport;
 import dev.mgf.api.provider.ColorEncoding;
@@ -21,6 +23,8 @@ import dev.mgf.api.provider.ProviderSessionState;
 import dev.mgf.api.provider.ProviderSupport;
 import dev.mgf.api.upscale.UpscalerProvider;
 import dev.mgf.api.upscale.UpscalerSupport;
+import dev.mgf.impl.upscale.RenderResolutionController;
+import dev.mgf.impl.upscale.TemporalResourceDiagnostics;
 
 /** Deterministic, fail-soft provider arbitration. */
 public final class ProviderSelector {
@@ -52,7 +56,8 @@ public final class ProviderSelector {
             ProviderCatalog catalog,
             ProviderConfig.Choice choice,
             ProviderEnvironment environment,
-            Optional<ProviderId> selectedUpscaler) {
+            Optional<ProviderId> selectedUpscaler,
+            boolean experimentalFrameGeneration) {
         List<FrameGenerationProvider> providers = catalog.frameGenerators();
         Selection<FrameGenerationProvider, FrameGenerationSupport> selected = select(
                 ProviderKind.FRAME_GENERATION, providers, choice,
@@ -60,7 +65,7 @@ public final class ProviderSelector {
                 support -> support.status(),
                 support -> support.requirements().orElseThrow().requiredResources(),
                 support -> validateFrameGenerationCapabilities(
-                        support, selectedUpscaler, environment.multiPresentSupported()),
+                        support, selectedUpscaler, environment, experimentalFrameGeneration),
                 environment);
         return new SelectedFrameGenerator(selected.provider, selected.support, selected.diagnostic);
     }
@@ -137,8 +142,8 @@ public final class ProviderSelector {
             java.util.Set<FrameResourceKind> missing = new java.util.HashSet<>(requirements.apply(probed));
             missing.removeAll(environment.availableResources());
             if (!missing.isEmpty()) {
-                lastFailure = ProviderSupport.unsupported("missing_resources",
-                        "Required frame resources are unavailable: " + missing);
+                lastFailure = TemporalResourceDiagnostics.firstMissingSupport(missing)
+                        .orElseThrow();
                 continue;
             }
             ProviderSupport compatibility = adapterCompatibility.apply(probed);
@@ -162,9 +167,10 @@ public final class ProviderSelector {
 
     private static ProviderSupport validateUpscalerCapabilities(UpscalerSupport support) {
         var capabilities = support.capabilities().orElseThrow();
-        if (capabilities.minimumScale() > 1.0 || capabilities.maximumScale() < 1.0) {
+        if (!RenderResolutionController.supportsNativeScale(capabilities)) {
             return ProviderSupport.unsupported(
-                    "unsupported_scale", "Provider does not support the native 1.0 scale exposed by 26.2");
+                    "render_scale_unsupported",
+                    "Minecraft 26.2 currently exposes only verified native 1.0 provider input");
         }
         if (!capabilities.colorEncodings().contains(ColorEncoding.SRGB)) {
             return ProviderSupport.unsupported(
@@ -176,12 +182,25 @@ public final class ProviderSelector {
     private static ProviderSupport validateFrameGenerationCapabilities(
             FrameGenerationSupport support,
             Optional<ProviderId> selectedUpscaler,
-            boolean multiPresentSupported) {
-        if (!multiPresentSupported) {
+            ProviderEnvironment environment,
+            boolean experimentalFrameGeneration) {
+        var capabilities = support.capabilities().orElseThrow();
+        if (capabilities.mode() == FrameGenerationMode.NVIDIA_EXPERIMENTAL
+                && !experimentalFrameGeneration) {
+            return ProviderSupport.unsupported(
+                    "experimental_frame_generation_disabled",
+                    "NVIDIA experimental Frame Generation must be enabled explicitly");
+        }
+        if (capabilities.mode() == FrameGenerationMode.NVIDIA_EXPERIMENTAL
+                && environment.adapterVendor() != GraphicsAdapterVendor.NVIDIA) {
+            return ProviderSupport.unsupported(
+                    "nvidia_adapter_required",
+                    "NVIDIA experimental Frame Generation requires a verified NVIDIA adapter");
+        }
+        if (!environment.multiPresentSupported()) {
             return ProviderSupport.unsupported(
                     "multi_present_unsupported", "The active surface cannot safely present generated and real frames");
         }
-        var capabilities = support.capabilities().orElseThrow();
         if (!capabilities.colorEncodings().contains(ColorEncoding.SRGB)) {
             return ProviderSupport.unsupported(
                     "unsupported_color_encoding", "Provider does not support the SRGB frame plan exposed by 26.2");

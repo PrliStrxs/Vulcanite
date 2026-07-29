@@ -8,6 +8,8 @@ import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vulkan.VulkanDevice;
 
+import dev.mgf.api.GraphicsAdapterVendor;
+
 /**
  * Resolves the live {@link VulkanDevice} behind vanilla's {@link GpuDevice}
  * facade. The {@code backend} field is opened by {@code mgf.accesswidener};
@@ -62,5 +64,36 @@ public final class VulkanDeviceAccess {
             }
         }
         return Set.copyOf(names);
+    }
+
+    /** @return a conservative vendor classification for the live Vulkan device. */
+    public static GraphicsAdapterVendor adapterVendor(VulkanDevice device) {
+        VulkanBootNegotiation.Outcome outcome = VulkanBootNegotiation.outcome();
+        if (outcome != null) {
+            return outcome.adapterVendor();
+        }
+        return classifyVendor(device.getDeviceInfo().vendorName());
+    }
+
+    static GraphicsAdapterVendor classifyVendor(String vendorName) {
+        if (vendorName == null) {
+            return GraphicsAdapterVendor.UNKNOWN;
+        }
+        String lower = vendorName.toLowerCase(java.util.Locale.ROOT);
+        if (lower.contains("nvidia")) {
+            return GraphicsAdapterVendor.NVIDIA;
+        }
+        if (lower.contains("amd") || lower.contains("advanced micro devices")
+                || lower.contains("ati")) {
+            return GraphicsAdapterVendor.AMD;
+        }
+        if (lower.contains("intel")) {
+            return GraphicsAdapterVendor.INTEL;
+        }
+        if (lower.contains("swiftshader") || lower.contains("software")
+                || lower.contains("llvmpipe")) {
+            return GraphicsAdapterVendor.SOFTWARE;
+        }
+        return GraphicsAdapterVendor.UNKNOWN;
     }
 }

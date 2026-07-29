@@ -93,7 +93,8 @@ public final class ProviderRuntime {
         Optional<ProviderId> upscalerId = upscaler.session().isPresent()
                 ? selectedUpscaler.diagnostic().selected() : Optional.empty();
         ProviderSelector.SelectedFrameGenerator selectedFrameGenerator = ProviderSelector.selectFrameGenerator(
-                catalog, config.frameGeneration(), environment, upscalerId);
+                catalog, config.frameGeneration(), environment, upscalerId,
+                config.experimentalFrameGeneration());
         OpenedFrameGenerator frameGenerator = openFrameGenerator(selectedFrameGenerator, context);
 
         Optional<ProviderId> frameGeneratorId = frameGenerator.session().isPresent()
@@ -436,7 +437,7 @@ public final class ProviderRuntime {
                     "no_provider", "No providers are registered");
         }
         return new ProviderSelection(kind, registered, Optional.empty(), ProviderSessionState.UNSUPPORTED,
-                "vulkan_required", "The Minecraft 26.2 provider adapter requires Vulkan");
+                "backend_not_vulkan", "The Minecraft 26.2 provider adapter requires Vulkan");
     }
 
     private static ProviderSelection awaitingDevice(

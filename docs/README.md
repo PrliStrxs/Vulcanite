@@ -1,20 +1,24 @@
 # Vulcanite Provider Documentation
 
-This documentation targets provider authors using Vulcanite 0.3.0 Alpha 1.
+This documentation targets provider authors using Vulcanite 1.0.0.
 
-1. [Getting started](getting-started.md): dependency, metadata, registration,
-   selection, and diagnostics.
-2. [Provider SPI](provider-spi.md): upscaler, frame generation, PresentHook,
-   callback results, and failure policy.
-3. [Resource lifecycle](resource-lifecycle.md): borrowed handles, command
+1. [Getting started](getting-started.md): dependency, metadata, provider
+   registration, selection, and diagnostics.
+2. [Provider SPI](provider-spi.md): upscaler, Frame Generation capability mode,
+   PresentHook, results, failure policy, and stable reason codes.
+3. [Temporal upscaling](temporal-upscaling.md): render scale, color, depth,
+   motion vectors, matrices, jitter, exposure, masks, and UI composition.
+4. [Provider conformance](provider-conformance.md): diagnostic provider modes
+   and expected `ACTIVE` or `UNSUPPORTED` outcomes.
+5. [Resource lifecycle](resource-lifecycle.md): borrowed handles, command
    recording, synchronization, resize/reset, and shutdown rules.
-4. [Minimal provider](examples/minimal-provider.md): a compile-tested skeleton
+6. [Minimal provider](examples/minimal-provider.md): a compile-tested skeleton
    that depends only on `mgf-api` and Fabric Loader.
-5. [Publishing](publishing.md): local Maven publications, Javadocs, sources, and
+7. [Migration from 0.3 to 1.0](migration-0.3-to-1.0.md): API additions and
+   updated provider expectations.
+8. [Publishing](publishing.md): local Maven publications, Javadocs, sources, and
    player artifacts.
-6. [Migration from 0.2 to 0.3](migration-0.2-to-0.3.md): breaking changes and
-   replacements.
 
 The API Javadocs are built with `./gradlew :mgf-api:javadoc`. The stable API is
-pure Java; Minecraft 26.2 adaptation and Vulkan synchronization remain owned by
-the installed `mgf-fabric-26.2` mod.
+pure Java; Minecraft 26.2 adaptation, Vulkan synchronization, and all Mojang
+integration remain owned by the installed `mgf-fabric-26.2` mod.

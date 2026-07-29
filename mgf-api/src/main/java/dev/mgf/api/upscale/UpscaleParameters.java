@@ -6,7 +6,9 @@ import java.util.Optional;
 /** Quality selection and optional live camera data for one upscale call. */
 public record UpscaleParameters(
         Optional<UpscaleCameraParameters> camera,
-        String qualityMode) {
+        String qualityMode,
+        JitterSequence jitter,
+        TemporalUpscalingHints temporalHints) {
 
     public UpscaleParameters {
         camera = Objects.requireNonNull(camera, "camera");
@@ -14,5 +16,13 @@ public record UpscaleParameters(
         if (qualityMode.isBlank()) {
             throw new IllegalArgumentException("qualityMode must not be blank");
         }
+        jitter = Objects.requireNonNull(jitter, "jitter");
+        temporalHints = Objects.requireNonNull(temporalHints, "temporalHints");
+    }
+
+    public UpscaleParameters(
+            Optional<UpscaleCameraParameters> camera,
+            String qualityMode) {
+        this(camera, qualityMode, JitterSequence.none(), TemporalUpscalingHints.neutral());
     }
 }
